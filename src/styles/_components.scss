@@ -1,0 +1,464 @@
+// ============================================
+// 🌸 Lily — Reusable Component Styles
+// ============================================
+
+// ── Card ──
+.lily-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card);
+  transition: all var(--duration-normal) var(--ease-out);
+
+  &:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-bg-card-hover);
+  }
+
+  &--glass {
+    background: var(--gradient-glass);
+    backdrop-filter: blur(12px);
+    border-color: var(--color-bg-glass-border);
+  }
+
+  &--gradient {
+    background: var(--gradient-card);
+    border-color: var(--color-bg-glass-border);
+  }
+
+  &--hero {
+    background: var(--gradient-hero);
+    border: 1px solid var(--color-bg-glass-border);
+    box-shadow: var(--shadow-glow-violet);
+    padding: var(--space-8);
+
+    &:hover {
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.2), 0 0 60px rgba(139, 92, 246, 0.08);
+    }
+  }
+
+  &--interactive {
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+  }
+
+  &__title {
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: var(--ls-wider);
+  }
+
+  &__value {
+    font-size: var(--fs-3xl);
+    font-weight: var(--fw-bold);
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// ── Buttons ──
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-medium);
+  font-family: inherit;
+  border: 1px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  outline: none;
+  line-height: var(--lh-normal);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-violet);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+
+    &:hover:not(:disabled) {
+      box-shadow: var(--shadow-glow-violet);
+      transform: translateY(-1px);
+    }
+  }
+
+  &--secondary {
+    background: var(--color-bg-input);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+
+    &:hover:not(:disabled) {
+      background: var(--color-bg-card-hover);
+      border-color: var(--color-border-hover);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+
+    &:hover:not(:disabled) {
+      background: var(--color-bg-input);
+      color: var(--color-text-primary);
+    }
+  }
+
+  &--danger {
+    background: var(--color-rose);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: var(--color-rose-dark);
+      box-shadow: var(--shadow-glow-rose);
+    }
+  }
+
+  &--income {
+    background: var(--color-emerald);
+    color: white;
+
+    &:hover:not(:disabled) {
+      background: var(--color-emerald-dark);
+      box-shadow: var(--shadow-glow-emerald);
+    }
+  }
+
+  &--sm {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--fs-sm);
+    border-radius: var(--radius-md);
+  }
+
+  &--lg {
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--fs-md);
+    border-radius: var(--radius-xl);
+  }
+
+  &--icon {
+    padding: var(--space-2);
+    border-radius: var(--radius-lg);
+    width: 40px;
+    height: 40px;
+  }
+
+  &--fab {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-xl), var(--shadow-glow-violet);
+    position: fixed;
+    bottom: calc(var(--space-8));
+    right: var(--space-8);
+    z-index: var(--z-fab);
+
+    @media (max-width: 768px) {
+      bottom: calc(var(--bottom-nav-height) + var(--space-4));
+      right: var(--space-4);
+    }
+
+    &:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), var(--shadow-xl);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+// ── Badge ──
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  border-radius: var(--radius-full);
+  line-height: var(--lh-normal);
+
+  &--income {
+    background: var(--color-emerald-glow);
+    color: var(--color-emerald-light);
+  }
+
+  &--expense {
+    background: var(--color-rose-glow);
+    color: var(--color-rose-light);
+  }
+
+  &--warning {
+    background: var(--color-amber-glow);
+    color: var(--color-amber-light);
+  }
+
+  &--info {
+    background: var(--color-sky-glow);
+    color: var(--color-sky-light);
+  }
+
+  &--violet {
+    background: var(--color-violet-glow);
+    color: var(--color-violet-light);
+  }
+}
+
+// ── Form Inputs ──
+.input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-base);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  outline: none;
+  transition: all var(--duration-fast) var(--ease-out);
+
+  &::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  &:hover {
+    border-color: var(--color-border-hover);
+  }
+
+  &:focus {
+    border-color: var(--color-border-focus);
+    box-shadow: 0 0 0 3px var(--color-violet-glow);
+  }
+
+  &--lg {
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--fs-lg);
+  }
+}
+
+.select {
+  @extend .input;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%2394a3b8' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+// ── Toggle ──
+.toggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: var(--color-text-secondary);
+    border-radius: var(--radius-full);
+    transition: all var(--duration-normal) var(--ease-spring);
+  }
+
+  &.active {
+    background: var(--color-violet);
+    border-color: var(--color-violet);
+
+    &::after {
+      transform: translateX(22px);
+      background: white;
+    }
+  }
+}
+
+// ── Progress Bar ──
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-input);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width var(--duration-slow) var(--ease-out);
+    transform-origin: left;
+
+    &--income { background: var(--gradient-income); }
+    &--expense { background: var(--gradient-expense); }
+    &--violet { background: var(--gradient-primary); }
+
+    &--dynamic {
+      // Use CSS custom property --progress (0-1) to control color
+      background: linear-gradient(90deg,
+        var(--color-emerald) 0%,
+        var(--color-amber) 80%,
+        var(--color-rose) 100%
+      );
+    }
+  }
+
+  &--thin { height: 4px; }
+  &--thick { height: 12px; }
+}
+
+// ── Pill / Chip ──
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  color: var(--color-text-secondary);
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+
+  &:hover {
+    background: var(--color-bg-card-hover);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+  }
+
+  &.active {
+    background: var(--color-violet-glow);
+    border-color: var(--color-violet);
+    color: var(--color-violet-light);
+  }
+}
+
+// ── Divider ──
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-4) 0;
+}
+
+// ── Scrollbar ──
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-text-muted);
+  border-radius: var(--radius-full);
+
+  &:hover {
+    background: var(--color-text-tertiary);
+  }
+}
+
+// ── Category Dot ──
+.category-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+// ── Skeleton ──
+.skeleton {
+  background: var(--color-bg-input);
+  border-radius: var(--radius-md);
+  animation: pulse 2s ease-in-out infinite;
+
+  &--text {
+    height: 14px;
+    width: 60%;
+    margin-bottom: var(--space-2);
+  }
+
+  &--title {
+    height: 24px;
+    width: 40%;
+    margin-bottom: var(--space-3);
+  }
+
+  &--circle {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+  }
+}
+
+// ── Empty State ──
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-8);
+  text-align: center;
+
+  &__icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.5;
+  }
+
+  &__title {
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--space-2);
+  }
+
+  &__description {
+    font-size: var(--fs-base);
+    color: var(--color-text-tertiary);
+    max-width: 320px;
+  }
+}
