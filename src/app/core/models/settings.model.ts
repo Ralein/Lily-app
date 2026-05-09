@@ -1,11 +1,15 @@
+import { IncomeSource } from './income.model';
+
 export interface AppSettings {
   currency: CurrencyConfig;
   theme: 'dark' | 'light' | 'amoled';
   defaultPaymentMethod: 'cash' | 'card' | 'upi' | 'netbanking' | 'other';
-  monthlyIncome: number;
+  monthlyIncome: number;           // legacy convenience — kept for backward compat
   monthlyBudgetTarget: number;
   tags: string[];
   onboardingComplete: boolean;
+  incomeSources: IncomeSource[];   // multiple named income streams
+  autoLogIncome: boolean;          // auto-create salary txns on 1st of month
 }
 
 export interface CurrencyConfig {
@@ -37,6 +41,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   monthlyBudgetTarget: 0,
   tags: ['food', 'travel', 'work', 'personal', 'emergency'],
   onboardingComplete: false,
+  incomeSources: [],
+  autoLogIncome: true,
 };
 
 export { };

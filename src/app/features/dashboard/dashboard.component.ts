@@ -1,18 +1,20 @@
 import { Component, inject, computed } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { LilyStore } from '../../core/store/lily.store';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { ToastService } from '../../core/services/toast.service';
 import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 import { NumberAnimateDirective } from '../../shared/directives/number-animate.directive';
-import { QuickAddComponent } from './quick-add/quick-add.component';
+import { QuickAddComponent } from './quick-add';
 import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { format } from 'date-fns';
 import {
   LucideFlame, LucideLightbulb, LucideX, LucideWallet,
-  LucideArrowUpRight, LucideArrowDownRight,
+  LucideArrowUpRight, LucideArrowDownRight, LucidePlus,
+  LucideTrendingUp,
 } from '@lucide/angular';
 
 @Component({
@@ -20,9 +22,10 @@ import {
   standalone: true,
   imports: [
     CurrencyDisplayPipe, RelativeDatePipe, NumberAnimateDirective,
-    QuickAddComponent, BaseChartDirective, LilyIconComponent,
+    QuickAddComponent, BaseChartDirective, LilyIconComponent, RouterLink,
     LucideFlame, LucideLightbulb, LucideX, LucideWallet,
-    LucideArrowUpRight, LucideArrowDownRight,
+    LucideArrowUpRight, LucideArrowDownRight, LucidePlus,
+    LucideTrendingUp,
   ],
   template: `
     <div class="dashboard">
@@ -41,9 +44,11 @@ import {
               <span class="hero-card__value" [lilyNumberAnimate]="store.balance()"></span>
             </div>
           </div>
-          <div class="hero-card__donut">
-            <canvas baseChart [data]="donutData()" [options]="donutOptions" type="doughnut" aria-label="Income vs Expense breakdown"></canvas>
-          </div>
+          @if (store.hasData()) {
+            <div class="hero-card__donut">
+              <canvas baseChart [data]="donutData()" [options]="donutOptions" type="doughnut" aria-label="Income vs Expense breakdown"></canvas>
+            </div>
+          }
         </div>
         <div class="hero-card__stats">
           <div class="hero-card__stat hero-card__stat--income">
@@ -56,8 +61,31 @@ import {
             <span class="hero-card__stat-label">Expenses</span>
             <span class="hero-card__stat-value">{{ store.totalExpenses() | currencyDisplay }}</span>
           </div>
+          @if (store.totalMonthlyIncome() > 0) {
+            <div class="hero-card__stat hero-card__stat--savings">
+              <svg lucideTrendingUp [size]="16" style="color: var(--color-violet-light)"></svg>
+              <span class="hero-card__stat-label">Savings Rate</span>
+              <span class="hero-card__stat-value" [class.positive]="store.savingsRate() >= 0" [class.negative]="store.savingsRate() < 0">{{ store.savingsRate() }}%</span>
+            </div>
+          }
         </div>
       </div>
+
+      <!-- Income Prompt (if no income logged this month) -->
+      @if (!store.hasIncomeThisMonth() && store.totalMonthlyIncome() > 0) {
+        <div class="lily-card lily-card--gradient income-prompt animate-fade-in-up">
+          <div class="income-prompt__content">
+            <svg lucideWallet [size]="24" style="color: var(--color-amber)"></svg>
+            <div>
+              <p class="income-prompt__title">No income logged this month</p>
+              <p class="income-prompt__desc">Your expected income is {{ store.totalMonthlyIncome() | currencyDisplay }}. Log it to keep your balance accurate.</p>
+            </div>
+          </div>
+          <button class="btn btn--primary btn--sm" (click)="logMonthlyIncome()">
+            <svg lucidePlus [size]="14"></svg> Log Income
+          </button>
+        </div>
+      }
 
       <div class="grid grid--3">
         <!-- Today's Snapshot -->
@@ -185,10 +213,18 @@ import {
       &__currency { font-size: var(--fs-2xl); color: var(--color-text-secondary); font-weight: var(--fw-semibold); }
       &__value { font-size: var(--fs-hero); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; font-family: var(--font-mono); background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
       &__donut { width: 100px; height: 100px; flex-shrink: 0; }
-      &__stats { display: flex; gap: var(--space-8); margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
+      &__stats { display: flex; gap: var(--space-8); margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--color-border); flex-wrap: wrap; }
       &__stat { display: flex; align-items: center; gap: var(--space-2); }
       &__stat-label { font-size: var(--fs-sm); color: var(--color-text-secondary); }
       &__stat-value { font-size: var(--fs-sm); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
+    }
+    .positive { color: var(--color-emerald); }
+    .negative { color: var(--color-rose); }
+    .income-prompt {
+      display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap;
+      &__content { display: flex; align-items: center; gap: var(--space-3); }
+      &__title { font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+      &__desc { font-size: var(--fs-xs); color: var(--color-text-secondary); margin-top: 2px; }
     }
     .snapshot-row { display: flex; gap: var(--space-6); margin-top: var(--space-4); padding-top: var(--space-3); border-top: 1px solid var(--color-border); }
     .snapshot-item { display: flex; flex-direction: column; gap: 2px; }
@@ -239,10 +275,14 @@ export class DashboardComponent {
   currentMonthLabel = computed(() => format(new Date(), 'MMMM yyyy'));
 
   donutData = computed<ChartData<'doughnut'>>(() => ({
-    labels: ['Income', 'Expenses'],
+    labels: ['Income', 'Expenses', 'Savings'],
     datasets: [{
-      data: [this.store.totalIncome() || 1, this.store.totalExpenses() || 1],
-      backgroundColor: ['#10b981', '#f43f5e'],
+      data: [
+        this.store.totalIncome() || 1,
+        this.store.totalExpenses() || 1,
+        Math.max(0, this.store.totalIncome() - this.store.totalExpenses()) || 0,
+      ],
+      backgroundColor: ['#10b981', '#f43f5e', '#8b5cf6'],
       borderWidth: 0,
       cutout: '75%',
     }],
@@ -287,5 +327,10 @@ export class DashboardComponent {
   deleteTransaction(id: string): void {
     this.store.deleteTransaction(id);
     this.toast.success('Transaction deleted');
+  }
+
+  logMonthlyIncome(): void {
+    this.store.autoLogMonthlyIncome();
+    this.toast.success('Monthly income logged');
   }
 }

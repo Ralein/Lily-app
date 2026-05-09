@@ -8,9 +8,7 @@ import { SavingsGoal } from '../../core/models/goal.model';
 import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 import { differenceInDays, parseISO } from 'date-fns';
 import {
-  LucideTrash2, LucidePlus, LucideTrophy,
-  LucidePlane, LucideHouse, LucideCar, LucideGraduationCap,
-  LucideTarget,
+  LucideTrash2, LucidePlus, LucideTrophy, LucideTarget,
 } from '@lucide/angular';
 
 @Component({
@@ -18,9 +16,7 @@ import {
   standalone: true,
   imports: [
     FormsModule, CurrencyDisplayPipe, LilyIconComponent,
-    LucideTrash2, LucidePlus, LucideTrophy,
-    LucidePlane, LucideHouse, LucideCar, LucideGraduationCap,
-    LucideTarget,
+    LucideTrash2, LucidePlus, LucideTrophy, LucideTarget,
   ],
   template: `
     <div class="page-header">

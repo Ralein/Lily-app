@@ -4,8 +4,9 @@ import { Category, DEFAULT_CATEGORIES } from '../models/category.model';
 import { MonthlyBudget } from '../models/budget.model';
 import { SavingsGoal } from '../models/goal.model';
 import { AppSettings, DEFAULT_SETTINGS } from '../models/settings.model';
+import { IncomeSource, toMonthlyAmount } from '../models/income.model';
 import { StorageService } from '../services/storage.service';
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO, startOfDay, endOfDay, subDays, isSameDay } from 'date-fns';
+import { format, subDays } from 'date-fns';
 
 @Injectable({ providedIn: 'root' })
 export class LilyStore {
@@ -138,6 +139,46 @@ export class LilyStore {
     return streak;
   });
 
+  // ── Income Selectors ──
+  readonly incomeSources = computed(() => this._settings().incomeSources || []);
+
+  readonly totalMonthlyIncome = computed(() =>
+    this.incomeSources()
+      .filter(s => s.isActive)
+      .reduce((sum, s) => sum + toMonthlyAmount(s), 0)
+  );
+
+  readonly currentBudgetTotal = computed(() => {
+    const budget = this.currentBudget();
+    if (!budget) return 0;
+    return Object.values(budget.categoryLimits).reduce((sum, v) => sum + v, 0);
+  });
+
+  readonly unallocatedBudget = computed(() => {
+    const budget = this.currentBudget();
+    if (!budget) return this.totalMonthlyIncome();
+    return this.totalMonthlyIncome() - this.currentBudgetTotal();
+  });
+
+  readonly savingsTarget = computed(() => {
+    const income = this.totalMonthlyIncome();
+    const budgetTotal = this.currentBudgetTotal();
+    return Math.max(0, income - budgetTotal);
+  });
+
+  readonly savingsRate = computed(() => {
+    const income = this.totalMonthlyIncome();
+    if (income <= 0) return 0;
+    const saved = income - this.totalExpenses();
+    return Math.round((saved / income) * 100);
+  });
+
+  readonly hasIncomeThisMonth = computed(() =>
+    this.currentMonthTransactions().some(t => t.type === 'income')
+  );
+
+  readonly hasData = computed(() => this._transactions().length > 0);
+
   // ── Persistence Effects ──
   constructor() {
     effect(() => this.storage.set('transactions', this._transactions()));
@@ -236,6 +277,74 @@ export class LilyStore {
         };
       })
     );
+  }
+
+  // ── Income Source Actions ──
+  addIncomeSource(source: IncomeSource): void {
+    this._settings.update(s => ({
+      ...s,
+      incomeSources: [...(s.incomeSources || []), source],
+      monthlyIncome: this.calcTotalIncome([...(s.incomeSources || []), source]),
+    }));
+  }
+
+  updateIncomeSource(id: string, updates: Partial<IncomeSource>): void {
+    this._settings.update(s => {
+      const sources = (s.incomeSources || []).map(src =>
+        src.id === id ? { ...src, ...updates } : src
+      );
+      return { ...s, incomeSources: sources, monthlyIncome: this.calcTotalIncome(sources) };
+    });
+  }
+
+  deleteIncomeSource(id: string): void {
+    this._settings.update(s => {
+      const sources = (s.incomeSources || []).filter(src => src.id !== id);
+      return { ...s, incomeSources: sources, monthlyIncome: this.calcTotalIncome(sources) };
+    });
+  }
+
+  private calcTotalIncome(sources: IncomeSource[]): number {
+    return sources.filter(s => s.isActive).reduce((sum, s) => sum + toMonthlyAmount(s), 0);
+  }
+
+  /**
+   * Auto-log monthly income transactions for recurring sources.
+   * Call on app init — checks if income already logged for current month.
+   */
+  autoLogMonthlyIncome(): void {
+    const settings = this._settings();
+    if (!settings.autoLogIncome || !settings.incomeSources?.length) return;
+
+    const month = this.currentMonth();
+    const existingIncome = this._transactions()
+      .filter(t => t.type === 'income' && t.date.startsWith(month));
+
+    for (const source of settings.incomeSources) {
+      if (!source.isActive || source.frequency === 'one-time') continue;
+
+      // Check if this source already has a transaction this month
+      const alreadyLogged = existingIncome.some(t =>
+        t.note.includes(source.name) || t.categoryId === source.categoryId
+      );
+
+      if (!alreadyLogged) {
+        this.addTransaction({
+          id: crypto.randomUUID(),
+          amount: source.amount,
+          type: 'income',
+          categoryId: source.categoryId,
+          note: source.name,
+          date: `${month}-01T09:00:00.000Z`,
+          tags: ['auto-logged'],
+          isRecurring: true,
+          recurringFrequency: 'monthly',
+          paymentMethod: 'netbanking',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }
   }
 
   // ── Settings Actions ──
