@@ -12,6 +12,7 @@ import {
   LucideFlower2, LucideDownload, LucideUpload,
   LucideTrash2, LucideTriangleAlert, LucideActivity,
   LucideWallet, LucidePlus, LucidePencil, LucideCheck, LucideX,
+  LucideGlobe, LucideCpu, LucideShieldCheck
 } from '@lucide/angular';
 
 @Component({
@@ -23,138 +24,200 @@ import {
     LucideFlower2, LucideDownload, LucideUpload,
     LucideTrash2, LucideTriangleAlert, LucideActivity,
     LucideWallet, LucidePlus, LucidePencil, LucideCheck, LucideX,
+    LucideGlobe, LucideCpu, LucideShieldCheck
   ],
   template: `
     <div class="settings-page">
-      <div class="page-header animate-fade-in">
-        <h1 class="page-header__title">Settings</h1>
-        <p class="page-header__subtitle">Manage your profile and application preferences</p>
+      <div class="page-header" anim="fadeIn">
+        <div class="header-content">
+          <h1 class="page-header__title">Control Center</h1>
+          <p class="page-header__subtitle">Configure your financial workspace and preferences</p>
+        </div>
+        <div class="header-actions">
+          <div class="status-pill security">
+            <svg lucideShieldCheck [size]="14"></svg>
+            <span class="status-pill__text">Vault Encrypted</span>
+          </div>
+        </div>
       </div>
 
       <div class="settings-layout">
         <!-- Main Configuration Area -->
         <div class="settings-main">
-          <!-- Income Sources Section -->
-          <div class="lily-card section-card animate-slide-up">
+          
+          <!-- Income Streams Section -->
+          <div class="lily-card glass section-card" anim="slideUp">
             <div class="section-header">
               <div class="section-title">
-                <div class="section-icon emerald"><svg lucideWallet [size]="18"></svg></div>
+                <div class="icon-orb emerald">
+                  <svg lucideWallet [size]="20"></svg>
+                </div>
                 <div class="section-text">
                   <h3>Income Streams</h3>
-                  <span>Recurring and one-time inflows</span>
+                  <p>Manage your recurring revenue and cash inflows</p>
                 </div>
               </div>
-              <button class="btn btn--primary btn--sm" (click)="addNewSource()">
-                <svg lucidePlus [size]="14"></svg> New Stream
+              <button class="glass-btn primary" (click)="addNewSource()">
+                <svg lucidePlus [size]="16"></svg>
+                <span>Add Stream</span>
               </button>
             </div>
 
             <div class="income-manager">
               @if (store.incomeSources().length > 0) {
-                <div class="income-list">
-                  @for (source of store.incomeSources(); track source.id) {
-                    <div class="income-item" [class.editing]="editingSourceId() === source.id" [class.inactive]="!source.isActive">
+                <div class="income-grid">
+                  @for (source of store.incomeSources(); track source.id; let i = $index) {
+                    <div class="income-card glass" 
+                         [class.editing]="editingSourceId() === source.id" 
+                         [class.inactive]="!source.isActive"
+                         anim="slideUp"
+                         [style.--anim-delay]="(i * 40) + 'ms'">
+                      
                       @if (editingSourceId() === source.id) {
-                        <div class="income-edit-form">
-                          <input class="input input--sm" type="text" [(ngModel)]="editName" placeholder="Name" />
-                          <div class="input-wrap">
-                            <span class="symbol">{{ store.currencySymbol() }}</span>
-                            <input class="input input--sm" type="number" [(ngModel)]="editAmount" />
+                        <div class="edit-mode" anim="fadeIn">
+                          <div class="edit-inputs">
+                            <div class="field">
+                              <label>Source Name</label>
+                              <input type="text" [(ngModel)]="editName" placeholder="e.g. Salary">
+                            </div>
+                            <div class="field">
+                              <label>Amount ({{ store.currencySymbol() }})</label>
+                              <input type="number" [(ngModel)]="editAmount">
+                            </div>
+                            <div class="field">
+                              <label>Interval</label>
+                              <div class="glass-select">
+                                <select [(ngModel)]="editFrequency">
+                                  <option value="monthly">Monthly</option>
+                                  <option value="biweekly">Bi-weekly</option>
+                                  <option value="weekly">Weekly</option>
+                                  <option value="one-time">One-time</option>
+                                </select>
+                              </div>
+                            </div>
                           </div>
-                          <select class="input input--sm" [(ngModel)]="editFrequency">
-                            <option value="monthly">Monthly</option>
-                            <option value="biweekly">Bi-weekly</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="one-time">One-time</option>
-                          </select>
                           <div class="edit-actions">
-                            <button class="btn btn--primary btn--icon btn--sm" (click)="saveEditSource(source.id)"><svg lucideCheck [size]="14"></svg></button>
-                            <button class="btn btn--ghost btn--icon btn--sm" (click)="editingSourceId.set(null)"><svg lucideX [size]="14"></svg></button>
+                            <button class="commit-btn" (click)="saveEditSource(source.id)">
+                              <svg lucideCheck [size]="16"></svg>
+                            </button>
+                            <button class="cancel-btn" (click)="editingSourceId.set(null)">
+                              <svg lucideX [size]="16"></svg>
+                            </button>
                           </div>
                         </div>
                       } @else {
-                        <div class="income-info">
-                          <div class="income-primary">
-                            <span class="name">{{ source.name }}</span>
-                            <span class="amount">{{ source.amount | currencyDisplay }}</span>
+                        <div class="view-mode">
+                          <div class="source-info">
+                            <div class="top">
+                              <span class="name">{{ source.name }}</span>
+                              <span class="status-tag" [class.active]="source.isActive">
+                                {{ source.isActive ? 'Active' : 'Paused' }}
+                              </span>
+                            </div>
+                            <div class="amount-wrap">
+                              <span class="val">{{ source.amount | currencyDisplay }}</span>
+                              <span class="freq">/ {{ source.frequency }}</span>
+                            </div>
                           </div>
-                          <div class="income-secondary">
-                            <span class="freq">{{ source.frequency }}</span>
-                            <span class="status" [class.active]="source.isActive">{{ source.isActive ? 'Active' : 'Paused' }}</span>
+                          
+                          <div class="source-controls">
+                            <button class="icon-btn edit" (click)="startEditSource(source)" title="Edit Source">
+                              <svg lucidePencil [size]="14"></svg>
+                            </button>
+                            <button class="icon-btn delete" (click)="deleteSource(source.id)" title="Delete Source">
+                              <svg lucideTrash2 [size]="14"></svg>
+                            </button>
+                            <div class="toggle-wrap">
+                              <label class="premium-toggle">
+                                <input type="checkbox" [checked]="source.isActive" (change)="toggleSource(source)" />
+                                <span class="slider"></span>
+                              </label>
+                            </div>
                           </div>
-                        </div>
-                        <div class="income-actions">
-                          <label class="toggle-switch">
-                            <input type="checkbox" [checked]="source.isActive" (change)="toggleSource(source)" />
-                            <span class="slider"></span>
-                          </label>
-                          <button class="btn btn--secondary btn--icon btn--sm" (click)="startEditSource(source)"><svg lucidePencil [size]="14"></svg></button>
-                          <button class="btn btn--secondary btn--icon btn--sm" (click)="deleteSource(source.id)"><svg lucideTrash2 [size]="14"></svg></button>
                         </div>
                       }
                     </div>
                   }
                 </div>
-                <div class="income-footer">
-                  <span class="label">Total Monthly Estim.</span>
-                  <span class="value">{{ store.totalMonthlyIncome() | currencyDisplay }}</span>
+                
+                <div class="income-summary glass">
+                  <div class="summary-item">
+                    <span class="label">Projected Monthly Volume</span>
+                    <span class="value">{{ store.totalMonthlyIncome() | currencyDisplay }}</span>
+                  </div>
+                  <div class="summary-toggle">
+                    <div class="text">
+                      <span class="label">Auto-log Engine</span>
+                      <p>Post entries automatically on the 1st</p>
+                    </div>
+                    <label class="premium-toggle">
+                      <input type="checkbox" [checked]="store.settings().autoLogIncome" (change)="toggleAutoLog()" />
+                      <span class="slider"></span>
+                    </label>
+                  </div>
                 </div>
               } @else {
-                <div class="empty-section">
-                  <p>No income streams defined. Start by adding your salary or dividends.</p>
+                <div class="empty-list" anim="fadeIn">
+                  <div class="empty-icon"><svg lucideActivity [size]="32"></svg></div>
+                  <p>No revenue streams detected. Initialize your first inflow to begin projections.</p>
                 </div>
               }
-
-              <div class="settings-row mt-6">
-                <div class="row-info">
-                  <span class="row-label">Auto-log Income</span>
-                  <span class="row-desc">Automatically post transactions on the 1st of each month</span>
-                </div>
-                <label class="toggle-switch">
-                  <input type="checkbox" [checked]="store.settings().autoLogIncome" (change)="toggleAutoLog()" />
-                  <span class="slider"></span>
-                </label>
-              </div>
             </div>
           </div>
 
           <!-- Preferences Section -->
-          <div class="lily-card section-card animate-slide-up" style="animation-delay: 0.1s">
+          <div class="lily-card glass section-card" anim="slideUp" style="--anim-delay: 100ms">
             <div class="section-header">
               <div class="section-title">
-                <div class="section-icon violet"><svg lucidePalette [size]="18"></svg></div>
+                <div class="icon-orb violet">
+                  <svg lucidePalette [size]="20"></svg>
+                </div>
                 <div class="section-text">
                   <h3>Preferences</h3>
-                  <span>Appearance and localization</span>
+                  <p>Interface aesthetics and localization settings</p>
                 </div>
               </div>
             </div>
 
-            <div class="preferences-form">
-              <div class="settings-row vertical">
-                <span class="row-label">Display Theme</span>
-                <div class="theme-grid">
+            <div class="preferences-content">
+              <div class="preference-group">
+                <label class="group-label">Visual Interface</label>
+                <div class="theme-selector">
                   @for (theme of themes; track theme.value) {
-                    <button class="theme-card" [class.active]="store.settings().theme === theme.value" (click)="setTheme(theme.value)">
-                      <div class="theme-preview" [style.background]="theme.bg">
-                        <div class="preview-accent" [style.background]="theme.value === 'light' ? '#8b5cf6' : '#c084fc'"></div>
+                    <button class="theme-option glass" 
+                            [class.active]="store.settings().theme === theme.value" 
+                            (click)="setTheme(theme.value)">
+                      <div class="preview" [style.background]="theme.bg">
+                        <div class="glow" [style.background]="theme.accent"></div>
                       </div>
-                      <span class="theme-label">{{ theme.label }}</span>
+                      <span class="label">{{ theme.label }}</span>
+                      @if (store.settings().theme === theme.value) {
+                        <div class="active-check"><svg lucideCheck [size]="12"></svg></div>
+                      }
                     </button>
                   }
                 </div>
               </div>
 
-              <div class="settings-row mt-4">
-                <div class="row-info">
-                  <span class="row-label">Primary Currency</span>
-                  <span class="row-desc">Applied to all amounts across the app</span>
+              <div class="preference-group">
+                <div class="horizontal-setting glass">
+                  <div class="setting-info">
+                    <div class="icon"><svg lucideGlobe [size]="18"></svg></div>
+                    <div class="text">
+                      <span class="label">Regional Currency</span>
+                      <p>Primary unit for all valuations</p>
+                    </div>
+                  </div>
+                  <div class="setting-action">
+                    <div class="glass-select">
+                      <select [ngModel]="store.settings().currency.code" (ngModelChange)="setCurrency($event)">
+                        @for (cur of currencies; track cur.code) {
+                          <option [value]="cur.code">{{ cur.symbol }} {{ cur.code }} - {{ cur.name }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
                 </div>
-                <select class="input select-input" [ngModel]="store.settings().currency.code" (ngModelChange)="setCurrency($event)">
-                  @for (cur of currencies; track cur.code) {
-                    <option [value]="cur.code">{{ cur.symbol }} {{ cur.code }} ({{ cur.name }})</option>
-                  }
-                </select>
               </div>
             </div>
           </div>
@@ -162,156 +225,257 @@ import {
 
         <!-- Sidebar Actions -->
         <div class="settings-side">
-          <!-- Data Control -->
-          <div class="lily-card side-card animate-slide-up" style="animation-delay: 0.2s">
-            <h3 class="side-title"><svg lucideDatabase [size]="16"></svg> Data Control</h3>
-            <div class="side-actions">
-              <button class="btn btn--secondary btn--full" (click)="exportJSON()">
-                <svg lucideDownload [size]="14"></svg> Export JSON
+          <!-- System Intelligence -->
+          <div class="lily-card glass side-card" anim="slideUp" style="--anim-delay: 200ms">
+            <div class="side-header">
+              <svg lucideCpu [size]="18"></svg>
+              <span>System Metadata</span>
+            </div>
+            <div class="system-stats">
+              <div class="stat-row">
+                <span class="key">Architecture</span>
+                <span class="val">Local-First</span>
+              </div>
+              <div class="stat-row">
+                <span class="key">Version</span>
+                <span class="val">1.2.4</span>
+              </div>
+              <div class="stat-row">
+                <span class="key">Data Points</span>
+                <span class="val">{{ store.transactions().length }}</span>
+              </div>
+            </div>
+            <p class="system-note">Lily stores all data locally in your browser's persistent storage. No data ever leaves your device.</p>
+          </div>
+
+          <!-- Maintenance Controls -->
+          <div class="lily-card glass side-card" anim="slideUp" style="--anim-delay: 300ms">
+            <div class="side-header">
+              <svg lucideDatabase [size]="18"></svg>
+              <span>Data Operations</span>
+            </div>
+            <div class="action-stack">
+              <button class="side-btn glass" (click)="exportJSON()">
+                <svg lucideDownload [size]="16"></svg>
+                <span>Export Vault</span>
               </button>
-              <label class="btn btn--secondary btn--full cursor-pointer" for="import-file">
-                <svg lucideUpload [size]="14"></svg> Import Backup
+              <label class="side-btn glass clickable" for="import-file">
+                <svg lucideUpload [size]="16"></svg>
+                <span>Restore Backup</span>
                 <input type="file" id="import-file" accept=".json" (change)="importJSON($event)" style="display: none">
               </label>
-              <button class="btn btn--secondary btn--full" (click)="loadDemoData()">
-                <svg lucideActivity [size]="14"></svg> Load Demo
+              <button class="side-btn glass" (click)="loadDemoData()">
+                <svg lucideActivity [size]="16"></svg>
+                <span>Simulate Activity</span>
               </button>
               <div class="danger-zone">
-                <button class="btn btn--danger btn--full" (click)="confirmReset()">
-                  <svg lucideTrash2 [size]="14"></svg> Factory Reset
+                <button class="side-btn danger" (click)="confirmReset()">
+                  <svg lucideTrash2 [size]="16"></svg>
+                  <span>Purge Intelligence</span>
                 </button>
               </div>
             </div>
-          </div>
-
-          <!-- Application Info -->
-          <div class="lily-card side-card animate-slide-up" style="animation-delay: 0.3s">
-            <h3 class="side-title"><svg lucideFlower2 [size]="16"></svg> Lily Finance</h3>
-            <div class="app-info">
-              <div class="info-row"><span>Version</span> <span class="val">1.2.0</span></div>
-              <div class="info-row"><span>Records</span> <span class="val">{{ store.transactions().length }}</span></div>
-              <div class="info-row"><span>Goals</span> <span class="val">{{ store.goals().length }}</span></div>
-            </div>
-            <p class="app-desc">Lily is a secure, local-first finance companion. Your data stays in your browser.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Reset Modal -->
+    <!-- Security Override Modal (Reset) -->
     @if (showResetConfirm()) {
-      <div class="overlay" (click)="showResetConfirm.set(false)">
-        <div class="lily-card modal-card animate-slide-up" (click)="$event.stopPropagation()">
+      <div class="overlay" (click)="showResetConfirm.set(false)" anim="fadeIn">
+        <div class="lily-card glass modal-card" (click)="$event.stopPropagation()" anim="slideUp">
           <div class="modal-header">
-            <div class="modal-icon"><svg lucideTriangleAlert [size]="24"></svg></div>
-            <h3 class="modal-title">Purge All Data?</h3>
+            <div class="modal-icon"><svg lucideTriangleAlert [size]="32"></svg></div>
+            <h3 class="modal-title">Confirm Data Purge</h3>
           </div>
-          <p class="modal-desc">This action will permanently remove all your transactions, budgets, goals, and settings. This cannot be undone.</p>
+          <p class="modal-desc">This operation will permanently eliminate all financial records, goals, and customized logic. This state transition is irreversible.</p>
           <div class="modal-actions">
-            <button class="btn btn--danger" (click)="resetAll()">Delete Everything</button>
-            <button class="btn btn--ghost" (click)="showResetConfirm.set(false)">Cancel</button>
+            <button class="btn-purge" (click)="resetAll()">Eliminate All Records</button>
+            <button class="btn-abort" (click)="showResetConfirm.set(false)">Abort Operation</button>
           </div>
         </div>
       </div>
     }
   `,
   styles: [`
-    .settings-page { display: flex; flex-direction: column; gap: var(--space-6); padding-bottom: var(--space-12); }
-    .settings-layout { display: grid; grid-template-columns: 1fr 300px; gap: var(--space-6); }
+    .settings-page { display: flex; flex-direction: column; gap: var(--space-8); padding-bottom: var(--space-20); }
 
-    .section-card { padding: 0; overflow: hidden; }
-    .section-header { 
-      padding: var(--space-6); border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; 
-      .section-title { display: flex; align-items: center; gap: var(--space-4); }
-      .section-icon { 
-        width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--color-bg-input); 
-        &.emerald { color: var(--color-emerald); background: rgba(16, 185, 129, 0.1); }
-        &.violet { color: var(--color-violet); background: rgba(139, 92, 246, 0.1); }
+    .page-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      .page-header__title { font-size: 32px; font-weight: 900; letter-spacing: -0.04em; color: var(--color-text-primary); margin: 0; }
+      .page-header__subtitle { font-size: var(--fs-base); color: var(--color-text-tertiary); font-weight: 500; }
+      
+      .status-pill {
+        display: flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); padding: 8px 16px; border-radius: var(--radius-full); border: 1px solid rgba(16, 185, 129, 0.2);
+        color: var(--color-emerald); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+        &.security { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.2); color: var(--color-violet-light); }
       }
-      h3 { font-size: var(--fs-lg); font-weight: 800; color: var(--color-text-primary); margin: 0; }
-      span { font-size: var(--fs-xs); color: var(--color-text-tertiary); font-weight: 600; text-transform: uppercase; }
     }
 
-    .income-manager { 
-      padding: var(--space-6); 
-      .income-list { display: flex; flex-direction: column; gap: var(--space-2); }
+    .settings-layout { display: grid; grid-template-columns: 1fr 320px; gap: var(--space-8); }
+
+    .section-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; gap: 0; margin-bottom: var(--space-8); }
+
+    .section-header { 
+      padding: var(--space-6) var(--space-8); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; 
+      .section-title { display: flex; align-items: center; gap: var(--space-4); }
+      .icon-orb { 
+        width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+        &.emerald { color: var(--color-emerald); background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.1); }
+        &.violet { color: var(--color-violet); background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.1); }
+      }
+      .section-text {
+        h3 { font-size: 18px; font-weight: 800; color: var(--color-text-primary); margin: 0; }
+        p { font-size: 13px; color: var(--color-text-tertiary); margin: 4px 0 0; }
+      }
     }
 
-    .income-item {
-      padding: var(--space-4); background: var(--color-bg-input); border-radius: var(--radius-xl); border: 1px solid transparent; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;
-      &:hover { border-color: var(--color-border-hover); background: var(--color-bg-secondary); }
-      &.editing { border-color: var(--color-violet); background: var(--color-bg-secondary); }
-      &.inactive { opacity: 0.6; }
+    .glass-btn {
+      display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05); color: var(--color-text-primary); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s;
+      &:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+      &.primary { background: var(--color-violet); border: none; color: white; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3); }
+    }
+
+    .income-manager { padding: var(--space-8); }
+    .income-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-4); }
+
+    .income-card {
+      padding: 20px; transition: all 0.3s;
+      &.editing { border-color: var(--color-violet); background: rgba(139, 92, 246, 0.05); }
+      &.inactive { opacity: 0.5; filter: grayscale(0.5); }
       
-      .income-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-      .income-primary { display: flex; align-items: center; gap: var(--space-3); }
-      .name { font-weight: 700; color: var(--color-text-primary); }
-      .amount { font-family: var(--font-mono); font-weight: 700; color: var(--color-text-secondary); font-size: var(--fs-sm); }
-      .income-secondary { display: flex; align-items: center; gap: var(--space-3); font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; }
-      .status.active { color: var(--color-emerald); }
+      .view-mode { display: flex; justify-content: space-between; align-items: flex-start; }
+      .source-info { display: flex; flex-direction: column; gap: 12px;
+        .top { display: flex; align-items: center; gap: 10px;
+          .name { font-size: 16px; font-weight: 800; color: var(--color-text-primary); }
+          .status-tag { font-size: 9px; font-weight: 900; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; background: rgba(255,255,255,0.05); color: var(--color-text-tertiary);
+            &.active { background: rgba(16, 185, 129, 0.1); color: var(--color-emerald); }
+          }
+        }
+        .amount-wrap { display: flex; align-items: baseline; gap: 6px;
+          .val { font-size: 20px; font-weight: 900; font-family: var(--font-mono); color: var(--color-text-primary); }
+          .freq { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; }
+        }
+      }
       
-      .income-actions { display: flex; align-items: center; gap: var(--space-2); }
-      .income-edit-form { flex: 1; display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: var(--space-2); align-items: center; }
-      .input-wrap { position: relative; display: flex; align-items: center; .symbol { position: absolute; left: 8px; font-size: 11px; font-weight: 800; color: var(--color-text-tertiary); pointer-events: none; } input { padding-left: 20px; } }
-      .edit-actions { display: flex; gap: 4px; }
+      .source-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+      .icon-btn { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05); color: var(--color-text-tertiary); cursor: pointer; transition: all 0.2s;
+        &:hover { color: white; background: rgba(255,255,255,0.1); }
+        &.delete:hover { color: var(--color-rose); background: rgba(244, 63, 94, 0.1); }
+      }
+
+      .edit-mode { display: flex; flex-direction: column; gap: 20px;
+        .edit-inputs { display: flex; flex-direction: column; gap: 12px;
+          .field { display: flex; flex-direction: column; gap: 6px;
+            label { font-size: 10px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 1px; }
+            input { height: 40px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0 12px; color: white; font-size: 14px; outline: none; &:focus { border-color: var(--color-violet); } }
+          }
+        }
+        .edit-actions { display: flex; gap: 10px;
+          button { flex: 1; height: 40px; border-radius: 8px; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+          .commit-btn { background: var(--color-violet); color: white; }
+          .cancel-btn { background: rgba(255,255,255,0.1); color: var(--color-text-tertiary); }
+        }
+      }
     }
 
-    .income-footer { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; .label { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; } .value { font-size: var(--fs-lg); font-weight: 800; color: var(--color-emerald); } }
-
-    .preferences-form { padding: var(--space-6); }
-    .settings-row { 
-      display: flex; justify-content: space-between; align-items: center; 
-      &.vertical { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
-      .row-info { display: flex; flex-direction: column; gap: 2px; }
-      .row-label { font-weight: 700; color: var(--color-text-primary); }
-      .row-desc { font-size: var(--fs-xs); color: var(--color-text-tertiary); }
-      .select-input { width: 220px; }
+    .income-summary {
+      margin-top: var(--space-8); padding: 24px; display: flex; justify-content: space-between; align-items: center;
+      .summary-item { display: flex; flex-direction: column; gap: 4px;
+        .label { font-size: 11px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 1px; }
+        .value { font-size: 28px; font-weight: 900; color: var(--color-emerald); font-family: var(--font-mono); }
+      }
+      .summary-toggle { display: flex; align-items: center; gap: 24px;
+        .text { text-align: right;
+          .label { font-size: 13px; font-weight: 800; color: var(--color-text-primary); }
+          p { font-size: 11px; color: var(--color-text-tertiary); margin: 2px 0 0; }
+        }
+      }
     }
 
-    .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); width: 100%; }
-    .theme-card {
-      background: var(--color-bg-input); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-4); cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
-      &:hover { border-color: var(--color-border-hover); }
-      &.active { border-color: var(--color-violet); background: var(--color-violet-glow); }
-      .theme-preview { width: 100%; height: 60px; border-radius: 8px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-      .preview-accent { position: absolute; bottom: 8px; right: 8px; width: 16px; height: 16px; border-radius: 4px; }
-      .theme-label { font-size: var(--fs-sm); font-weight: 700; color: var(--color-text-secondary); }
+    .preferences-content { padding: var(--space-8); display: flex; flex-direction: column; gap: 32px; }
+    .preference-group { display: flex; flex-direction: column; gap: 16px;
+      .group-label { font-size: 12px; font-weight: 900; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 2px; }
     }
 
-    .side-card { 
-      padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-4);
-      .side-title { font-size: var(--fs-base); font-weight: 800; color: var(--color-text-primary); display: flex; align-items: center; gap: var(--space-2); margin: 0; }
-      .side-actions { display: flex; flex-direction: column; gap: var(--space-2); }
-      .danger-zone { margin-top: var(--space-2); padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
+    .theme-selector { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+    .theme-option {
+      position: relative; padding: 12px; border-radius: 16px; transition: all 0.3s; cursor: pointer; text-align: left;
+      &:hover { transform: translateY(-4px); background: rgba(255,255,255,0.05); }
+      &.active { border-color: var(--color-violet); background: rgba(139, 92, 246, 0.05); }
+      
+      .preview { width: 100%; height: 80px; border-radius: 10px; position: relative; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05);
+        .glow { position: absolute; bottom: -20px; right: -20px; width: 60px; height: 60px; filter: blur(30px); opacity: 0.6; }
+      }
+      .label { font-size: 14px; font-weight: 800; color: var(--color-text-primary); }
+      .active-check { position: absolute; top: 8px; right: 8px; width: 20px; height: 20px; background: var(--color-violet); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.4); }
     }
 
-    .app-info { display: flex; flex-direction: column; gap: var(--space-2); .info-row { display: flex; justify-content: space-between; font-size: var(--fs-sm); font-weight: 600; color: var(--color-text-tertiary); .val { color: var(--color-text-primary); font-weight: 700; } } }
-    .app-desc { font-size: 11px; color: var(--color-text-tertiary); line-height: 1.5; margin: 0; }
+    .horizontal-setting {
+      padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 20px;
+      .setting-info { display: flex; align-items: center; gap: 16px;
+        .icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: var(--color-text-secondary); }
+        .text {
+          .label { font-size: 15px; font-weight: 800; color: var(--color-text-primary); }
+          p { font-size: 12px; color: var(--color-text-tertiary); margin: 2px 0 0; }
+        }
+      }
+    }
 
-    .toggle-switch {
+    .glass-select {
+      position: relative; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden;
+      select { background: transparent; border: none; color: white; font-size: 13px; font-weight: 700; height: 40px; padding: 0 32px 0 16px; outline: none; appearance: none; }
+      &::after { content: '↓'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--color-text-tertiary); pointer-events: none; }
+    }
+
+    .side-card { padding: 24px; display: flex; flex-direction: column; gap: 20px; margin-bottom: var(--space-4); }
+    .side-header { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 900; color: var(--color-text-primary); text-transform: uppercase; letter-spacing: 1px; }
+
+    .system-stats { display: flex; flex-direction: column; gap: 10px;
+      .stat-row { display: flex; justify-content: space-between; font-size: 13px;
+        .key { color: var(--color-text-tertiary); font-weight: 600; }
+        .val { color: var(--color-text-primary); font-weight: 800; font-family: var(--font-mono); }
+      }
+    }
+    .system-note { font-size: 11px; color: var(--color-text-muted); line-height: 1.6; margin: 0; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+    .action-stack { display: flex; flex-direction: column; gap: 10px; }
+    .side-btn {
+      width: 100%; height: 44px; border-radius: 12px; display: flex; align-items: center; gap: 12px; padding: 0 16px;
+      font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255,255,255,0.1);
+      &.glass { background: rgba(255,255,255,0.05); color: var(--color-text-secondary); &:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(4px); } }
+      &.danger { background: rgba(244, 63, 94, 0.05); color: var(--color-rose); border-color: rgba(244, 63, 94, 0.1); &:hover { background: var(--color-rose); color: white; transform: scale(1.02); } }
+      &.clickable { cursor: pointer; }
+    }
+
+    .premium-toggle {
       position: relative; width: 44px; height: 24px;
       input { opacity: 0; width: 0; height: 0; }
-      .slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--color-border); border-radius: 34px; transition: .4s; &:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; } }
+      .slider { position: absolute; cursor: pointer; inset: 0; background-color: rgba(255,255,255,0.1); border-radius: 34px; transition: .4s; &:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; } }
       input:checked + .slider { background-color: var(--color-violet); &:before { transform: translateX(20px); } }
     }
 
-    .overlay { position: fixed; inset: 0; background: var(--color-bg-overlay); z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(12px); }
     .modal-card { 
-      max-width: 400px; width: 90%; padding: var(--space-8); display: flex; flex-direction: column; gap: var(--space-6); text-align: center;
-      .modal-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(244, 63, 94, 0.1); color: var(--color-rose); display: flex; align-items: center; justify-content: center; margin: 0 auto; }
-      .modal-title { font-size: var(--fs-xl); font-weight: 800; color: var(--color-text-primary); margin: 0; }
-      .modal-desc { font-size: var(--fs-base); color: var(--color-text-secondary); line-height: 1.6; margin: 0; }
-      .modal-actions { display: flex; flex-direction: column; gap: var(--space-2); }
+      max-width: 440px; padding: 40px; text-align: center;
+      .modal-icon { width: 80px; height: 80px; border-radius: 30px; background: rgba(244, 63, 94, 0.1); color: var(--color-rose); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+      .modal-title { font-size: 24px; font-weight: 900; color: var(--color-text-primary); margin: 0 0 16px; }
+      .modal-desc { font-size: 16px; color: var(--color-text-tertiary); line-height: 1.6; margin: 0 0 40px; }
+      .modal-actions { display: flex; flex-direction: column; gap: 12px;
+        button { height: 52px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: all 0.2s; }
+        .btn-purge { background: var(--color-rose); color: white; border: none; &:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(244, 63, 94, 0.3); } }
+        .btn-abort { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--color-text-tertiary); &:hover { color: white; background: rgba(255,255,255,0.05); } }
+      }
     }
 
     @media (max-width: 900px) {
       .settings-layout { grid-template-columns: 1fr; }
-      .settings-side { order: -1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+      .settings-side { order: 1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
     }
     @media (max-width: 640px) {
       .settings-side { grid-template-columns: 1fr; }
-      .income-edit-form { grid-template-columns: 1fr 1fr; }
-      .edit-actions { grid-column: span 2; justify-content: flex-end; }
+      .income-grid { grid-template-columns: 1fr; }
     }
   `],
 })
@@ -325,22 +489,20 @@ export class SettingsComponent {
   showResetConfirm = signal(false);
   editingSourceId = signal<string | null>(null);
 
-  // Edit state
   editName = '';
   editAmount = 0;
   editFrequency: IncomeSource['frequency'] = 'monthly';
 
   themes = [
-    { value: 'dark' as const, label: 'Dark', bg: '#0a0e1a' },
-    { value: 'light' as const, label: 'Light', bg: '#f8fafc' },
-    { value: 'amoled' as const, label: 'AMOLED', bg: '#000000' },
+    { value: 'dark' as const, label: 'Obsidian', bg: '#0f172a', accent: '#8b5cf6', accentName: 'Violet' },
+    { value: 'light' as const, label: 'Pure', bg: '#f8fafc', accent: '#6366f1', accentName: 'Indigo' },
+    { value: 'amoled' as const, label: 'Deep', bg: '#000000', accent: '#d946ef', accentName: 'Fuchsia' },
   ];
 
-  // ── Income Source CRUD ──
   addNewSource(): void {
     const source: IncomeSource = {
       id: crypto.randomUUID(),
-      name: 'New Income',
+      name: 'New Revenue',
       amount: 0,
       frequency: 'monthly',
       categoryId: 'salary',
@@ -349,7 +511,7 @@ export class SettingsComponent {
     };
     this.store.addIncomeSource(source);
     this.startEditSource(source);
-    this.toast.info('Income source added — edit the details');
+    this.toast.info('New stream initialized');
   }
 
   startEditSource(source: IncomeSource): void {
@@ -360,14 +522,14 @@ export class SettingsComponent {
   }
 
   saveEditSource(id: string): void {
-    if (!this.editName.trim()) { this.toast.warning('Enter a name'); return; }
+    if (!this.editName.trim()) { this.toast.warning('Identity required for source'); return; }
     this.store.updateIncomeSource(id, {
       name: this.editName.trim(),
       amount: this.editAmount,
       frequency: this.editFrequency,
     });
     this.editingSourceId.set(null);
-    this.toast.success('Income source updated');
+    this.toast.success('Source parameters updated');
   }
 
   toggleSource(source: IncomeSource): void {
@@ -376,32 +538,30 @@ export class SettingsComponent {
 
   deleteSource(id: string): void {
     this.store.deleteIncomeSource(id);
-    this.toast.success('Income source removed');
+    this.toast.success('Source purged');
   }
 
   toggleAutoLog(): void {
     this.store.updateSettings({ autoLogIncome: !this.store.settings().autoLogIncome });
-    this.toast.info(this.store.settings().autoLogIncome ? 'Auto-log enabled' : 'Auto-log disabled');
+    this.toast.info(this.store.settings().autoLogIncome ? 'Autonomous logging active' : 'Manual logging required');
   }
 
-  // ── Theme & Currency ──
   setTheme(theme: 'dark' | 'light' | 'amoled'): void {
     this.store.updateSettings({ theme });
-    this.toast.success(`Theme set to ${theme}`);
+    this.toast.success(`Theme transitioned to ${theme}`);
   }
 
   setCurrency(code: string): void {
     const cur = CURRENCIES.find(c => c.code === code);
     if (cur) {
       this.store.updateSettings({ currency: cur });
-      this.toast.success(`Currency set to ${cur.symbol} ${cur.code}`);
+      this.toast.success(`Currency synchronized to ${cur.code}`);
     }
   }
 
-  // ── Data ──
   exportJSON(): void {
     this.exportService.exportJSON();
-    this.toast.success('Backup exported');
+    this.toast.success('Vault backup generated');
   }
 
   importJSON(event: Event): void {
@@ -417,7 +577,7 @@ export class SettingsComponent {
 
   loadDemoData(): void {
     this.demoData.generateDemoData();
-    this.toast.success('Sample data loaded!');
+    this.toast.success('Activity simulation complete');
   }
 
   confirmReset(): void { this.showResetConfirm.set(true); }
@@ -425,6 +585,6 @@ export class SettingsComponent {
   resetAll(): void {
     this.store.resetAll();
     this.showResetConfirm.set(false);
-    this.toast.success('All data reset');
+    this.toast.success('Global purge complete');
   }
 }

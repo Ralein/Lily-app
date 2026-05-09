@@ -4,301 +4,561 @@ import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { LilyStore } from '../../core/store/lily.store';
 import { ConfettiService } from '../../core/services/confetti.service';
-
 import { CURRENCIES } from '../../core/models/settings.model';
-import { IncomeSource, BUDGET_RULE, NEEDS_CATEGORIES, WANTS_CATEGORIES } from '../../core/models/income.model';
+import { IncomeSource, BUDGET_RULE } from '../../core/models/income.model';
 import { format } from 'date-fns';
+import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 import {
   LucideFlower2, LucideCircleDollarSign, LucideBarChart3,
   LucideActivity, LucideSparkles, LucideArrowRight, LucideArrowLeft,
-  LucidePlus, LucideTrash2, LucideWallet,
+  LucidePlus, LucideTrash2, LucideWallet, LucideCheck,
 } from '@lucide/angular';
 
 @Component({
   selector: 'lily-onboarding',
   standalone: true,
   imports: [
-    FormsModule, DecimalPipe,
+    FormsModule, DecimalPipe, LilyIconComponent,
     LucideFlower2, LucideCircleDollarSign, LucideBarChart3,
     LucideActivity, LucideSparkles, LucideArrowRight, LucideArrowLeft,
-    LucidePlus, LucideTrash2, LucideWallet,
+    LucidePlus, LucideTrash2, LucideWallet, LucideCheck,
   ],
   template: `
-    <div class="onboarding">
-      <div class="onboarding__content">
-        @switch (step()) {
-          @case (0) {
-            <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__icon"><svg lucideFlower2 [size]="56" style="color: var(--color-violet)"></svg></div>
-              <h1 class="onboarding__title">Welcome to Lily</h1>
-              <p class="onboarding__desc">Your personal finance companion. Track income, manage budgets, and build better money habits — starting with what you earn.</p>
-              <button class="btn btn--primary btn--lg" (click)="step.set(1)">
-                Get Started <svg lucideArrowRight [size]="16"></svg>
-              </button>
-            </div>
-          }
-          @case (1) {
-            <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__icon"><svg lucideCircleDollarSign [size]="48" style="color: var(--color-emerald)"></svg></div>
-              <h2 class="onboarding__title">Choose Your Currency</h2>
-              <p class="onboarding__desc">Select the currency you primarily use.</p>
-              <div class="currency-grid">
-                @for (cur of popularCurrencies; track cur.code) {
-                  <button class="currency-option" [class.active]="selectedCurrency() === cur.code" (click)="selectedCurrency.set(cur.code)">
-                    <span class="currency-option__symbol">{{ cur.symbol }}</span>
-                    <span class="currency-option__code">{{ cur.code }}</span>
-                  </button>
-                }
-              </div>
-              <div class="onboarding__nav">
-                <button class="btn btn--ghost" (click)="step.set(0)">
-                  <svg lucideArrowLeft [size]="14"></svg> Back
-                </button>
-                <button class="btn btn--primary" (click)="saveCurrency(); step.set(2)">
-                  Next <svg lucideArrowRight [size]="14"></svg>
-                </button>
-              </div>
-            </div>
-          }
-          @case (2) {
-            <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__icon"><svg lucideWallet [size]="48" style="color: var(--color-violet-light)"></svg></div>
-              <h2 class="onboarding__title">Your Monthly Income</h2>
-              <p class="onboarding__desc">Add your income sources so Lily can help you budget smartly.</p>
+    <div class="onboarding-wrapper">
+      <!-- Background Elements -->
+      <div class="bg-blur bg-blur--1"></div>
+      <div class="bg-blur bg-blur--2"></div>
 
-              <div class="income-sources">
-                @for (source of tempSources(); track source.id; let i = $index) {
-                  <div class="income-source-row">
-                    <input class="income-source-row__name" type="text" [(ngModel)]="source.name" placeholder="Source name" />
-                    <div class="income-source-row__amount-wrap">
-                      <span class="income-source-row__symbol">{{ currencySymbol() }}</span>
-                      <input class="income-source-row__amount" type="number" [(ngModel)]="source.amount" placeholder="0" min="0" />
-                    </div>
-                    <select class="income-source-row__freq" [(ngModel)]="source.frequency">
-                      <option value="monthly">Monthly</option>
-                      <option value="biweekly">Bi-weekly</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="one-time">One-time</option>
-                    </select>
-                    <button class="btn btn--ghost btn--icon" (click)="removeSource(i)" aria-label="Remove source">
-                      <svg lucideTrash2 [size]="14"></svg>
+      <div class="onboarding-container">
+        <!-- Progress Stepper -->
+        <div class="stepper" anim="fadeIn">
+          @for (s of steps; track s.id; let i = $index) {
+            <div class="stepper__item" 
+                 [class.active]="step() === i" 
+                 [class.completed]="step() > i">
+              <div class="stepper__dot">
+                @if (step() > i) { <svg lucideCheck [size]="12"></svg> }
+                @else { <span>{{ i + 1 }}</span> }
+              </div>
+              <span class="stepper__label">{{ s.label }}</span>
+              @if (i < steps.length - 1) {
+                <div class="stepper__line"></div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="step-content">
+          @switch (step()) {
+            @case (0) {
+              <!-- Welcome -->
+              <div class="step-card" anim="slideUp">
+                <div class="step-card__icon welcome-icon">
+                  <svg lucideFlower2 [size]="64"></svg>
+                  <div class="icon-glow"></div>
+                </div>
+                <h1 class="step-card__title">Welcome to <span class="text-gradient">Lily</span></h1>
+                <p class="step-card__desc">Your financial ecosystem, refined. Lily helps you orchestrate your income, budgets, and goals with surgical precision and beautiful clarity.</p>
+                
+                <div class="feature-pills">
+                  <div class="pill"><lily-icon name="shield-check" [size]="14" /> Privacy First</div>
+                  <div class="pill"><lily-icon name="zap" [size]="14" /> Real-time Sync</div>
+                  <div class="pill"><lily-icon name="layers" [size]="14" /> Smart Budgets</div>
+                </div>
+
+                <button class="btn-premium primary" (click)="nextStep()">
+                  <span>Begin Initialization</span>
+                  <svg lucideArrowRight [size]="18"></svg>
+                </button>
+              </div>
+            }
+
+            @case (1) {
+              <!-- Currency -->
+              <div class="step-card" anim="slideUp">
+                <div class="step-card__header">
+                  <h2 class="step-card__title">Primary Currency</h2>
+                  <p class="step-card__desc">Select the baseline currency for your financial tracking.</p>
+                </div>
+
+                <div class="currency-grid">
+                  @for (cur of popularCurrencies; track cur.code) {
+                    <button class="currency-card" 
+                            [class.active]="selectedCurrency() === cur.code" 
+                            (click)="selectedCurrency.set(cur.code)">
+                      <div class="currency-card__info">
+                        <span class="symbol">{{ cur.symbol }}</span>
+                        <span class="code">{{ cur.code }}</span>
+                      </div>
+                      <span class="name">{{ cur.name }}</span>
+                      <div class="active-ring"></div>
                     </button>
+                  }
+                </div>
+
+                <div class="step-actions">
+                  <button class="btn-premium ghost" (click)="prevStep()">
+                    <svg lucideArrowLeft [size]="18"></svg>
+                    <span>Back</span>
+                  </button>
+                  <button class="btn-premium primary" (click)="saveCurrency(); nextStep()">
+                    <span>Continue</span>
+                    <svg lucideArrowRight [size]="18"></svg>
+                  </button>
+                </div>
+              </div>
+            }
+
+            @case (2) {
+              <!-- Income -->
+              <div class="step-card step-card--large" anim="slideUp">
+                <div class="step-card__header">
+                  <h2 class="step-card__title">Income Architecture</h2>
+                  <p class="step-card__desc">Define your monthly inflow. Lily uses this to architect your budget rules.</p>
+                </div>
+
+                <div class="income-manager">
+                  <div class="income-list custom-scrollbar">
+                    @for (source of tempSources(); track source.id; let i = $index) {
+                      <div class="income-item glass" anim="fadeIn">
+                        <div class="income-item__name">
+                          <label>Source Name</label>
+                          <input type="text" [(ngModel)]="source.name" placeholder="e.g. Main Salary" />
+                        </div>
+                        <div class="income-item__amount">
+                          <label>Amount</label>
+                          <div class="input-wrap">
+                            <span class="symbol">{{ currencySymbol() }}</span>
+                            <input type="number" [(ngModel)]="source.amount" placeholder="0" />
+                          </div>
+                        </div>
+                        <div class="income-item__freq">
+                          <label>Frequency</label>
+                          <select [(ngModel)]="source.frequency">
+                            <option value="monthly">Monthly</option>
+                            <option value="biweekly">Bi-weekly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="one-time">One-time</option>
+                          </select>
+                        </div>
+                        <button class="btn-delete" (click)="removeSource(i)" [disabled]="tempSources().length === 1">
+                          <svg lucideTrash2 [size]="16"></svg>
+                        </button>
+                      </div>
+                    }
                   </div>
-                }
-              </div>
 
-              <button class="btn btn--ghost" (click)="addSource()" style="margin-top: var(--space-2)">
-                <svg lucidePlus [size]="14"></svg> Add Income Source
-              </button>
+                  <button class="btn-add-source" (click)="addSource()">
+                    <svg lucidePlus [size]="16"></svg>
+                    <span>Register Another Source</span>
+                  </button>
 
-              @if (tempTotalIncome() > 0) {
-                <div class="income-total">
-                  <span class="income-total__label">Total Monthly Income</span>
-                  <span class="income-total__value">{{ currencySymbol() }}{{ tempTotalIncome() | number:'1.0-0' }}</span>
+                  @if (tempTotalIncome() > 0) {
+                    <div class="total-bar glass">
+                      <div class="label-group">
+                        <span class="label">Total Estimated Inflow</span>
+                        <span class="monthly">per month</span>
+                      </div>
+                      <span class="value text-income">{{ currencySymbol() }}{{ tempTotalIncome() | number:'1.0-0' }}</span>
+                    </div>
+                  }
                 </div>
-              }
 
-              <div class="onboarding__nav">
-                <button class="btn btn--ghost" (click)="step.set(1)">
-                  <svg lucideArrowLeft [size]="14"></svg> Back
-                </button>
-                <button class="btn btn--primary" (click)="saveIncome(); step.set(3)" [disabled]="tempTotalIncome() <= 0">
-                  Next <svg lucideArrowRight [size]="14"></svg>
-                </button>
-              </div>
-            </div>
-          }
-          @case (3) {
-            <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__icon"><svg lucideBarChart3 [size]="48" style="color: var(--color-amber)"></svg></div>
-              <h2 class="onboarding__title">Budget Allocation</h2>
-              <p class="onboarding__desc">We suggest the 50/30/20 rule. Adjust as you like.</p>
-
-              <div class="budget-split">
-                <div class="budget-split__bar">
-                  <div class="budget-split__segment budget-split__segment--needs" [style.width.%]="needsPct()"></div>
-                  <div class="budget-split__segment budget-split__segment--wants" [style.width.%]="wantsPct()"></div>
-                  <div class="budget-split__segment budget-split__segment--savings" [style.width.%]="savingsPct()"></div>
-                </div>
-                <div class="budget-split__labels">
-                  <span class="budget-split__label budget-split__label--needs">Needs {{ needsPct() | number:'1.0-0' }}%</span>
-                  <span class="budget-split__label budget-split__label--wants">Wants {{ wantsPct() | number:'1.0-0' }}%</span>
-                  <span class="budget-split__label budget-split__label--savings">Savings {{ savingsPct() | number:'1.0-0' }}%</span>
+                <div class="step-actions">
+                  <button class="btn-premium ghost" (click)="prevStep()">
+                    <svg lucideArrowLeft [size]="18"></svg>
+                    <span>Back</span>
+                  </button>
+                  <button class="btn-premium primary" (click)="saveIncome(); nextStep()" [disabled]="tempTotalIncome() <= 0">
+                    <span>Continue</span>
+                    <svg lucideArrowRight [size]="18"></svg>
+                  </button>
                 </div>
               </div>
+            }
 
-              <div class="budget-categories">
-                @for (cat of budgetCategories; track cat.id) {
-                  <div class="budget-cat-row">
-                    <span class="budget-cat-row__name">{{ cat.name }}</span>
-                    <div class="budget-cat-row__input-wrap">
-                      <span class="budget-cat-row__symbol">{{ currencySymbol() }}</span>
-                      <input class="budget-cat-row__input" type="number" [(ngModel)]="cat.limit" min="0" step="500" />
+            @case (3) {
+              <!-- Budget -->
+              <div class="step-card step-card--large" anim="slideUp">
+                <div class="step-card__header">
+                  <h2 class="step-card__title">Budget Allocation</h2>
+                  <p class="step-card__desc">Optimizing your 50/30/20 rule. Adjust limits based on your lifestyle.</p>
+                </div>
+
+                <div class="budget-planner">
+                  <div class="visualization glass">
+                    <div class="progress-labels">
+                      <div class="l needs">Needs <span>{{ needsPct() }}%</span></div>
+                      <div class="l wants">Wants <span>{{ wantsPct() }}%</span></div>
+                      <div class="l savings">Savings <span>{{ savingsPct() }}%</span></div>
+                    </div>
+                    <div class="progress-bar">
+                      <div class="segment needs" [style.width.%]="needsPct()"></div>
+                      <div class="segment wants" [style.width.%]="wantsPct()"></div>
+                      <div class="segment savings" [style.width.%]="savingsPct()"></div>
                     </div>
                   </div>
-                }
+
+                  <div class="category-grid custom-scrollbar">
+                    @for (cat of budgetCategories; track cat.id) {
+                      <div class="cat-pill glass">
+                        <span class="cat-name">{{ cat.name }}</span>
+                        <div class="cat-input">
+                          <span class="symbol">{{ currencySymbol() }}</span>
+                          <input type="number" [(ngModel)]="cat.limit" min="0" step="100" />
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="total-status" [class.danger]="totalBudgetAllocated() > tempTotalIncome()">
+                    <div class="status-info">
+                      <span class="label">Allocated Budget</span>
+                      <span class="subtext">out of {{ currencySymbol() }}{{ tempTotalIncome() | number:'1.0-0' }}</span>
+                    </div>
+                    <div class="status-value">
+                      {{ currencySymbol() }}{{ totalBudgetAllocated() | number:'1.0-0' }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="step-actions">
+                  <button class="btn-premium ghost" (click)="prevStep()">
+                    <svg lucideArrowLeft [size]="18"></svg>
+                    <span>Back</span>
+                  </button>
+                  <button class="btn-premium primary" (click)="saveBudget(); nextStep()">
+                    <span>Finalize Setup</span>
+                    <svg lucideArrowRight [size]="18"></svg>
+                  </button>
+                </div>
               </div>
+            }
 
-              <div class="income-total" style="margin-top: var(--space-4)">
-                <span class="income-total__label">Total Budget</span>
-                <span class="income-total__value" [class.over-budget]="totalBudgetAllocated() > tempTotalIncome()">
-                  {{ currencySymbol() }}{{ totalBudgetAllocated() | number:'1.0-0' }} / {{ currencySymbol() }}{{ tempTotalIncome() | number:'1.0-0' }}
-                </span>
-              </div>
+            @case (4) {
+              <!-- Completion -->
+              <div class="step-card celebratory" anim="scaleIn">
+                <div class="sparkle-visual">
+                  <svg lucideSparkles [size]="80" class="main-sparkle"></svg>
+                  <div class="ring"></div>
+                  <div class="ring"></div>
+                </div>
 
-              @if (totalBudgetAllocated() > tempTotalIncome()) {
-                <p class="text-sm" style="color: var(--color-rose); margin-top: var(--space-2)">Budget exceeds income by {{ currencySymbol() }}{{ totalBudgetAllocated() - tempTotalIncome() | number:'1.0-0' }}</p>
-              }
+                <h1 class="step-card__title">Ready for Launch</h1>
+                <p class="step-card__desc">Your financial ecosystem has been successfully initialized. Welcome to the future of personal finance.</p>
 
-              <div class="onboarding__nav">
-                <button class="btn btn--ghost" (click)="step.set(2)">
-                  <svg lucideArrowLeft [size]="14"></svg> Back
+                <div class="snapshot-grid">
+                  <div class="snapshot-item glass">
+                    <span class="label">Inflow</span>
+                    <span class="value text-income">{{ currencySymbol() }}{{ tempTotalIncome() | number:'1.0-0' }}</span>
+                  </div>
+                  <div class="snapshot-item glass">
+                    <span class="label">Budget</span>
+                    <span class="value">{{ currencySymbol() }}{{ totalBudgetAllocated() | number:'1.0-0' }}</span>
+                  </div>
+                  <div class="snapshot-item glass">
+                    <span class="label">Projected Savings</span>
+                    <span class="value text-violet">{{ currencySymbol() }}{{ tempTotalIncome() - totalBudgetAllocated() | number:'1.0-0' }}</span>
+                  </div>
+                </div>
+
+                <button class="btn-premium primary btn--lg" (click)="complete()">
+                  <span>Enter Dashboard</span>
+                  <svg lucideActivity [size]="18"></svg>
                 </button>
-                <button class="btn btn--primary" (click)="saveBudget(); step.set(4)">
-                  Next <svg lucideArrowRight [size]="14"></svg>
-                </button>
               </div>
-            </div>
-          }
-          @case (4) {
-            <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__icon"><svg lucideSparkles [size]="48" style="color: var(--color-violet)"></svg></div>
-              <h2 class="onboarding__title">You're All Set!</h2>
-              <p class="onboarding__desc">Here's your financial snapshot.</p>
-
-              <div class="summary-cards">
-                <div class="summary-card">
-                  <span class="summary-card__label">Monthly Income</span>
-                  <span class="summary-card__value summary-card__value--income">{{ currencySymbol() }}{{ tempTotalIncome() | number:'1.0-0' }}</span>
-                </div>
-                <div class="summary-card">
-                  <span class="summary-card__label">Budget Allocated</span>
-                  <span class="summary-card__value">{{ currencySymbol() }}{{ totalBudgetAllocated() | number:'1.0-0' }}</span>
-                </div>
-                <div class="summary-card">
-                  <span class="summary-card__label">Monthly Savings</span>
-                  <span class="summary-card__value summary-card__value--savings">{{ currencySymbol() }}{{ tempTotalIncome() - totalBudgetAllocated() | number:'1.0-0' }}</span>
-                </div>
-              </div>
-
-              <button class="btn btn--primary btn--lg" (click)="complete()" style="margin-top: var(--space-6)">
-                <svg lucideActivity [size]="18"></svg> Start Tracking
-              </button>
-            </div>
-          }
-        }
-
-        <div class="step-dots">
-          @for (s of [0,1,2,3,4]; track s) {
-            <div class="step-dot" [class.active]="step() === s" [class.completed]="step() > s"></div>
+            }
           }
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .onboarding {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: var(--space-6); background: var(--color-bg-primary);
-    }
-    .onboarding__content { max-width: 520px; width: 100%; }
-    .onboarding__step { text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--space-4); }
-    .onboarding__icon { margin-bottom: var(--space-2); }
-    .onboarding__title { font-size: var(--fs-2xl); font-weight: var(--fw-bold); }
-    .onboarding__desc { font-size: var(--fs-base); color: var(--color-text-secondary); max-width: 400px; line-height: 1.6; }
-    .onboarding__nav { display: flex; justify-content: space-between; width: 100%; margin-top: var(--space-4); }
-    .currency-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); width: 100%; }
-    .currency-option {
-      display: flex; flex-direction: column; align-items: center; gap: var(--space-1);
-      padding: var(--space-4) var(--space-3); border-radius: var(--radius-lg);
-      border: 2px solid var(--color-border); cursor: pointer; transition: all var(--duration-fast);
-      background: transparent; color: var(--color-text-primary);
-      &:hover { border-color: var(--color-violet); background: var(--color-violet-glow); }
-      &.active { border-color: var(--color-violet); background: var(--color-violet-glow); box-shadow: 0 0 20px var(--color-violet-glow); }
-      &__symbol { font-size: var(--fs-2xl); font-weight: var(--fw-bold); }
-      &__code { font-size: var(--fs-xs); color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .onboarding-wrapper {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-6);
     }
 
-    // ── Income Sources ──
-    .income-sources { width: 100%; display: flex; flex-direction: column; gap: var(--space-3); }
-    .income-source-row {
-      display: grid; grid-template-columns: 1fr 140px 110px 36px; gap: var(--space-2); align-items: center;
-      &__name, &__amount, &__freq {
-        padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
-        border: 1px solid var(--color-border); background: var(--color-bg-secondary);
-        color: var(--color-text-primary); font-size: var(--fs-sm);
-        &:focus { border-color: var(--color-violet); outline: none; }
-      }
-      &__amount-wrap { position: relative; display: flex; align-items: center; }
-      &__symbol { position: absolute; left: 10px; color: var(--color-text-muted); font-size: var(--fs-sm); pointer-events: none; }
-      &__amount { padding-left: var(--space-6) !important; width: 100%; }
-      &__freq { cursor: pointer; }
-    }
-    .income-total {
-      display: flex; justify-content: space-between; align-items: center;
-      width: 100%; padding: var(--space-4); border-radius: var(--radius-lg);
-      background: var(--color-bg-secondary); margin-top: var(--space-4);
-      &__label { font-size: var(--fs-sm); color: var(--color-text-secondary); }
-      &__value { font-size: var(--fs-xl); font-weight: var(--fw-bold); font-family: var(--font-mono); color: var(--color-emerald); }
+    .bg-blur {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      z-index: 0;
+      pointer-events: none;
+      
+      &--1 { background: var(--color-violet); top: -100px; right: -100px; }
+      &--2 { background: var(--color-pink); bottom: -100px; left: -100px; }
     }
 
-    // ── Budget Split ──
-    .budget-split {
-      width: 100%; margin-bottom: var(--space-4);
-      &__bar { display: flex; height: 12px; border-radius: var(--radius-full); overflow: hidden; gap: 2px; }
-      &__segment {
-        transition: width var(--duration-normal);
-        &--needs { background: var(--color-blue); }
-        &--wants { background: var(--color-amber); }
-        &--savings { background: var(--color-emerald); }
+    .onboarding-container {
+      width: 100%;
+      max-width: 640px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-8);
+    }
+
+    // ── Stepper ──
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 var(--space-4);
+      
+      &__item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-2);
+        position: relative;
+        flex: 1;
+
+        &.active {
+          .stepper__dot { background: var(--color-violet); border-color: var(--color-violet); color: white; box-shadow: 0 0 20px var(--color-violet-glow); }
+          .stepper__label { color: var(--color-text-primary); font-weight: 700; }
+        }
+
+        &.completed {
+          .stepper__dot { background: var(--color-emerald); border-color: var(--color-emerald); color: white; }
+          .stepper__line { background: var(--color-emerald); }
+        }
       }
-      &__labels { display: flex; justify-content: space-between; margin-top: var(--space-2); }
+
+      &__dot {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid var(--color-border);
+        background: var(--color-bg-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--color-text-tertiary);
+        transition: all 0.4s var(--ease-spring);
+        z-index: 2;
+      }
+
       &__label {
-        font-size: var(--fs-xs); font-weight: var(--fw-semibold);
-        &--needs { color: var(--color-blue); }
-        &--wants { color: var(--color-amber); }
-        &--savings { color: var(--color-emerald); }
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--color-text-tertiary);
+        transition: color 0.3s;
+      }
+
+      &__line {
+        position: absolute;
+        top: 16px;
+        left: calc(50% + 20px);
+        right: calc(-50% + 20px);
+        height: 2px;
+        background: var(--color-border);
+        transition: background 0.4s;
+        z-index: 1;
       }
     }
-    .budget-categories { width: 100%; display: flex; flex-direction: column; gap: var(--space-2); max-height: 280px; overflow-y: auto; }
-    .budget-cat-row {
+
+    // ── Step Cards ──
+    .step-card {
+      background: var(--color-bg-card);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--color-bg-glass-border);
+      border-radius: 32px;
+      padding: var(--space-10);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: var(--shadow-glass);
+      
+      &--large { max-width: 720px; align-self: center; width: 100%; }
+
+      &__icon.welcome-icon {
+        position: relative;
+        margin-bottom: var(--space-6);
+        color: var(--color-violet);
+        
+        .icon-glow {
+          position: absolute;
+          inset: -20px;
+          background: radial-gradient(circle, var(--color-violet-glow) 0%, transparent 70%);
+          filter: blur(20px);
+          animation: pulse 4s infinite;
+        }
+      }
+
+      &__header { margin-bottom: var(--space-8); width: 100%; }
+      &__title { font-size: 36px; font-weight: 900; letter-spacing: -0.04em; margin-bottom: var(--space-3); line-height: 1.1; }
+      &__desc { font-size: 16px; color: var(--color-text-secondary); line-height: 1.6; max-width: 480px; }
+    }
+
+    .text-gradient { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .feature-pills {
+      display: flex; gap: var(--space-3); margin: var(--space-8) 0;
+      .pill { 
+        padding: 8px 16px; background: var(--color-bg-input); border-radius: var(--radius-full); 
+        border: 1px solid var(--color-border); font-size: 12px; font-weight: 700; color: var(--color-text-secondary);
+        display: flex; align-items: center; gap: 8px;
+      }
+    }
+
+    // ── Currency Grid ──
+    .currency-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); width: 100%; margin-bottom: var(--space-8);
+      @media (max-width: 560px) { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .currency-card {
+      background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 20px; padding: var(--space-5);
+      display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); cursor: pointer; transition: all 0.3s var(--ease-out);
+      position: relative; overflow: hidden;
+      
+      &__info { display: flex; align-items: baseline; gap: var(--space-2); }
+      .symbol { font-size: 24px; font-weight: 800; color: var(--color-text-primary); }
+      .code { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; }
+      .name { font-size: 13px; font-weight: 600; color: var(--color-text-secondary); }
+      
+      .active-ring { position: absolute; inset: 0; border: 2px solid transparent; border-radius: inherit; transition: all 0.3s; }
+
+      &:hover { background: var(--color-bg-card-hover); border-color: var(--color-violet-alpha); transform: translateY(-2px); }
+      &.active { 
+        background: var(--color-bg-secondary); border-color: var(--color-violet); 
+        .active-ring { border-color: var(--color-violet); box-shadow: 0 0 20px var(--color-violet-glow); }
+        .symbol { color: var(--color-violet-light); }
+      }
+    }
+
+    // ── Income Manager ──
+    .income-manager { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-8); }
+    .income-list { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-3); padding-right: 8px; }
+    
+    .income-item {
+      display: grid; grid-template-columns: 1fr 140px 140px 48px; gap: var(--space-4); padding: var(--space-4); border-radius: 20px;
+      @media (max-width: 640px) { grid-template-columns: 1fr 1fr; }
+      
+      label { font-size: 10px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+      input, select { 
+        background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 12px; height: 44px; padding: 0 16px; 
+        color: var(--color-text-primary); font-size: 14px; font-weight: 600; width: 100%;
+        &:focus { border-color: var(--color-violet); outline: none; background: var(--color-bg-secondary); }
+      }
+      
+      .input-wrap { position: relative; display: flex; align-items: center; }
+      .symbol { position: absolute; left: 14px; color: var(--color-text-tertiary); font-weight: 700; }
+      input[type="number"] { padding-left: 28px; font-family: var(--font-mono); }
+      
+      .btn-delete { 
+        align-self: flex-end; height: 44px; border-radius: 12px; background: rgba(244, 63, 94, 0.1); border: none; color: var(--color-rose); cursor: pointer;
+        &:hover:not(:disabled) { background: var(--color-rose); color: white; }
+        &:disabled { opacity: 0.3; cursor: not-allowed; }
+      }
+    }
+
+    .btn-add-source {
+      background: transparent; border: 2px dashed var(--color-border); border-radius: 16px; padding: var(--space-4); color: var(--color-text-tertiary);
+      font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all 0.2s;
+      &:hover { border-color: var(--color-violet); color: var(--color-violet-light); background: var(--color-bg-input); }
+    }
+
+    .total-bar {
+      padding: var(--space-5) var(--space-6); border-radius: 20px; display: flex; justify-content: space-between; align-items: center;
+      .label-group { display: flex; flex-direction: column; }
+      .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--color-text-tertiary); }
+      .monthly { font-size: 11px; font-weight: 600; color: var(--color-text-muted); }
+      .value { font-size: 28px; font-weight: 900; letter-spacing: -0.02em; font-family: var(--font-mono); }
+    }
+
+    // ── Budget Planner ──
+    .budget-planner { width: 100%; display: flex; flex-direction: column; gap: var(--space-6); margin-bottom: var(--space-8); }
+    .visualization {
+      padding: var(--space-6); border-radius: 24px;
+      .progress-labels { display: flex; justify-content: space-between; margin-bottom: var(--space-3); }
+      .l { font-size: 11px; font-weight: 800; text-transform: uppercase; span { font-weight: 900; opacity: 1; margin-left: 4px; } }
+      .needs { color: var(--color-sky); }
+      .wants { color: var(--color-amber); }
+      .savings { color: var(--color-emerald); }
+      
+      .progress-bar { height: 12px; border-radius: var(--radius-full); background: var(--color-bg-input); display: flex; overflow: hidden; gap: 2px; }
+      .segment { transition: width 0.8s var(--ease-spring); }
+      .segment.needs { background: var(--color-sky); }
+      .segment.wants { background: var(--color-amber); }
+      .segment.savings { background: var(--color-emerald); }
+    }
+
+    .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); max-height: 280px; overflow-y: auto; padding-right: 8px; }
+    .cat-pill {
+      display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-radius: 16px;
+      .cat-name { font-size: 13px; font-weight: 700; color: var(--color-text-secondary); }
+      .cat-input {
+        display: flex; align-items: center; gap: 6px;
+        .symbol { font-size: 12px; font-weight: 800; color: var(--color-text-tertiary); }
+        input { background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 8px; width: 80px; height: 32px; text-align: right; font-family: var(--font-mono); font-weight: 800; color: var(--color-text-primary); padding: 0 8px; }
+      }
+    }
+
+    .total-status {
+      padding: var(--space-5) var(--space-6); border-radius: 24px; background: var(--color-bg-secondary); border: 1px solid var(--color-border);
       display: flex; justify-content: space-between; align-items: center;
-      padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
-      background: var(--color-bg-secondary);
-      &__name { font-size: var(--fs-sm); font-weight: var(--fw-medium); }
-      &__input-wrap { display: flex; align-items: center; gap: var(--space-1); }
-      &__symbol { font-size: var(--fs-sm); color: var(--color-text-muted); }
-      &__input {
-        width: 90px; padding: var(--space-1) var(--space-2); border-radius: var(--radius-md);
-        border: 1px solid var(--color-border); background: var(--color-bg-primary);
-        color: var(--color-text-primary); font-size: var(--fs-sm); text-align: right;
-        font-family: var(--font-mono);
-        &:focus { border-color: var(--color-violet); outline: none; }
-      }
+      &.danger { border-color: var(--color-rose); .status-value { color: var(--color-rose); } }
+      .status-info { display: flex; flex-direction: column; .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--color-text-tertiary); } .subtext { font-size: 11px; color: var(--color-text-muted); } }
+      .status-value { font-size: 24px; font-weight: 900; font-family: var(--font-mono); }
     }
-    .over-budget { color: var(--color-rose) !important; }
 
-    // ── Summary Cards ──
-    .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); width: 100%; }
-    .summary-card {
-      display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
-      padding: var(--space-5) var(--space-3); border-radius: var(--radius-lg);
-      background: var(--color-bg-secondary); border: 1px solid var(--color-border);
-      &__label { font-size: var(--fs-xs); color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
-      &__value { font-size: var(--fs-lg); font-weight: var(--fw-bold); font-family: var(--font-mono);
-        &--income { color: var(--color-emerald); }
-        &--savings { color: var(--color-violet-light); }
+    // ── Celebration ──
+    .step-card.celebratory {
+      .sparkle-visual { position: relative; margin-bottom: var(--space-8); }
+      .main-sparkle { color: var(--color-violet); filter: drop-shadow(0 0 20px var(--color-violet-glow)); }
+      .ring { position: absolute; inset: -20px; border: 2px solid var(--color-violet-glow); border-radius: 50%; animation: pulse-ring 4s infinite; }
+      .ring:nth-child(2) { animation-delay: 1s; }
+      
+      .snapshot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); width: 100%; margin: var(--space-8) 0; }
+      .snapshot-item {
+        padding: var(--space-5) var(--space-2); border-radius: 20px; display: flex; flex-direction: column; gap: 4px;
+        .label { font-size: 10px; font-weight: 800; text-transform: uppercase; color: var(--color-text-tertiary); }
+        .value { font-size: 18px; font-weight: 900; font-family: var(--font-mono); }
       }
     }
 
-    .step-dots { display: flex; gap: var(--space-2); justify-content: center; margin-top: var(--space-8); }
-    .step-dot {
-      width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--color-border); transition: all var(--duration-fast);
-      &.active { width: 24px; background: var(--color-violet); }
-      &.completed { background: var(--color-violet-muted); }
+    @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(2); opacity: 0; } }
+
+    // ── Buttons ──
+    .btn-premium {
+      height: 56px; padding: 0 32px; border-radius: 18px; font-size: 16px; font-weight: 800; border: none; cursor: pointer;
+      display: flex; align-items: center; gap: 12px; transition: all 0.3s var(--ease-spring);
+      
+      &.primary { 
+        background: var(--gradient-primary); color: white; box-shadow: 0 8px 24px -6px var(--color-violet-glow);
+        &:hover { transform: translateY(-3px) scale(1.02); filter: brightness(1.1); box-shadow: 0 12px 32px -8px var(--color-violet-glow); }
+      }
+      
+      &.ghost { background: var(--color-bg-input); color: var(--color-text-secondary); border: 1px solid var(--color-border); &:hover { background: var(--color-bg-secondary); color: var(--color-text-primary); } }
+      
+      &.btn--lg { height: 64px; padding: 0 48px; font-size: 18px; }
+      &:active { transform: translateY(0) scale(0.98); }
+      &:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
     }
-    input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-    input[type="number"] { -moz-appearance: textfield; }
+
+    .step-actions { display: flex; justify-content: space-between; width: 100%; margin-top: var(--space-4); }
+
+    .custom-scrollbar { &::-webkit-scrollbar { width: 4px; } &::-webkit-scrollbar-track { background: transparent; } &::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 10px; } }
+    .glass { background: var(--color-bg-input); border: 1px solid var(--color-border); backdrop-filter: blur(10px); }
   `],
 })
 export class OnboardingComponent {
@@ -307,12 +567,19 @@ export class OnboardingComponent {
   private router = inject(Router);
 
   step = signal(0);
-  selectedCurrency = signal('INR');
+  steps = [
+    { id: 'welcome', label: 'Welcome' },
+    { id: 'currency', label: 'Currency' },
+    { id: 'income', label: 'Income' },
+    { id: 'budget', label: 'Budget' },
+    { id: 'ready', label: 'Ready' },
+  ];
 
-  // ── Income Sources (local state before saving) ──
+  selectedCurrency = signal('USD');
+
   tempSources = signal<IncomeSource[]>([
     {
-      id: crypto.randomUUID(), name: 'Salary', amount: 0,
+      id: crypto.randomUUID(), name: 'Main Salary', amount: 0,
       frequency: 'monthly', categoryId: 'salary', isActive: true,
       createdAt: new Date().toISOString(),
     },
@@ -325,7 +592,6 @@ export class OnboardingComponent {
     }, 0)
   );
 
-  // ── Budget Categories (local state) ──
   budgetCategories = [
     { id: 'food', name: 'Food & Dining', limit: 0, type: 'wants' },
     { id: 'transport', name: 'Transport', limit: 0, type: 'needs' },
@@ -344,20 +610,25 @@ export class OnboardingComponent {
 
   needsPct = computed(() => {
     const total = this.tempTotalIncome();
-    if (total <= 0) return 50;
+    if (total <= 0) return 0;
     const needs = this.budgetCategories.filter(c => c.type === 'needs').reduce((s, c) => s + (c.limit || 0), 0);
     return Math.round((needs / total) * 100);
   });
+
   wantsPct = computed(() => {
     const total = this.tempTotalIncome();
-    if (total <= 0) return 30;
+    if (total <= 0) return 0;
     const wants = this.budgetCategories.filter(c => c.type === 'wants').reduce((s, c) => s + (c.limit || 0), 0);
     return Math.round((wants / total) * 100);
   });
+
   savingsPct = computed(() => Math.max(0, 100 - this.needsPct() - this.wantsPct()));
 
-  popularCurrencies = CURRENCIES.slice(0, 6);
-  currencySymbol = () => CURRENCIES.find(c => c.code === this.selectedCurrency())?.symbol || '₹';
+  popularCurrencies = CURRENCIES.slice(0, 9);
+  currencySymbol = () => CURRENCIES.find(c => c.code === this.selectedCurrency())?.symbol || '$';
+
+  nextStep(): void { if (this.step() < 4) this.step.update(s => s + 1); }
+  prevStep(): void { if (this.step() > 0) this.step.update(s => s - 1); }
 
   addSource(): void {
     this.tempSources.update(s => [...s, {
@@ -378,22 +649,21 @@ export class OnboardingComponent {
 
   saveIncome(): void {
     const sources = this.tempSources().filter(s => s.amount > 0 && s.name.trim());
-    for (const source of sources) {
-      this.store.addIncomeSource(source);
+    // Auto-suggest 50/30/20 allocation if categories are empty
+    if (this.totalBudgetAllocated() === 0) {
+      const income = this.tempTotalIncome();
+      const needsBudget = Math.round(income * BUDGET_RULE.needs);
+      const wantsBudget = Math.round(income * BUDGET_RULE.wants);
+
+      const needsCats = this.budgetCategories.filter(c => c.type === 'needs');
+      const wantsCats = this.budgetCategories.filter(c => c.type === 'wants');
+
+      const perNeed = Math.round(needsBudget / needsCats.length / 100) * 100;
+      const perWant = Math.round(wantsBudget / wantsCats.length / 100) * 100;
+
+      needsCats.forEach(c => c.limit = perNeed);
+      wantsCats.forEach(c => c.limit = perWant);
     }
-    // Auto-suggest 50/30/20 allocation
-    const income = this.tempTotalIncome();
-    const needsBudget = Math.round(income * BUDGET_RULE.needs);
-    const wantsBudget = Math.round(income * BUDGET_RULE.wants);
-
-    const needsCats = this.budgetCategories.filter(c => c.type === 'needs');
-    const wantsCats = this.budgetCategories.filter(c => c.type === 'wants');
-
-    const perNeed = Math.round(needsBudget / needsCats.length / 500) * 500;
-    const perWant = Math.round(wantsBudget / wantsCats.length / 500) * 500;
-
-    needsCats.forEach(c => c.limit = perNeed);
-    wantsCats.forEach(c => c.limit = perWant);
   }
 
   saveBudget(): void {
@@ -412,28 +682,9 @@ export class OnboardingComponent {
   }
 
   complete(): void {
-    // Log first month's income
     const sources = this.tempSources().filter(s => s.amount > 0 && s.name.trim());
-    const month = format(new Date(), 'yyyy-MM');
-    for (const source of sources) {
-      if (source.frequency !== 'one-time') {
-        this.store.addTransaction({
-          id: crypto.randomUUID(),
-          amount: source.amount,
-          type: 'income',
-          categoryId: source.categoryId,
-          note: source.name,
-          date: `${month}-01T09:00:00.000Z`,
-          tags: [],
-          isRecurring: true,
-          recurringFrequency: 'monthly',
-          paymentMethod: 'netbanking',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-      }
-    }
-
+    sources.forEach(s => this.store.addIncomeSource(s));
+    
     this.store.completeOnboarding();
     this.confetti.burst();
     this.router.navigate(['/dashboard']);

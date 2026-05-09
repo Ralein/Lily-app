@@ -788,6 +788,10 @@ import {
 export class BudgetsComponent {
   store = inject(LilyStore);
   private analytics = inject(AnalyticsService);
+
+  getCatColor(categoryId: string) {
+    return this.store.categories().find(c => c.id === categoryId)?.color || '#64748b';
+  }
   private toast = inject(ToastService);
   Math = Math;
 

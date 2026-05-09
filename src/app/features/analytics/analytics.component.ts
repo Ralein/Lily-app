@@ -491,7 +491,7 @@ export class AnalyticsComponent {
     scales: { 
       x: { 
         grid: { display: false }, 
-        ticks: { color: this.chartColors.text, font: { size: 10, weight: '600' } } 
+        ticks: { color: this.chartColors.text, font: { size: 10, weight: 'bold' } } 
       }, 
       y: { 
         grid: { color: this.chartColors.grid }, 
@@ -566,7 +566,7 @@ export class AnalyticsComponent {
     scales: { 
       x: { 
         grid: { display: false }, 
-        ticks: { color: this.chartColors.text, font: { size: 10, weight: '600' } } 
+        ticks: { color: this.chartColors.text, font: { size: 10, weight: 'bold' } } 
       }, 
       y: { 
         grid: { color: this.chartColors.grid }, 

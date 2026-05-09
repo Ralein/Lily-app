@@ -36,7 +36,8 @@
   @media (max-width: 768px) {
     margin-left: 0;
     padding: var(--space-4);
-    padding-bottom: calc(var(--bottom-nav-height) + var(--space-8));
+    padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + var(--space-8));
+    padding-top: calc(var(--safe-area-top) + var(--space-4));
   }
 }
 
@@ -183,3 +184,62 @@
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .w-full { width: 100%; }
 .min-w-0 { min-width: 0; }
+
+// ── Mobile Enhancements ──
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+// Global touch feedback for premium feel
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, .clickable {
+  transition: transform var(--duration-fast) var(--ease-spring), opacity var(--duration-fast);
+  
+  &:active {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+}
+
+// Scrollbar refinement for mobile/desktop
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 10px;
+    
+    &:hover {
+      background: var(--color-text-tertiary);
+    }
+  }
+}
+
+// Animations helper
+[anim="fadeIn"] { animation: fadeIn var(--duration-normal) var(--ease-out) forwards; }
+[anim="slideUp"] { animation: slideUp var(--duration-normal) var(--ease-out) forwards; }
+[anim="slideRight"] { animation: slideRight var(--duration-normal) var(--ease-out) forwards; }
+[anim="scaleIn"] { animation: scaleIn var(--duration-normal) var(--ease-spring) forwards; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideRight { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }

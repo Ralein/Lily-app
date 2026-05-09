@@ -1,4 +1,4 @@
-import { Component, HostListener, signal, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, inject, signal, computed, effect, HostListener, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LilyIconComponent } from '../../icons/lily-icon.component';
@@ -8,9 +8,10 @@ interface CommandAction {
   id: string;
   label: string;
   iconName: string;
-  action: () => void;
   shortcut?: string;
-  category: 'Navigation' | 'Actions';
+  description?: string;
+  category: string;
+  action: () => void;
 }
 
 @Component({
