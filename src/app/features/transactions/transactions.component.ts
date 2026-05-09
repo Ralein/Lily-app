@@ -21,159 +21,363 @@ import {
     LucideCheck, LucideReceipt,
   ],
   template: `
-    <div class="page-header">
-      <h1 class="page-header__title">Transactions</h1>
-      <p class="page-header__subtitle">{{ filteredTxns().length }} transactions</p>
-    </div>
-
-    <!-- Search & Actions Bar -->
-    <div class="txn-toolbar">
-      <div class="txn-search">
-        <svg lucideSearch [size]="16" class="txn-search__icon"></svg>
-        <input type="text" class="txn-search__input" placeholder="Search transactions..." [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()">
+    <div class="transactions-page">
+      <div class="page-header animate-fade-in">
+        <h1 class="page-header__title">History</h1>
+        <div class="page-header__meta">
+          <p class="page-header__subtitle">{{ filteredTxns().length }} transactions recorded</p>
+          <div class="badge badge--soft">Verified Activity</div>
+        </div>
       </div>
-      <div class="txn-actions">
-        <button class="btn btn--secondary btn--sm" (click)="showFilters.set(!showFilters())">
-          <svg lucideFilter [size]="14"></svg> Filters {{ activeFilterCount() > 0 ? '(' + activeFilterCount() + ')' : '' }}
-        </button>
-        <button class="btn btn--secondary btn--sm" (click)="exportCSV()">
-          <svg lucideDownload [size]="14"></svg> Export
-        </button>
-      </div>
-    </div>
 
-    <!-- Filters Panel -->
-    @if (showFilters()) {
-      <div class="lily-card filter-panel animate-fade-in-up">
-        <div class="filter-grid">
-          <div class="filter-group">
-            <label class="filter-label">Type</label>
-            <div class="type-toggle" style="padding: 2px">
-              <button class="pill" [class.active]="!filter().type" (click)="setFilterType(undefined)">All</button>
-              <button class="pill" [class.active]="filter().type === 'expense'" (click)="setFilterType('expense')">Expense</button>
-              <button class="pill" [class.active]="filter().type === 'income'" (click)="setFilterType('income')">Income</button>
+      <!-- Floating Glass Toolbar -->
+      <div class="glass-toolbar animate-slide-up">
+        <div class="glass-toolbar__inner">
+          <div class="search-field">
+            <svg lucideSearch [size]="18" class="icon"></svg>
+            <input type="text" 
+                   placeholder="Search activity..." 
+                   [(ngModel)]="searchQuery" 
+                   (ngModelChange)="onSearchChange()">
+          </div>
+          
+          <div class="actions">
+            <button class="tool-btn" 
+                    [class.active]="showFilters()"
+                    (click)="showFilters.set(!showFilters())">
+              <svg lucideFilter [size]="18"></svg>
+              @if (activeFilterCount() > 0) {
+                <span class="count-badge">{{ activeFilterCount() }}</span>
+              }
+            </button>
+            <button class="tool-btn" (click)="exportCSV()">
+              <svg lucideDownload [size]="18"></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Filters Panel -->
+      @if (showFilters()) {
+        <div class="lily-card lily-card--glass filter-panel animate-slide-up">
+          <div class="filter-panel__grid">
+            <div class="filter-box">
+              <label>Transaction Type</label>
+              <div class="glass-toggle">
+                <button [class.active]="!filter().type" (click)="setFilterType(undefined)">All</button>
+                <button [class.active]="filter().type === 'expense'" (click)="setFilterType('expense')">Expenses</button>
+                <button [class.active]="filter().type === 'income'" (click)="setFilterType('income')">Income</button>
+              </div>
+            </div>
+
+            <div class="filter-box">
+              <label>Date Range</label>
+              <div class="date-group">
+                <input type="date" [ngModel]="filter().dateFrom" (ngModelChange)="updateFilter({dateFrom: $event})">
+                <span class="sep">/</span>
+                <input type="date" [ngModel]="filter().dateTo" (ngModelChange)="updateFilter({dateTo: $event})">
+              </div>
+            </div>
+
+            <div class="filter-box">
+              <label>Sort By</label>
+              <div class="glass-select">
+                <select [ngModel]="filter().sortBy" (ngModelChange)="updateFilter({sortBy: $event})">
+                  <option value="date">Most Recent</option>
+                  <option value="amount">Highest Amount</option>
+                  <option value="category">Alphabetical</option>
+                </select>
+                <svg lucideChevronDown [size]="14"></svg>
+              </div>
             </div>
           </div>
-          <div class="filter-group">
-            <label class="filter-label">Date Range</label>
-            <div class="flex gap-2">
-              <input type="date" class="input" [ngModel]="filter().dateFrom" (ngModelChange)="updateFilter({dateFrom: $event})">
-              <input type="date" class="input" [ngModel]="filter().dateTo" (ngModelChange)="updateFilter({dateTo: $event})">
-            </div>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Sort By</label>
-            <select class="select" [ngModel]="filter().sortBy" (ngModelChange)="updateFilter({sortBy: $event})">
-              <option value="date">Date</option>
-              <option value="amount">Amount</option>
-              <option value="category">Category</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label class="filter-label">Categories</label>
-            <div class="flex flex-wrap gap-2">
+
+          <div class="filter-panel__categories">
+            <label>Categories</label>
+            <div class="cat-scroller">
               @for (cat of store.categories(); track cat.id) {
-                <button class="pill" [class.active]="isCategorySelected(cat.id)" (click)="toggleCategory(cat.id)">
-                  <lily-icon [name]="cat.icon" [size]="14" /> {{ cat.name }}
+                <button class="glass-pill" 
+                        [class.active]="isCategorySelected(cat.id)" 
+                        (click)="toggleCategory(cat.id)"
+                        [style.--cat-color]="cat.color">
+                  <lily-icon [name]="cat.icon" [size]="14" />
+                  <span>{{ cat.name }}</span>
                 </button>
               }
             </div>
           </div>
-        </div>
-        <button class="btn btn--ghost btn--sm" (click)="clearFilters()" style="margin-top: var(--space-3)">Clear Filters</button>
-      </div>
-    }
 
-    <!-- Bulk Actions -->
-    @if (selectedIds().size > 0) {
-      <div class="bulk-bar animate-slide-up">
-        <span>{{ selectedIds().size }} selected</span>
-        <button class="btn btn--danger btn--sm" (click)="bulkDelete()">
-          <svg lucideTrash2 [size]="14"></svg> Delete
-        </button>
-        <button class="btn btn--secondary btn--sm" (click)="clearSelection()">Cancel</button>
-      </div>
-    }
-
-    <!-- Transaction List -->
-    <div class="txn-list-container">
-      @for (txn of filteredTxns(); track txn.id; let i = $index) {
-        <div class="txn-card" [class.txn-card--selected]="selectedIds().has(txn.id)" [class.txn-card--editing]="editingId() === txn.id">
-          <div class="txn-card__main" (click)="toggleEdit(txn.id)">
-            <input type="checkbox" class="txn-card__check" [checked]="selectedIds().has(txn.id)" (click)="toggleSelect($event, txn.id)" (change)="$event.stopPropagation()">
-            <div class="txn-card__icon" [style.background]="getCatColor(txn.categoryId) + '22'" [style.color]="getCatColor(txn.categoryId)">
-              <lily-icon [name]="getCatIcon(txn.categoryId)" [size]="18" />
-            </div>
-            <div class="txn-card__info">
-              <span class="txn-card__category">{{ getCatName(txn.categoryId) }}</span>
-              <span class="txn-card__note">{{ txn.note || '—' }} · {{ txn.paymentMethod }}</span>
-            </div>
-            <div class="txn-card__right">
-              <span class="txn-card__amount" [class.text-income]="txn.type === 'income'" [class.text-expense]="txn.type === 'expense'">
-                {{ txn.type === 'income' ? '+' : '-' }}{{ txn.amount | currencyDisplay }}
-              </span>
-              <span class="txn-card__date">{{ txn.date | relativeDate }}</span>
-            </div>
+          <div class="filter-panel__footer">
+            <button class="reset-btn" (click)="clearFilters()">Clear All Filters</button>
           </div>
-
-          <!-- Inline Edit -->
-          @if (editingId() === txn.id) {
-            <div class="txn-card__edit animate-fade-in-up">
-              <div class="flex gap-3 flex-wrap">
-                <input type="number" class="input" style="max-width: 140px" [ngModel]="txn.amount" (ngModelChange)="editAmount = $event" placeholder="Amount">
-                <input type="text" class="input" style="flex: 1" [ngModel]="txn.note" (ngModelChange)="editNote = $event" placeholder="Note">
-                <select class="select" style="max-width: 160px" [ngModel]="txn.categoryId" (ngModelChange)="editCategory = $event">
-                  @for (cat of store.categories(); track cat.id) { <option [value]="cat.id">{{ cat.name }}</option> }
-                </select>
-              </div>
-              <div class="flex gap-2" style="margin-top: var(--space-3)">
-                <button class="btn btn--primary btn--sm" (click)="saveEdit(txn)">
-                  <svg lucideCheck [size]="14"></svg> Save
-                </button>
-                <button class="btn btn--danger btn--sm" (click)="store.deleteTransaction(txn.id); toast.success('Deleted')">
-                  <svg lucideTrash2 [size]="14"></svg> Delete
-                </button>
-                <button class="btn btn--ghost btn--sm" (click)="editingId.set(null)">Cancel</button>
-              </div>
-            </div>
-          }
-        </div>
-      } @empty {
-        <div class="empty-state">
-          <span class="empty-state__icon"><svg lucideReceipt [size]="40" style="opacity: 0.5"></svg></span>
-          <p class="empty-state__title">No transactions found</p>
-          <p class="empty-state__description">Try adjusting your filters or add a new transaction</p>
         </div>
       }
+
+      <!-- Bulk Selection Bar -->
+      @if (selectedIds().size > 0) {
+        <div class="floating-selection animate-slide-up">
+          <div class="selection-info">
+            <span class="count">{{ selectedIds().size }}</span>
+            <span class="label">Items Selected</span>
+          </div>
+          <div class="selection-actions">
+            <button class="delete-btn" (click)="bulkDelete()">
+              <svg lucideTrash2 [size]="16"></svg>
+              <span>Delete</span>
+            </button>
+            <button class="cancel-btn" (click)="clearSelection()">Cancel</button>
+          </div>
+        </div>
+      }
+
+      <!-- Transactions List -->
+      <div class="list-container">
+        @for (txn of filteredTxns(); track txn.id; let i = $index) {
+          <div class="premium-row animate-slide-up" 
+               [class.selected]="selectedIds().has(txn.id)"
+               [class.editing]="editingId() === txn.id"
+               [style.animation-delay]="(i * 0.04) + 's'">
+            
+            <div class="premium-row__main" (click)="toggleEdit(txn.id)">
+              <div class="left-side">
+                <div class="selection-box" (click)="$event.stopPropagation()">
+                  <input type="checkbox" 
+                         [checked]="selectedIds().has(txn.id)" 
+                         (change)="toggleSelect($event, txn.id)">
+                </div>
+                
+                <div class="icon-sphere" [style.background]="getCatColor(txn.categoryId) + '15'">
+                  <lily-icon [name]="getCatIcon(txn.categoryId)" [size]="20" [style.color]="getCatColor(txn.categoryId)" />
+                </div>
+                
+                <div class="details">
+                  <div class="top-row">
+                    <span class="title">{{ getCatName(txn.categoryId) }}</span>
+                    <span class="method">{{ txn.paymentMethod }}</span>
+                  </div>
+                  <div class="bottom-row">
+                    <span class="note">{{ txn.note || 'No description' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="right-side">
+                <div class="amount-group" [class.income]="txn.type === 'income'" [class.expense]="txn.type === 'expense'">
+                  <span class="symbol">{{ txn.type === 'income' ? '+' : '-' }}</span>
+                  <span class="val">{{ txn.amount | currencyDisplay }}</span>
+                </div>
+                <div class="date">{{ txn.date | relativeDate }}</div>
+              </div>
+            </div>
+
+            @if (editingId() === txn.id) {
+              <div class="edit-drawer animate-slide-down">
+                <div class="edit-drawer__grid">
+                  <div class="field">
+                    <label>Amount</label>
+                    <input type="number" [ngModel]="txn.amount" (ngModelChange)="editAmount = $event">
+                  </div>
+                  <div class="field">
+                    <label>Note</label>
+                    <input type="text" [ngModel]="txn.note" (ngModelChange)="editNote = $event">
+                  </div>
+                  <div class="field">
+                    <label>Category</label>
+                    <div class="glass-select">
+                      <select [ngModel]="txn.categoryId" (ngModelChange)="editCategory = $event">
+                        @for (cat of store.categories(); track cat.id) {
+                          <option [value]="cat.id">{{ cat.name }}</option>
+                        }
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="edit-drawer__footer">
+                  <button class="save-btn" (click)="saveEdit(txn)">Update Entry</button>
+                  <button class="trash-btn" (click)="store.deleteTransaction(txn.id); toast.success('Deleted')">
+                    <svg lucideTrash2 [size]="16"></svg>
+                  </button>
+                  <button class="close-btn" (click)="editingId.set(null)">Discard</button>
+                </div>
+              </div>
+            }
+          </div>
+        } @empty {
+          <div class="empty-view animate-fade-in">
+            <div class="empty-view__icon">
+              <svg lucideReceipt [size]="48"></svg>
+            </div>
+            <h3>No Records Found</h3>
+            <p>We couldn't find any transactions matching your criteria.</p>
+            <button class="reset-link" (click)="clearFilters()">Reset All Filters</button>
+          </div>
+        }
+      </div>
     </div>
   `,
   styles: [`
-    .txn-toolbar { display: flex; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap; align-items: center; }
-    .txn-search { display: flex; align-items: center; gap: var(--space-2); flex: 1; min-width: 200px; background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 0 var(--space-3); }
-    .txn-search__icon { flex-shrink: 0; color: var(--color-text-muted); }
-    .txn-search__input { flex: 1; border: none; background: transparent; padding: var(--space-3) 0; color: var(--color-text-primary); outline: none; font-size: var(--fs-base); &::placeholder { color: var(--color-text-muted); } }
-    .txn-actions { display: flex; gap: var(--space-2); }
-    .filter-panel { margin-bottom: var(--space-4); }
-    .filter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: var(--space-4); }
-    .filter-group { display: flex; flex-direction: column; gap: var(--space-2); }
-    .filter-label { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: var(--ls-wider); }
-    .type-toggle { display: flex; gap: var(--space-1); }
-    .bulk-bar { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); background: var(--color-violet-glow); border: 1px solid var(--color-violet); border-radius: var(--radius-lg); margin-bottom: var(--space-4); font-size: var(--fs-sm); font-weight: var(--fw-medium); color: var(--color-violet-light); }
-    .txn-list-container { display: flex; flex-direction: column; gap: var(--space-2); }
-    .txn-card { background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: all var(--duration-fast);
-      &:hover { border-color: var(--color-border-hover); }
-      &--selected { border-color: var(--color-violet); background: var(--color-violet-glow); }
+    .transactions-page { display: flex; flex-direction: column; gap: var(--space-8); padding-bottom: var(--space-12); }
+
+    .glass-toolbar {
+      position: sticky; top: var(--space-4); z-index: 100;
+      background: rgba(255,255,255,0.03); backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-3xl);
+      padding: 6px; box-shadow: var(--shadow-glass);
+      
+      &__inner { display: flex; align-items: center; gap: var(--space-4); padding: 0 var(--space-2); }
     }
-    .txn-card__main { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); cursor: pointer; }
-    .txn-card__check { flex-shrink: 0; accent-color: var(--color-violet); }
-    .txn-card__icon { width: 36px; height: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .txn-card__info { flex: 1; min-width: 0; }
-    .txn-card__category { display: block; font-size: var(--fs-sm); font-weight: var(--fw-medium); }
-    .txn-card__note { display: block; font-size: var(--fs-xs); color: var(--color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .txn-card__right { text-align: right; flex-shrink: 0; }
-    .txn-card__amount { display: block; font-size: var(--fs-sm); font-weight: var(--fw-semibold); font-variant-numeric: tabular-nums; }
-    .txn-card__date { display: block; font-size: var(--fs-xs); color: var(--color-text-tertiary); }
-    .txn-card__edit { padding: 0 var(--space-4) var(--space-4); border-top: 1px solid var(--color-border); padding-top: var(--space-3); }
+
+    .search-field {
+      flex: 1; display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-3);
+      .icon { color: var(--color-text-tertiary); }
+      input {
+        flex: 1; height: 44px; background: transparent; border: none; outline: none;
+        font-size: var(--fs-base); color: var(--color-text-primary); font-weight: 500;
+        &::placeholder { color: var(--color-text-muted); }
+      }
+    }
+
+    .actions { display: flex; gap: var(--space-2); }
+    .tool-btn {
+      width: 44px; height: 44px; border-radius: var(--radius-2xl); display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+      color: var(--color-text-secondary); cursor: pointer; transition: all var(--duration-fast);
+      position: relative;
+      &:hover { background: rgba(255,255,255,0.1); color: var(--color-text-primary); }
+      &.active { border-color: var(--color-violet); color: var(--color-violet-light); background: var(--color-violet-glow); }
+      
+      .count-badge {
+        position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 4px;
+        background: var(--color-violet); color: white; border-radius: var(--radius-full);
+        font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+      }
+    }
+
+    .filter-panel {
+      display: flex; flex-direction: column; gap: var(--space-8); padding: var(--space-8);
+      &__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-8); }
+      &__categories { display: flex; flex-direction: column; gap: var(--space-4); }
+      &__footer { display: flex; justify-content: flex-end; padding-top: var(--space-6); border-top: 1px solid rgba(255,255,255,0.05); }
+    }
+
+    .filter-box {
+      display: flex; flex-direction: column; gap: var(--space-4);
+      label { font-size: 10px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 2px; }
+    }
+
+    .glass-toggle {
+      display: flex; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 4px; border-radius: var(--radius-2xl);
+      button {
+        flex: 1; height: 36px; border: none; border-radius: var(--radius-xl); background: transparent;
+        font-size: var(--fs-xs); font-weight: 700; color: var(--color-text-secondary); cursor: pointer; transition: all var(--duration-fast);
+        &.active { background: rgba(255,255,255,0.1); color: var(--color-text-primary); box-shadow: var(--shadow-sm); }
+      }
+    }
+
+    .date-group {
+      display: flex; align-items: center; gap: var(--space-3); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 4px 12px; border-radius: var(--radius-2xl);
+      input { background: transparent; border: none; color: var(--color-text-primary); font-size: var(--fs-xs); font-weight: 600; outline: none; }
+      .sep { color: var(--color-text-muted); font-size: 10px; }
+    }
+
+    .glass-select {
+      position: relative; display: flex; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-2xl);
+      select { width: 100%; height: 44px; padding: 0 var(--space-4); background: transparent; border: none; color: var(--color-text-primary); font-size: var(--fs-xs); font-weight: 600; appearance: none; outline: none; }
+      svg { position: absolute; right: var(--space-4); pointer-events: none; color: var(--color-text-tertiary); }
+    }
+
+    .cat-scroller { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+    .glass-pill {
+      display: flex; align-items: center; gap: 8px; padding: var(--space-2) var(--space-4);
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-full);
+      font-size: var(--fs-xs); font-weight: 600; color: var(--color-text-secondary); cursor: pointer; transition: all var(--duration-fast);
+      &.active { border-color: var(--cat-color); background: var(--cat-color) + '15'; color: var(--color-text-primary); box-shadow: var(--shadow-sm); }
+    }
+
+    .reset-btn { background: transparent; border: none; font-size: var(--fs-xs); font-weight: 800; color: var(--color-violet-light); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+
+    .floating-selection {
+      position: fixed; bottom: var(--space-8); left: 50%; transform: translateX(-50%); z-index: 1000;
+      background: var(--color-violet); color: white; padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-full); box-shadow: var(--shadow-glow-violet-intense);
+      display: flex; align-items: center; gap: var(--space-8);
+      
+      .selection-info { display: flex; align-items: center; gap: var(--space-3);
+        .count { width: 24px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; }
+        .label { font-size: var(--fs-sm); font-weight: 700; }
+      }
+      .selection-actions { display: flex; align-items: center; gap: var(--space-4);
+        .delete-btn { display: flex; align-items: center; gap: 6px; background: white; color: var(--color-rose); border: none; padding: 6px 16px; border-radius: var(--radius-full); font-size: var(--fs-xs); font-weight: 800; cursor: pointer; }
+        .cancel-btn { background: transparent; border: none; color: white; font-size: var(--fs-xs); font-weight: 700; cursor: pointer; }
+      }
+    }
+
+    .list-container { display: flex; flex-direction: column; gap: var(--space-3); }
+
+    .premium-row {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: var(--radius-3xl);
+      transition: all var(--duration-normal) var(--ease-spring); overflow: hidden;
+      
+      &:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); transform: scale(1.01); }
+      &.selected { border-color: var(--color-violet); background: var(--color-violet-glow); }
+      &.editing { border-color: var(--color-violet); box-shadow: var(--shadow-glass); }
+
+      &__main { display: flex; justify-content: space-between; align-items: center; padding: var(--space-5) var(--space-6); cursor: pointer; }
+      
+      .left-side { display: flex; align-items: center; gap: var(--space-5); }
+      .selection-box { 
+        display: flex; align-items: center; 
+        input { width: 18px; height: 18px; accent-color: var(--color-violet); border-radius: 4px; border: 2px solid rgba(255,255,255,0.2); background: transparent; cursor: pointer; }
+      }
+      
+      .icon-sphere { width: 48px; height: 48px; border-radius: var(--radius-2xl); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      
+      .details { display: flex; flex-direction: column; gap: 2px;
+        .top-row { display: flex; align-items: center; gap: 10px;
+          .title { font-size: var(--fs-base); font-weight: 700; color: var(--color-text-primary); }
+          .method { font-size: 10px; font-weight: 800; color: var(--color-text-muted); text-transform: uppercase; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
+        }
+        .note { font-size: var(--fs-sm); color: var(--color-text-tertiary); max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      }
+
+      .right-side { text-align: right; 
+        .amount-group { display: flex; align-items: baseline; justify-content: flex-end; gap: 2px; font-family: var(--font-mono); font-weight: 800; font-size: var(--fs-base); letter-spacing: -0.5px;
+          &.income { color: var(--color-emerald); }
+          &.expense { color: var(--color-rose); }
+        }
+        .date { font-size: 10px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; margin-top: 4px; }
+      }
+
+      .edit-drawer {
+        padding: var(--space-8); background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.05);
+        &__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-6); }
+        .field { display: flex; flex-direction: column; gap: var(--space-2);
+          label { font-size: 10px; font-weight: 800; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px; }
+          input { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); height: 44px; border-radius: var(--radius-xl); padding: 0 var(--space-4); color: var(--color-text-primary); font-size: var(--fs-sm); outline: none; &:focus { border-color: var(--color-violet); } }
+        }
+        &__footer { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-8);
+          .save-btn { background: var(--color-violet); color: white; border: none; padding: 10px 24px; border-radius: var(--radius-xl); font-size: var(--fs-sm); font-weight: 700; cursor: pointer; }
+          .trash-btn { width: 44px; height: 44px; background: var(--color-rose-glow); color: var(--color-rose); border: 1px solid var(--color-rose-glow); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+          .close-btn { margin-left: auto; background: transparent; border: none; color: var(--color-text-tertiary); font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
+        }
+      }
+    }
+
+    .empty-view {
+      padding: var(--space-20) 0; display: flex; flex-direction: column; align-items: center; text-align: center; color: var(--color-text-tertiary);
+      &__icon { width: 80px; height: 80px; background: rgba(255,255,255,0.03); border-radius: var(--radius-4xl); display: flex; align-items: center; justify-content: center; color: var(--color-text-muted); margin-bottom: var(--space-6); }
+      h3 { font-size: var(--fs-xl); font-weight: 800; color: var(--color-text-primary); margin-bottom: var(--space-2); }
+      p { font-size: var(--fs-base); max-width: 300px; margin-bottom: var(--space-8); }
+      .reset-link { background: transparent; border: none; color: var(--color-violet-light); font-weight: 800; font-size: var(--fs-sm); cursor: pointer; text-transform: uppercase; }
+    }
+
+    @media (max-width: 768px) {
+      .glass-toolbar { top: var(--space-2); }
+      .premium-row__main { padding: var(--space-4); }
+      .icon-sphere { width: 40px; height: 40px; }
+      .details .note { max-width: 140px; }
+      .floating-selection { width: calc(100% - 32px); justify-content: space-between; gap: 0; }
+    }
   `],
 })
 export class TransactionsComponent {

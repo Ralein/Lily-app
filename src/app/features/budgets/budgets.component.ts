@@ -23,187 +23,766 @@ import {
     LucideTrendingUp,
   ],
   template: `
-    <div class="page-header">
-      <h1 class="page-header__title">Budget</h1>
-      <p class="page-header__subtitle">{{ currentMonthLabel() }}</p>
-    </div>
-
-    <!-- Income Summary Bar -->
-    @if (store.totalMonthlyIncome() > 0) {
-      <div class="lily-card income-bar animate-fade-in-up">
-        <div class="income-bar__row">
-          <div class="income-bar__item">
-            <svg lucideArrowUpRight [size]="16" style="color: var(--color-emerald)"></svg>
-            <span class="income-bar__label">Income</span>
-            <span class="income-bar__value text-income">{{ store.totalMonthlyIncome() | currencyDisplay }}</span>
-          </div>
-          <div class="income-bar__arrow">→</div>
-          <div class="income-bar__item">
-            <svg lucideTarget [size]="16" style="color: var(--color-amber)"></svg>
-            <span class="income-bar__label">Budget</span>
-            <span class="income-bar__value">{{ store.currentBudgetTotal() | currencyDisplay }}</span>
-          </div>
-          <div class="income-bar__arrow">→</div>
-          <div class="income-bar__item">
-            <svg lucideTrendingUp [size]="16" style="color: var(--color-violet-light)"></svg>
-            <span class="income-bar__label">Savings</span>
-            <span class="income-bar__value" [class.text-income]="store.savingsTarget() >= 0" [class.text-expense]="store.savingsTarget() < 0">
-              {{ store.savingsTarget() | currencyDisplay }}
-            </span>
+    <div class="budgets-page">
+      <div class="page-header" anim="fadeIn">
+        <div class="header-content">
+          <h1 class="page-header__title">Budget Plan</h1>
+          <p class="page-header__subtitle">{{ currentMonthLabel() }}</p>
+        </div>
+        <div class="header-actions">
+          <div class="badge-glass">
+            <lily-icon name="clock" [size]="14" />
+            <span>Auto-calculating</span>
           </div>
         </div>
-        <!-- Unallocated bar -->
-        @if (store.unallocatedBudget() > 0 && hasBudget()) {
-          <div class="unallocated-bar">
-            <span class="text-xs text-tertiary">Unallocated</span>
-            <div class="progress-bar" style="flex: 1">
-              <div class="progress-bar__fill" [style.width.%]="unallocatedPct()" style="background: var(--color-violet-muted)"></div>
+      </div>
+
+      <!-- Hero Spending Velocity -->
+      @if (hasBudget()) {
+        <div class="lily-card hero-velocity-card" anim="slideUp">
+          <div class="card-content">
+            <div class="velocity-info">
+              <span class="label-upper">Projected Monthly Spend</span>
+              <div class="velocity-value" [class.danger]="velocity().projected > velocity().budget">
+                {{ velocity().projected | currencyDisplay }}
+                <lily-icon [name]="velocity().projected > velocity().budget ? 'trending-up' : 'trending-down'" [size]="28" class="velocity-icon" />
+              </div>
+              <div class="velocity-insight">
+                <lily-icon [name]="velocity().projected > velocity().budget ? 'triangle-alert' : 'sparkles'" [size]="16" />
+                <span>
+                  @if (velocity().projected > velocity().budget) {
+                    Projected to exceed budget by {{ velocity().projected - velocity().budget | currencyDisplay }}
+                  } @else {
+                    On track to save {{ velocity().budget - velocity().projected | currencyDisplay }} this month
+                  }
+                </span>
+              </div>
             </div>
-            <span class="text-xs font-medium">{{ store.unallocatedBudget() | currencyDisplay }}</span>
+            <div class="velocity-visual">
+              <div class="progress-ring-container">
+                <svg class="progress-ring" viewBox="0 0 100 100">
+                  <circle class="ring-track" cx="50" cy="50" r="45" />
+                  <circle class="ring-fill" cx="50" cy="50" r="45" 
+                          [style.stroke-dasharray]="(projectedPct() * 2.82) + ', 282'"
+                          [style.stroke]="projectedPct() > 100 ? 'var(--color-rose)' : projectedPct() > 80 ? 'var(--color-amber)' : 'var(--color-emerald)'" />
+                </svg>
+                <div class="ring-content">
+                  <span class="pct">{{ projectedPct() }}%</span>
+                  <span class="subtext">used</span>
+                </div>
+              </div>
+            </div>
           </div>
-        }
-      </div>
-    }
-
-    <!-- Spending Velocity -->
-    @if (hasBudget()) {
-      <div class="lily-card lily-card--hero velocity-card animate-fade-in-up stagger-1">
-        <div class="velocity-card__row">
-          <div class="velocity-stat">
-            <span class="velocity-stat__label">Projected Spend</span>
-            <span class="velocity-stat__value" [class.text-expense]="velocity().projected > velocity().budget">{{ velocity().projected | currencyDisplay }}</span>
+          
+          <div class="velocity-stats">
+            <div class="v-stat">
+              <span class="v-stat__label">Total Budget</span>
+              <span class="v-stat__value">{{ velocity().budget | currencyDisplay }}</span>
+            </div>
+            <div class="v-stat">
+              <span class="v-stat__label">Safe Daily Burn</span>
+              <span class="v-stat__value">{{ velocity().safeDaily | currencyDisplay }}</span>
+            </div>
+            <div class="v-stat">
+              <span class="v-stat__label">Days Remaining</span>
+              <span class="v-stat__value">{{ velocity().daysLeft }}</span>
+            </div>
           </div>
-          <div class="velocity-stat">
-            <span class="velocity-stat__label">Budget</span>
-            <span class="velocity-stat__value text-income">{{ velocity().budget | currencyDisplay }}</span>
-          </div>
-          <div class="velocity-stat">
-            <span class="velocity-stat__label">Safe Daily</span>
-            <span class="velocity-stat__value">{{ velocity().safeDaily | currencyDisplay }}</span>
-          </div>
-          <div class="velocity-stat">
-            <span class="velocity-stat__label">Days Left</span>
-            <span class="velocity-stat__value">{{ velocity().daysLeft }}</span>
-          </div>
-        </div>
-        <div class="progress-bar" style="height: 8px; margin-top: var(--space-4)">
-          <div class="progress-bar__fill" [style.width.%]="projectedPct()" [style.background]="projectedPct() > 100 ? 'var(--color-rose)' : projectedPct() > 80 ? 'var(--color-amber)' : 'var(--color-emerald)'"></div>
-        </div>
-      </div>
-    }
-
-    <!-- Setup / Edit Budget -->
-    <div class="lily-card animate-fade-in-up stagger-2" style="margin-top: var(--space-4)">
-      <div class="lily-card__header">
-        <span class="lily-card__title">{{ hasBudget() ? 'Budget Allocations' : 'Setup Budget' }}</span>
-        <div class="flex gap-2">
-          @if (editing() && store.totalMonthlyIncome() > 0) {
-            <button class="btn btn--ghost btn--sm" (click)="apply503020()" title="Apply 50/30/20 rule">
-              <svg lucideZap [size]="14"></svg> 50/30/20
-            </button>
-          }
-          @if (!editing()) {
-            <button class="btn btn--primary btn--sm" (click)="startEditing()">
-              <svg lucidePencil [size]="14"></svg> Edit
-            </button>
-          }
-        </div>
-      </div>
-
-      <!-- Over-income warning -->
-      @if (editing() && totalAllocated() > store.totalMonthlyIncome() && store.totalMonthlyIncome() > 0) {
-        <div class="over-income-warning">
-          <svg lucideTriangleAlert [size]="16"></svg>
-          <span>Budget exceeds income by {{ totalAllocated() - store.totalMonthlyIncome() | currencyDisplay }}</span>
         </div>
       }
 
-      @if (editing()) {
-        <div class="budget-form">
-          <div class="budget-form__total">
-            <label class="filter-label">Monthly Budget</label>
-            <div class="amount-input">
-              <span>{{ store.currencySymbol() }}</span>
-              <input type="number" class="input" [(ngModel)]="totalLimit" placeholder="Total limit" style="max-width: 200px">
+      <!-- Income Allocation Bar -->
+      @if (store.totalMonthlyIncome() > 0) {
+        <div class="lily-card allocation-card" anim="slideUp">
+          <div class="allocation-header">
+            <div class="title-group">
+              <h3 class="allocation-title">Income Allocation</h3>
+              <p class="allocation-subtitle">How your monthly income is distributed</p>
+            </div>
+            <span class="total-income">{{ store.totalMonthlyIncome() | currencyDisplay }}</span>
+          </div>
+          <div class="allocation-content">
+            <div class="viz-bar-group">
+              <div class="viz-bar">
+                <div class="viz-segment budget" [style.width.%]="(store.currentBudgetTotal() / store.totalMonthlyIncome()) * 100">
+                  <div class="glow"></div>
+                </div>
+                <div class="viz-segment savings" [style.width.%]="(store.savingsTarget() / store.totalMonthlyIncome()) * 100">
+                  <div class="glow"></div>
+                </div>
+              </div>
+            </div>
+            <div class="viz-legend">
+              <div class="legend-item">
+                <div class="indicator budget"></div>
+                <div class="text">
+                  <span class="label">Budgeted</span>
+                  <span class="value">{{ store.currentBudgetTotal() | currencyDisplay }}</span>
+                </div>
+              </div>
+              <div class="legend-item">
+                <div class="indicator savings"></div>
+                <div class="text">
+                  <span class="label">Projected Savings</span>
+                  <span class="value">{{ store.savingsTarget() | currencyDisplay }}</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="budget-form__cats">
-            @for (cat of expenseCategories(); track cat.id) {
-              <div class="budget-cat-row">
-                <span class="budget-cat-row__label">
-                  <lily-icon [name]="cat.icon" [size]="14" /> {{ cat.name }}
-                </span>
-                <input type="number" class="input input--sm" [(ngModel)]="catLimits[cat.id]" [placeholder]="'Limit'" style="max-width: 120px">
+        </div>
+      }
+
+      <!-- Categories Budget -->
+      <div class="lily-card budget-list-card" anim="slideUp">
+        <div class="card-header">
+          <div class="title-group">
+            <h3 class="card-title">{{ hasBudget() ? 'Category Breakdown' : 'Budget Setup' }}</h3>
+            <p class="card-subtitle">Spending limits by category</p>
+          </div>
+          <div class="header-actions">
+            @if (editing() && store.totalMonthlyIncome() > 0) {
+              <button class="btn-action" (click)="apply503020()">
+                <lily-icon name="zap" [size]="14" /> <span>Smart Fill</span>
+              </button>
+            }
+            @if (!editing()) {
+              <button class="btn-action" (click)="startEditing()">
+                <lily-icon name="pencil" [size]="14" /> <span>Modify</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        @if (editing()) {
+          <div class="budget-editor" anim="fadeIn">
+            <div class="editor-top">
+              <div class="limit-input-group">
+                <label>Monthly Spending Limit</label>
+                <div class="amount-input">
+                  <span class="currency">{{ store.currencySymbol() }}</span>
+                  <input type="number" [(ngModel)]="totalLimit" placeholder="0">
+                </div>
+              </div>
+              @if (totalAllocated() > store.totalMonthlyIncome() && store.totalMonthlyIncome() > 0) {
+                <div class="allocation-warning">
+                  <lily-icon name="triangle-alert" [size]="14" />
+                  <span>Exceeds income by {{ totalAllocated() - store.totalMonthlyIncome() | currencyDisplay }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="editor-grid">
+              @for (cat of expenseCategories(); track cat.id) {
+                <div class="cat-field">
+                  <div class="cat-label">
+                    <div class="icon-box" [style.background]="cat.color + '15'" [style.color]="cat.color">
+                      <lily-icon [name]="cat.icon" [size]="16" />
+                    </div>
+                    <span>{{ cat.name }}</span>
+                  </div>
+                  <div class="field-wrapper">
+                    <span class="sym">{{ store.currencySymbol() }}</span>
+                    <input type="number" [(ngModel)]="catLimits[cat.id]" placeholder="0">
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="editor-footer">
+              <button class="btn-premium" (click)="saveBudget()">Save Budget Plan</button>
+              <button class="btn-ghost" (click)="editing.set(false)">Discard Changes</button>
+            </div>
+          </div>
+        } @else if (hasBudget()) {
+          <div class="budget-items" [@listAnimation]="budgetVariance().length">
+            @for (item of budgetVariance(); track item.categoryId) {
+              <div class="budget-row">
+                <div class="row-main">
+                  <div class="cat-group">
+                    <div class="cat-icon-glass" [style.background]="getCatColor(item.categoryId) + '15'" [style.color]="getCatColor(item.categoryId)">
+                      <lily-icon [name]="getCatIcon(item.categoryId)" [size]="14" />
+                    </div>
+                    <div class="cat-meta">
+                      <span class="name">{{ getCatName(item.categoryId) }}</span>
+                      <span class="remaining" [class.over]="item.variance < 0">
+                        @if (item.variance < 0) {
+                          {{ Math.abs(item.variance) | currencyDisplay }} over budget
+                        } @else {
+                          {{ item.variance | currencyDisplay }} remaining
+                        }
+                      </span>
+                    </div>
+                  </div>
+                  <div class="amount-group">
+                    <span class="spent">{{ item.actual | currencyDisplay }}</span>
+                    <span class="divider">/</span>
+                    <span class="total">{{ item.budgeted | currencyDisplay }}</span>
+                  </div>
+                </div>
+                <div class="row-progress">
+                  <div class="glass-progress">
+                    <div class="fill" 
+                         [style.width.%]="Math.min(item.percentage, 100)"
+                         [style.background]="item.percentage > 100 ? 'var(--color-rose)' : item.percentage > 80 ? 'var(--color-amber)' : 'var(--color-emerald)'">
+                      <div class="shine"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
             }
           </div>
-          <div class="flex gap-2" style="margin-top: var(--space-4)">
-            <button class="btn btn--primary" (click)="saveBudget()">
-              <svg lucideCheck [size]="14"></svg> Save Budget
-            </button>
-            <button class="btn btn--ghost" (click)="editing.set(false)">Cancel</button>
-          </div>
-        </div>
-      } @else if (hasBudget()) {
-        <div class="budget-overview">
-          @for (item of budgetVariance(); track item.categoryId) {
-            <div class="budget-item">
-              <div class="budget-item__top">
-                <span class="budget-item__cat">
-                  <lily-icon [name]="getCatIcon(item.categoryId)" [size]="14" /> {{ getCatName(item.categoryId) }}
-                </span>
-                <span class="text-xs" [class.text-expense]="item.percentage > 100" [class.text-income]="item.percentage <= 80">
-                  {{ item.actual | currencyDisplay }} / {{ item.budgeted | currencyDisplay }}
-                </span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-bar__fill" [style.width.%]="Math.min(item.percentage, 100)"
-                     [style.background]="item.percentage > 100 ? 'var(--color-rose)' : item.percentage > 80 ? 'var(--color-amber)' : 'var(--color-emerald)'"></div>
-              </div>
-              @if (item.variance < 0) {
-                <span class="text-xs text-expense">{{ Math.abs(item.variance) | currencyDisplay }} over budget</span>
-              } @else {
-                <span class="text-xs text-income">{{ item.variance | currencyDisplay }} remaining</span>
-              }
+        } @else {
+          <div class="empty-state-container" anim="fadeIn">
+            <div class="icon-circle">
+              <lily-icon name="target" [size]="32" />
             </div>
-          }
-        </div>
-      } @else {
-        <div class="empty-state">
-          <span class="empty-state__icon"><svg lucideTarget [size]="40" style="opacity: 0.5"></svg></span>
-          <p class="empty-state__title">No budget set for this month</p>
-          <p class="empty-state__description">Set a budget to track your spending against your income</p>
-          <button class="btn btn--primary" (click)="startEditing()">Create Budget</button>
-        </div>
-      }
+            <h4 class="title">Take Control of Your Flow</h4>
+            <p class="description">Create a smart budget plan to optimize your savings and spend with confidence.</p>
+            <button class="btn-premium" (click)="startEditing()">Setup Monthly Budget</button>
+          </div>
+        }
+      </div>
     </div>
   `,
   styles: [`
-    .income-bar__row { display: flex; align-items: center; justify-content: center; gap: var(--space-6); flex-wrap: wrap; }
-    .income-bar__item { display: flex; align-items: center; gap: var(--space-2); }
-    .income-bar__label { font-size: var(--fs-xs); color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: var(--ls-wider); }
-    .income-bar__value { font-size: var(--fs-base); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
-    .income-bar__arrow { color: var(--color-text-muted); font-size: var(--fs-lg); }
-    .unallocated-bar { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-4); padding-top: var(--space-3); border-top: 1px solid var(--color-border); }
-    .over-income-warning {
-      display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4);
-      background: rgba(244, 63, 94, 0.1); border-radius: var(--radius-md); color: var(--color-rose);
-      font-size: var(--fs-sm); margin-bottom: var(--space-3);
+    .budgets-page { 
+      display: flex; 
+      flex-direction: column; 
+      gap: var(--space-8); 
+      padding-bottom: var(--space-12); 
     }
-    .velocity-card__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-4); }
-    .velocity-stat { display: flex; flex-direction: column; gap: var(--space-1); }
-    .velocity-stat__label { font-size: var(--fs-xs); color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: var(--ls-wider); }
-    .velocity-stat__value { font-size: var(--fs-2xl); font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
-    .budget-form { display: flex; flex-direction: column; gap: var(--space-4); }
-    .budget-form__total { display: flex; flex-direction: column; gap: var(--space-2); }
-    .amount-input { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-lg); font-weight: var(--fw-semibold); }
-    .budget-form__cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-3); }
-    .budget-cat-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-2); border-radius: var(--radius-md); background: var(--color-bg-input); }
-    .budget-cat-row__label { font-size: var(--fs-sm); font-weight: var(--fw-medium); white-space: nowrap; display: inline-flex; align-items: center; gap: var(--space-2); }
-    .budget-overview { display: flex; flex-direction: column; gap: var(--space-5); }
-    .budget-item { display: flex; flex-direction: column; gap: var(--space-2); }
-    .budget-item__top { display: flex; justify-content: space-between; align-items: center; }
-    .budget-item__cat { font-size: var(--fs-sm); font-weight: var(--fw-medium); display: inline-flex; align-items: center; gap: var(--space-2); }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      
+      .page-header__title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-tertiary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .page-header__subtitle {
+        font-size: var(--fs-base);
+        color: var(--color-text-muted);
+        font-weight: 500;
+        margin-top: var(--space-1);
+      }
+    }
+
+    .badge-glass {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-bg-glass-border);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hero-velocity-card {
+      padding: var(--space-8);
+      background: linear-gradient(135deg, var(--color-bg-card) 0%, rgba(139, 92, 246, 0.05) 100%);
+      border: 1px solid var(--color-bg-glass-border);
+      box-shadow: var(--shadow-glass);
+      overflow: hidden;
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, var(--color-violet-alpha) 0%, transparent 70%);
+        opacity: 0.2;
+        pointer-events: none;
+      }
+
+      .card-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space-8);
+        margin-bottom: var(--space-8);
+      }
+    }
+
+    .velocity-info {
+      flex: 1;
+      .label-upper { 
+        font-size: 11px; 
+        font-weight: 800; 
+        color: var(--color-text-muted); 
+        text-transform: uppercase; 
+        letter-spacing: 0.1em; 
+      }
+      .velocity-value { 
+        font-size: 3.5rem; 
+        font-weight: 800; 
+        color: var(--color-text-primary); 
+        display: flex; 
+        align-items: center; 
+        gap: var(--space-4); 
+        margin: var(--space-2) 0;
+        letter-spacing: -0.02em;
+        
+        &.danger { color: var(--color-rose-light); }
+        .velocity-icon { color: var(--color-text-tertiary); opacity: 0.5; }
+      }
+      .velocity-insight {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--fs-base);
+        font-weight: 500;
+        color: var(--color-text-secondary);
+        background: var(--color-bg-secondary);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-xl);
+        width: fit-content;
+      }
+    }
+
+    .velocity-visual {
+      width: 160px;
+      height: 160px;
+      position: relative;
+      
+      .progress-ring-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+      
+      .progress-ring {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+        
+        .ring-track {
+          fill: none;
+          stroke: var(--color-bg-secondary);
+          stroke-width: 8;
+        }
+        
+        .ring-fill {
+          fill: none;
+          stroke-width: 8;
+          stroke-linecap: round;
+          transition: stroke-dasharray 1.5s var(--ease-spring);
+        }
+      }
+      
+      .ring-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        
+        .pct { font-size: 28px; font-weight: 800; color: var(--color-text-primary); line-height: 1; }
+        .subtext { font-size: 10px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; margin-top: 4px; }
+      }
+    }
+
+    .velocity-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--color-bg-glass-border);
+      
+      .v-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        
+        &__label { 
+          font-size: 10px; 
+          font-weight: 800; 
+          color: var(--color-text-tertiary); 
+          text-transform: uppercase; 
+          letter-spacing: 0.05em;
+        }
+        &__value { 
+          font-size: var(--fs-lg); 
+          font-weight: 700; 
+          color: var(--color-text-primary); 
+        }
+      }
+    }
+
+    .allocation-card {
+      padding: var(--space-8);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-bg-glass-border);
+      box-shadow: var(--shadow-glass);
+      
+      .allocation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--space-8);
+        
+        .allocation-title { font-size: var(--fs-xl); font-weight: 700; color: var(--color-text-primary); }
+        .allocation-subtitle { font-size: var(--fs-sm); color: var(--color-text-muted); margin-top: 2px; }
+        .total-income { font-size: var(--fs-2xl); font-weight: 800; color: var(--color-violet-light); letter-spacing: -0.01em; }
+      }
+
+      .allocation-content {
+        .viz-bar-group { margin-bottom: var(--space-8); }
+        .viz-bar { 
+          height: 16px; 
+          background: var(--color-bg-secondary); 
+          border-radius: var(--radius-full); 
+          overflow: hidden; 
+          display: flex;
+          border: 1px solid var(--color-bg-glass-border);
+        }
+        .viz-segment { 
+          height: 100%; 
+          position: relative;
+          transition: width 1s var(--ease-spring);
+          
+          &.budget { background: var(--color-violet); }
+          &.savings { background: var(--color-emerald); }
+          
+          .glow {
+            position: absolute;
+            top: 0; right: 0; bottom: 0;
+            width: 20px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.2));
+            filter: blur(4px);
+          }
+        }
+        
+        .viz-legend {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--space-8);
+        }
+        
+        .legend-item {
+          display: flex;
+          align-items: center;
+          gap: var(--space-4);
+          padding: var(--space-4);
+          background: var(--color-bg-secondary);
+          border-radius: var(--radius-2xl);
+          border: 1px solid var(--color-bg-glass-border);
+          
+          .indicator {
+            width: 12px; height: 12px; border-radius: 4px;
+            &.budget { background: var(--color-violet); box-shadow: 0 0 10px var(--color-violet-alpha); }
+            &.savings { background: var(--color-emerald); box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+          }
+          
+          .text {
+            display: flex;
+            flex-direction: column;
+            .label { font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; }
+            .value { font-size: var(--fs-lg); font-weight: 700; color: var(--color-text-primary); }
+          }
+        }
+      }
+    }
+
+    .budget-list-card {
+      padding: var(--space-8);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-bg-glass-border);
+      box-shadow: var(--shadow-glass);
+      
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-8);
+        
+        .card-title { font-size: var(--fs-xl); font-weight: 700; color: var(--color-text-primary); }
+        .card-subtitle { font-size: var(--fs-sm); color: var(--color-text-muted); }
+      }
+    }
+
+    .btn-action {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 8px 16px;
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-bg-glass-border);
+      border-radius: var(--radius-xl);
+      color: var(--color-text-primary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-out);
+
+      &:hover {
+        background: var(--color-violet-alpha-low);
+        border-color: var(--color-violet-alpha);
+        transform: translateY(-2px);
+      }
+    }
+
+    .budget-editor {
+      .editor-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: var(--space-8);
+      }
+      
+      .limit-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        label { font-size: 11px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; }
+        .amount-input {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          font-size: 2.5rem;
+          font-weight: 800;
+          color: var(--color-text-primary);
+          
+          input {
+            background: transparent;
+            border: none;
+            font: inherit;
+            color: inherit;
+            width: 200px;
+            outline: none;
+            border-bottom: 2px solid var(--color-bg-glass-border);
+            transition: border-color 0.3s;
+            &:focus { border-color: var(--color-violet); }
+          }
+        }
+      }
+      
+      .allocation-warning {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        background: rgba(244, 63, 94, 0.1);
+        color: var(--color-rose-light);
+        padding: 10px 16px;
+        border-radius: var(--radius-xl);
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid rgba(244, 63, 94, 0.2);
+      }
+      
+      .editor-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--space-4);
+        margin-bottom: var(--space-8);
+      }
+      
+      .cat-field {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-4) var(--space-5);
+        background: var(--color-bg-secondary);
+        border-radius: var(--radius-2xl);
+        border: 1px solid var(--color-bg-glass-border);
+        transition: border-color 0.3s;
+        
+        &:focus-within { border-color: var(--color-violet-alpha); }
+        
+        .cat-label {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          font-weight: 600;
+          color: var(--color-text-primary);
+          
+          .icon-box {
+            width: 36px; height: 36px; border-radius: var(--radius-xl);
+            display: flex; align-items: center; justify-content: center;
+          }
+        }
+        
+        .field-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          .sym { color: var(--color-text-muted); font-weight: 700; }
+          input {
+            background: transparent;
+            border: none;
+            text-align: right;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            outline: none;
+            width: 80px;
+            font-size: 16px;
+          }
+        }
+      }
+      
+      .editor-footer {
+        display: flex;
+        gap: var(--space-4);
+        padding-top: var(--space-8);
+        border-top: 1px solid var(--color-bg-glass-border);
+      }
+    }
+
+    .btn-premium {
+      background: var(--color-violet);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--radius-xl);
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 15px var(--color-violet-alpha);
+      transition: all 0.3s;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px var(--color-violet-alpha);
+        filter: brightness(1.1);
+      }
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-bg-glass-border);
+      padding: 12px 24px;
+      border-radius: var(--radius-xl);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      
+      &:hover {
+        background: var(--color-bg-secondary);
+        color: var(--color-text-primary);
+      }
+    }
+
+    .budget-items {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-8);
+    }
+
+    .budget-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      
+      .row-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .cat-group {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        
+        .cat-icon-glass {
+          width: 44px; height: 44px;
+          border-radius: var(--radius-2xl);
+          display: flex; align-items: center; justify-content: center;
+          border: 1px solid var(--color-bg-glass-border);
+        }
+        
+        .cat-meta {
+          display: flex;
+          flex-direction: column;
+          .name { font-size: var(--fs-base); font-weight: 700; color: var(--color-text-primary); }
+          .remaining { 
+            font-size: 12px; font-weight: 600; color: var(--color-emerald); 
+            &.over { color: var(--color-rose-light); }
+          }
+        }
+      }
+      
+      .amount-group {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        .spent { font-size: var(--fs-lg); font-weight: 800; color: var(--color-text-primary); }
+        .divider { color: var(--color-text-muted); font-size: 12px; }
+        .total { font-size: 13px; font-weight: 600; color: var(--color-text-tertiary); }
+      }
+      
+      .row-progress {
+        .glass-progress {
+          height: 10px;
+          background: var(--color-bg-secondary);
+          border-radius: var(--radius-full);
+          overflow: hidden;
+          border: 1px solid var(--color-bg-glass-border);
+          
+          .fill {
+            height: 100%;
+            border-radius: var(--radius-full);
+            transition: width 1.2s var(--ease-spring);
+            position: relative;
+            
+            .shine {
+              position: absolute;
+              top: 0; left: 0; right: 0; bottom: 0;
+              background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+            }
+          }
+        }
+      }
+    }
+
+    .empty-state-container {
+      padding: var(--space-12) 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      
+      .icon-circle {
+        width: 100px; height: 100px;
+        border-radius: var(--radius-full);
+        background: var(--color-bg-secondary);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--color-text-tertiary);
+        margin-bottom: var(--space-6);
+        border: 1px solid var(--color-bg-glass-border);
+      }
+      
+      .title { font-size: 1.5rem; font-weight: 800; color: var(--color-text-primary); margin-bottom: var(--space-2); }
+      .description { font-size: var(--fs-base); color: var(--color-text-secondary); max-width: 360px; margin-bottom: var(--space-8); }
+    }
+
+    @media (max-width: 768px) {
+      .hero-velocity-card { 
+        padding: var(--space-6); 
+        .card-content { flex-direction: column; text-align: center; } 
+      }
+      .velocity-info .velocity-value { justify-content: center; font-size: 2.8rem; }
+      .velocity-info .velocity-insight { margin: 0 auto; }
+      .velocity-stats { grid-template-columns: 1fr; gap: var(--space-4); }
+      .allocation-card .allocation-header { flex-direction: column; gap: var(--space-4); }
+      .viz-legend { grid-template-columns: 1fr; gap: var(--space-4); }
+      .page-header__title { font-size: 2rem; }
+    }
   `],
 })
 export class BudgetsComponent {

@@ -25,240 +25,294 @@ import {
     LucideWallet, LucidePlus, LucidePencil, LucideCheck, LucideX,
   ],
   template: `
-    <div class="page-header">
-      <h1 class="page-header__title">Settings</h1>
-      <p class="page-header__subtitle">Customize your Lily experience</p>
-    </div>
+    <div class="settings-page">
+      <div class="page-header animate-fade-in">
+        <h1 class="page-header__title">Settings</h1>
+        <p class="page-header__subtitle">Manage your profile and application preferences</p>
+      </div>
 
-    <div class="settings-grid">
-      <!-- Income Sources -->
-      <div class="lily-card animate-fade-in-up settings-card--wide">
-        <div class="lily-card__header">
-          <h3 class="lily-card__title settings-title">
-            <svg lucideWallet [size]="18" style="color: var(--color-emerald)"></svg> Income Sources
-          </h3>
-          <button class="btn btn--primary btn--sm" (click)="addNewSource()">
-            <svg lucidePlus [size]="14"></svg> Add
-          </button>
-        </div>
-
-        @if (store.incomeSources().length > 0) {
-          <div class="income-list">
-            @for (source of store.incomeSources(); track source.id) {
-              <div class="income-row" [class.income-row--inactive]="!source.isActive">
-                @if (editingSourceId() === source.id) {
-                  <input class="income-row__name-input" type="text" [(ngModel)]="editName" placeholder="Source name" />
-                  <div class="income-row__amount-wrap">
-                    <span class="income-row__symbol">{{ store.currencySymbol() }}</span>
-                    <input class="income-row__amount-input" type="number" [(ngModel)]="editAmount" min="0" />
-                  </div>
-                  <select class="income-row__freq-input" [(ngModel)]="editFrequency">
-                    <option value="monthly">Monthly</option>
-                    <option value="biweekly">Bi-weekly</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="one-time">One-time</option>
-                  </select>
-                  <button class="btn btn--ghost btn--icon" (click)="saveEditSource(source.id)">
-                    <svg lucideCheck [size]="14" style="color: var(--color-emerald)"></svg>
-                  </button>
-                  <button class="btn btn--ghost btn--icon" (click)="editingSourceId.set(null)">
-                    <svg lucideX [size]="14"></svg>
-                  </button>
-                } @else {
-                  <div class="income-row__info">
-                    <span class="income-row__name">{{ source.name }}</span>
-                    <span class="income-row__meta">{{ source.amount | currencyDisplay }} · {{ source.frequency }}</span>
-                  </div>
-                  <label class="toggle">
-                    <input type="checkbox" [checked]="source.isActive" (change)="toggleSource(source)" />
-                    <span class="toggle__track"></span>
-                  </label>
-                  <button class="btn btn--ghost btn--icon" (click)="startEditSource(source)">
-                    <svg lucidePencil [size]="14"></svg>
-                  </button>
-                  <button class="btn btn--ghost btn--icon" (click)="deleteSource(source.id)">
-                    <svg lucideTrash2 [size]="14" style="color: var(--color-rose)"></svg>
-                  </button>
-                }
+      <div class="settings-layout">
+        <!-- Main Configuration Area -->
+        <div class="settings-main">
+          <!-- Income Sources Section -->
+          <div class="lily-card section-card animate-slide-up">
+            <div class="section-header">
+              <div class="section-title">
+                <div class="section-icon emerald"><svg lucideWallet [size]="18"></svg></div>
+                <div class="section-text">
+                  <h3>Income Streams</h3>
+                  <span>Recurring and one-time inflows</span>
+                </div>
               </div>
-            }
-          </div>
-          <div class="income-total">
-            <span class="text-sm text-secondary">Total Monthly</span>
-            <span class="text-lg font-bold font-mono text-income">{{ store.totalMonthlyIncome() | currencyDisplay }}</span>
-          </div>
-        } @else {
-          <p class="text-sm text-tertiary" style="margin-top: var(--space-3)">No income sources configured. Add your salary or freelance income to get started.</p>
-        }
+              <button class="btn btn--primary btn--sm" (click)="addNewSource()">
+                <svg lucidePlus [size]="14"></svg> New Stream
+              </button>
+            </div>
 
-        <!-- Auto-log toggle -->
-        <div class="auto-log-row">
-          <div>
-            <span class="text-sm font-medium">Auto-log monthly income</span>
-            <span class="text-xs text-tertiary" style="display: block; margin-top: 2px">Automatically create income transactions on the 1st of each month</span>
+            <div class="income-manager">
+              @if (store.incomeSources().length > 0) {
+                <div class="income-list">
+                  @for (source of store.incomeSources(); track source.id) {
+                    <div class="income-item" [class.editing]="editingSourceId() === source.id" [class.inactive]="!source.isActive">
+                      @if (editingSourceId() === source.id) {
+                        <div class="income-edit-form">
+                          <input class="input input--sm" type="text" [(ngModel)]="editName" placeholder="Name" />
+                          <div class="input-wrap">
+                            <span class="symbol">{{ store.currencySymbol() }}</span>
+                            <input class="input input--sm" type="number" [(ngModel)]="editAmount" />
+                          </div>
+                          <select class="input input--sm" [(ngModel)]="editFrequency">
+                            <option value="monthly">Monthly</option>
+                            <option value="biweekly">Bi-weekly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="one-time">One-time</option>
+                          </select>
+                          <div class="edit-actions">
+                            <button class="btn btn--primary btn--icon btn--sm" (click)="saveEditSource(source.id)"><svg lucideCheck [size]="14"></svg></button>
+                            <button class="btn btn--ghost btn--icon btn--sm" (click)="editingSourceId.set(null)"><svg lucideX [size]="14"></svg></button>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="income-info">
+                          <div class="income-primary">
+                            <span class="name">{{ source.name }}</span>
+                            <span class="amount">{{ source.amount | currencyDisplay }}</span>
+                          </div>
+                          <div class="income-secondary">
+                            <span class="freq">{{ source.frequency }}</span>
+                            <span class="status" [class.active]="source.isActive">{{ source.isActive ? 'Active' : 'Paused' }}</span>
+                          </div>
+                        </div>
+                        <div class="income-actions">
+                          <label class="toggle-switch">
+                            <input type="checkbox" [checked]="source.isActive" (change)="toggleSource(source)" />
+                            <span class="slider"></span>
+                          </label>
+                          <button class="btn btn--secondary btn--icon btn--sm" (click)="startEditSource(source)"><svg lucidePencil [size]="14"></svg></button>
+                          <button class="btn btn--secondary btn--icon btn--sm" (click)="deleteSource(source.id)"><svg lucideTrash2 [size]="14"></svg></button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="income-footer">
+                  <span class="label">Total Monthly Estim.</span>
+                  <span class="value">{{ store.totalMonthlyIncome() | currencyDisplay }}</span>
+                </div>
+              } @else {
+                <div class="empty-section">
+                  <p>No income streams defined. Start by adding your salary or dividends.</p>
+                </div>
+              }
+
+              <div class="settings-row mt-6">
+                <div class="row-info">
+                  <span class="row-label">Auto-log Income</span>
+                  <span class="row-desc">Automatically post transactions on the 1st of each month</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" [checked]="store.settings().autoLogIncome" (change)="toggleAutoLog()" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
           </div>
-          <label class="toggle">
-            <input type="checkbox" [checked]="store.settings().autoLogIncome" (change)="toggleAutoLog()" />
-            <span class="toggle__track"></span>
-          </label>
+
+          <!-- Preferences Section -->
+          <div class="lily-card section-card animate-slide-up" style="animation-delay: 0.1s">
+            <div class="section-header">
+              <div class="section-title">
+                <div class="section-icon violet"><svg lucidePalette [size]="18"></svg></div>
+                <div class="section-text">
+                  <h3>Preferences</h3>
+                  <span>Appearance and localization</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="preferences-form">
+              <div class="settings-row vertical">
+                <span class="row-label">Display Theme</span>
+                <div class="theme-grid">
+                  @for (theme of themes; track theme.value) {
+                    <button class="theme-card" [class.active]="store.settings().theme === theme.value" (click)="setTheme(theme.value)">
+                      <div class="theme-preview" [style.background]="theme.bg">
+                        <div class="preview-accent" [style.background]="theme.value === 'light' ? '#8b5cf6' : '#c084fc'"></div>
+                      </div>
+                      <span class="theme-label">{{ theme.label }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <div class="settings-row mt-4">
+                <div class="row-info">
+                  <span class="row-label">Primary Currency</span>
+                  <span class="row-desc">Applied to all amounts across the app</span>
+                </div>
+                <select class="input select-input" [ngModel]="store.settings().currency.code" (ngModelChange)="setCurrency($event)">
+                  @for (cur of currencies; track cur.code) {
+                    <option [value]="cur.code">{{ cur.symbol }} {{ cur.code }} ({{ cur.name }})</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <!-- Theme -->
-      <div class="lily-card animate-fade-in-up stagger-1">
-        <h3 class="lily-card__title settings-title">
-          <svg lucidePalette [size]="18"></svg> Theme
-        </h3>
-        <div class="theme-options">
-          @for (theme of themes; track theme.value) {
-            <button class="theme-option" [class.active]="store.settings().theme === theme.value" (click)="setTheme(theme.value)">
-              <div class="theme-option__preview" [style.background]="theme.bg"></div>
-              <span class="text-sm font-medium">{{ theme.label }}</span>
-            </button>
-          }
-        </div>
-      </div>
-
-      <!-- Currency -->
-      <div class="lily-card animate-fade-in-up stagger-2">
-        <h3 class="lily-card__title settings-title">
-          <svg lucideCircleDollarSign [size]="18"></svg> Currency
-        </h3>
-        <select class="select" [ngModel]="store.settings().currency.code" (ngModelChange)="setCurrency($event)">
-          @for (cur of currencies; track cur.code) {
-            <option [value]="cur.code">{{ cur.symbol }} {{ cur.code }} — {{ cur.name }}</option>
-          }
-        </select>
-      </div>
-
-      <!-- Data Management -->
-      <div class="lily-card animate-fade-in-up stagger-3">
-        <h3 class="lily-card__title settings-title">
-          <svg lucideDatabase [size]="18"></svg> Data
-        </h3>
-        <div class="flex flex-col gap-3">
-          <button class="btn btn--secondary" (click)="exportJSON()">
-            <svg lucideDownload [size]="14"></svg> Export Backup (JSON)
-          </button>
-          <div class="file-upload">
-            <label class="btn btn--secondary" for="import-file">
-              <svg lucideUpload [size]="14"></svg> Import Backup
-            </label>
-            <input type="file" id="import-file" accept=".json" (change)="importJSON($event)" style="display: none">
+        <!-- Sidebar Actions -->
+        <div class="settings-side">
+          <!-- Data Control -->
+          <div class="lily-card side-card animate-slide-up" style="animation-delay: 0.2s">
+            <h3 class="side-title"><svg lucideDatabase [size]="16"></svg> Data Control</h3>
+            <div class="side-actions">
+              <button class="btn btn--secondary btn--full" (click)="exportJSON()">
+                <svg lucideDownload [size]="14"></svg> Export JSON
+              </button>
+              <label class="btn btn--secondary btn--full cursor-pointer" for="import-file">
+                <svg lucideUpload [size]="14"></svg> Import Backup
+                <input type="file" id="import-file" accept=".json" (change)="importJSON($event)" style="display: none">
+              </label>
+              <button class="btn btn--secondary btn--full" (click)="loadDemoData()">
+                <svg lucideActivity [size]="14"></svg> Load Demo
+              </button>
+              <div class="danger-zone">
+                <button class="btn btn--danger btn--full" (click)="confirmReset()">
+                  <svg lucideTrash2 [size]="14"></svg> Factory Reset
+                </button>
+              </div>
+            </div>
           </div>
-          <button class="btn btn--secondary" (click)="loadDemoData()">
-            <svg lucideActivity [size]="14"></svg> Load Sample Data
-          </button>
-          <div class="divider"></div>
-          <button class="btn btn--danger" (click)="confirmReset()">
-            <svg lucideTrash2 [size]="14"></svg> Reset All Data
-          </button>
-        </div>
-      </div>
 
-      <!-- About -->
-      <div class="lily-card animate-fade-in-up stagger-4">
-        <h3 class="lily-card__title settings-title">
-          <svg lucideFlower2 [size]="18" style="color: var(--color-violet)"></svg> About Lily
-        </h3>
-        <div class="about-info">
-          <p class="text-sm text-secondary">Lily v1.0.0</p>
-          <p class="text-sm text-tertiary">A premium personal finance tracker built with Angular, Chart.js, and GSAP.</p>
-          <p class="text-sm text-tertiary" style="margin-top: var(--space-3)">
-            {{ store.transactions().length }} transactions · {{ store.categories().length }} categories · {{ store.goals().length }} goals
-          </p>
+          <!-- Application Info -->
+          <div class="lily-card side-card animate-slide-up" style="animation-delay: 0.3s">
+            <h3 class="side-title"><svg lucideFlower2 [size]="16"></svg> Lily Finance</h3>
+            <div class="app-info">
+              <div class="info-row"><span>Version</span> <span class="val">1.2.0</span></div>
+              <div class="info-row"><span>Records</span> <span class="val">{{ store.transactions().length }}</span></div>
+              <div class="info-row"><span>Goals</span> <span class="val">{{ store.goals().length }}</span></div>
+            </div>
+            <p class="app-desc">Lily is a secure, local-first finance companion. Your data stays in your browser.</p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Reset Confirm Dialog -->
+    <!-- Reset Modal -->
     @if (showResetConfirm()) {
-      <div class="drawer-overlay" (click)="showResetConfirm.set(false)"></div>
-      <div class="modal animate-fade-in-up">
-        <h3 class="modal-title">
-          <svg lucideTriangleAlert [size]="20" style="color: var(--color-amber)"></svg> Reset All Data?
-        </h3>
-        <p class="text-sm text-secondary" style="margin-bottom: var(--space-4)">This will permanently delete all transactions, budgets, goals, and settings. This cannot be undone.</p>
-        <div class="flex gap-2">
-          <button class="btn btn--danger" (click)="resetAll()">Yes, Delete Everything</button>
-          <button class="btn btn--ghost" (click)="showResetConfirm.set(false)">Cancel</button>
+      <div class="overlay" (click)="showResetConfirm.set(false)">
+        <div class="lily-card modal-card animate-slide-up" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div class="modal-icon"><svg lucideTriangleAlert [size]="24"></svg></div>
+            <h3 class="modal-title">Purge All Data?</h3>
+          </div>
+          <p class="modal-desc">This action will permanently remove all your transactions, budgets, goals, and settings. This cannot be undone.</p>
+          <div class="modal-actions">
+            <button class="btn btn--danger" (click)="resetAll()">Delete Everything</button>
+            <button class="btn btn--ghost" (click)="showResetConfirm.set(false)">Cancel</button>
+          </div>
         </div>
       </div>
     }
   `,
   styles: [`
-    .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4); }
-    .settings-card--wide { grid-column: 1 / -1; }
-    .settings-title { display: flex; align-items: center; gap: var(--space-2); }
+    .settings-page { display: flex; flex-direction: column; gap: var(--space-6); padding-bottom: var(--space-12); }
+    .settings-layout { display: grid; grid-template-columns: 1fr 300px; gap: var(--space-6); }
 
-    // ── Income Sources ──
-    .income-list { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); }
-    .income-row {
-      display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3);
-      border-radius: var(--radius-md); background: var(--color-bg-input); transition: opacity var(--duration-fast);
-      &--inactive { opacity: 0.5; }
-      &__info { flex: 1; min-width: 0; }
-      &__name { display: block; font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
-      &__meta { display: block; font-size: var(--fs-xs); color: var(--color-text-tertiary); margin-top: 2px; }
-      &__name-input, &__amount-input, &__freq-input {
-        padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
-        border: 1px solid var(--color-border); background: var(--color-bg-secondary);
-        color: var(--color-text-primary); font-size: var(--fs-sm);
-        &:focus { border-color: var(--color-violet); outline: none; }
+    .section-card { padding: 0; overflow: hidden; }
+    .section-header { 
+      padding: var(--space-6); border-bottom: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; 
+      .section-title { display: flex; align-items: center; gap: var(--space-4); }
+      .section-icon { 
+        width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--color-bg-input); 
+        &.emerald { color: var(--color-emerald); background: rgba(16, 185, 129, 0.1); }
+        &.violet { color: var(--color-violet); background: rgba(139, 92, 246, 0.1); }
       }
-      &__name-input { flex: 1; min-width: 120px; }
-      &__amount-wrap { position: relative; display: flex; align-items: center; }
-      &__symbol { position: absolute; left: 10px; color: var(--color-text-muted); font-size: var(--fs-sm); pointer-events: none; }
-      &__amount-input { width: 110px; padding-left: var(--space-6) !important; }
-      &__freq-input { width: 110px; cursor: pointer; }
-    }
-    .income-total {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
-      background: var(--color-bg-secondary); margin-top: var(--space-3); border: 1px solid var(--color-border);
-    }
-    .auto-log-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: var(--space-3) 0; margin-top: var(--space-3); border-top: 1px solid var(--color-border);
+      h3 { font-size: var(--fs-lg); font-weight: 800; color: var(--color-text-primary); margin: 0; }
+      span { font-size: var(--fs-xs); color: var(--color-text-tertiary); font-weight: 600; text-transform: uppercase; }
     }
 
-    // ── Toggle ──
-    .toggle { position: relative; display: inline-flex; cursor: pointer; }
-    .toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
-    .toggle__track {
-      width: 40px; height: 22px; border-radius: var(--radius-full);
-      background: var(--color-border); transition: background var(--duration-fast);
-      position: relative;
-      &::after {
-        content: ''; position: absolute; top: 3px; left: 3px;
-        width: 16px; height: 16px; border-radius: var(--radius-full);
-        background: white; transition: transform var(--duration-fast);
-      }
-    }
-    .toggle input:checked + .toggle__track {
-      background: var(--color-violet);
-      &::after { transform: translateX(18px); }
+    .income-manager { 
+      padding: var(--space-6); 
+      .income-list { display: flex; flex-direction: column; gap: var(--space-2); }
     }
 
-    .theme-options { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-3); }
-    .theme-option {
-      display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-3);
-      border-radius: var(--radius-lg); border: 2px solid var(--color-border); cursor: pointer; transition: all var(--duration-fast); min-width: 80px;
+    .income-item {
+      padding: var(--space-4); background: var(--color-bg-input); border-radius: var(--radius-xl); border: 1px solid transparent; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s;
+      &:hover { border-color: var(--color-border-hover); background: var(--color-bg-secondary); }
+      &.editing { border-color: var(--color-violet); background: var(--color-bg-secondary); }
+      &.inactive { opacity: 0.6; }
+      
+      .income-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+      .income-primary { display: flex; align-items: center; gap: var(--space-3); }
+      .name { font-weight: 700; color: var(--color-text-primary); }
+      .amount { font-family: var(--font-mono); font-weight: 700; color: var(--color-text-secondary); font-size: var(--fs-sm); }
+      .income-secondary { display: flex; align-items: center; gap: var(--space-3); font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; }
+      .status.active { color: var(--color-emerald); }
+      
+      .income-actions { display: flex; align-items: center; gap: var(--space-2); }
+      .income-edit-form { flex: 1; display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: var(--space-2); align-items: center; }
+      .input-wrap { position: relative; display: flex; align-items: center; .symbol { position: absolute; left: 8px; font-size: 11px; font-weight: 800; color: var(--color-text-tertiary); pointer-events: none; } input { padding-left: 20px; } }
+      .edit-actions { display: flex; gap: 4px; }
+    }
+
+    .income-footer { margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; .label { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; } .value { font-size: var(--fs-lg); font-weight: 800; color: var(--color-emerald); } }
+
+    .preferences-form { padding: var(--space-6); }
+    .settings-row { 
+      display: flex; justify-content: space-between; align-items: center; 
+      &.vertical { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+      .row-info { display: flex; flex-direction: column; gap: 2px; }
+      .row-label { font-weight: 700; color: var(--color-text-primary); }
+      .row-desc { font-size: var(--fs-xs); color: var(--color-text-tertiary); }
+      .select-input { width: 220px; }
+    }
+
+    .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); width: 100%; }
+    .theme-card {
+      background: var(--color-bg-input); border: 2px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-4); cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
       &:hover { border-color: var(--color-border-hover); }
       &.active { border-color: var(--color-violet); background: var(--color-violet-glow); }
+      .theme-preview { width: 100%; height: 60px; border-radius: 8px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+      .preview-accent { position: absolute; bottom: 8px; right: 8px; width: 16px; height: 16px; border-radius: 4px; }
+      .theme-label { font-size: var(--fs-sm); font-weight: 700; color: var(--color-text-secondary); }
     }
-    .theme-option__preview { width: 40px; height: 40px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1); }
-    .divider { height: 1px; background: var(--color-border); margin: var(--space-2) 0; }
-    .about-info { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-2); }
-    .modal {
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: calc(var(--z-drawer) + 1);
-      background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-2xl);
-      padding: var(--space-6); max-width: 420px; width: 90%;
+
+    .side-card { 
+      padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-4); margin-bottom: var(--space-4);
+      .side-title { font-size: var(--fs-base); font-weight: 800; color: var(--color-text-primary); display: flex; align-items: center; gap: var(--space-2); margin: 0; }
+      .side-actions { display: flex; flex-direction: column; gap: var(--space-2); }
+      .danger-zone { margin-top: var(--space-2); padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
     }
-    .modal-title { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-lg); font-weight: var(--fw-bold); margin-bottom: var(--space-3); }
-    .drawer-overlay { position: fixed; inset: 0; background: var(--color-bg-overlay); z-index: var(--z-drawer); }
-    input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-    input[type="number"] { -moz-appearance: textfield; }
+
+    .app-info { display: flex; flex-direction: column; gap: var(--space-2); .info-row { display: flex; justify-content: space-between; font-size: var(--fs-sm); font-weight: 600; color: var(--color-text-tertiary); .val { color: var(--color-text-primary); font-weight: 700; } } }
+    .app-desc { font-size: 11px; color: var(--color-text-tertiary); line-height: 1.5; margin: 0; }
+
+    .toggle-switch {
+      position: relative; width: 44px; height: 24px;
+      input { opacity: 0; width: 0; height: 0; }
+      .slider { position: absolute; cursor: pointer; inset: 0; background-color: var(--color-border); border-radius: 34px; transition: .4s; &:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .4s; } }
+      input:checked + .slider { background-color: var(--color-violet); &:before { transform: translateX(20px); } }
+    }
+
+    .overlay { position: fixed; inset: 0; background: var(--color-bg-overlay); z-index: var(--z-modal); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+    .modal-card { 
+      max-width: 400px; width: 90%; padding: var(--space-8); display: flex; flex-direction: column; gap: var(--space-6); text-align: center;
+      .modal-icon { width: 64px; height: 64px; border-radius: 50%; background: rgba(244, 63, 94, 0.1); color: var(--color-rose); display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+      .modal-title { font-size: var(--fs-xl); font-weight: 800; color: var(--color-text-primary); margin: 0; }
+      .modal-desc { font-size: var(--fs-base); color: var(--color-text-secondary); line-height: 1.6; margin: 0; }
+      .modal-actions { display: flex; flex-direction: column; gap: var(--space-2); }
+    }
+
+    @media (max-width: 900px) {
+      .settings-layout { grid-template-columns: 1fr; }
+      .settings-side { order: -1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    }
+    @media (max-width: 640px) {
+      .settings-side { grid-template-columns: 1fr; }
+      .income-edit-form { grid-template-columns: 1fr 1fr; }
+      .edit-actions { grid-column: span 2; justify-content: flex-end; }
+    }
   `],
 })
 export class SettingsComponent {
