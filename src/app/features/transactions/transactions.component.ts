@@ -7,19 +7,11 @@ import { Transaction, TransactionFilter } from '../../core/models/transaction.mo
 import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
 import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
-import {
-  LucideSearch, LucideFilter, LucideDownload, LucideTrash2,
-  LucideCheck, LucideReceipt, LucideChevronDown, LucideX,
-} from '@lucide/angular';
-import { format } from 'date-fns';
-
 @Component({
   selector: 'lily-transactions',
   standalone: true,
   imports: [
     FormsModule, CurrencyDisplayPipe, RelativeDatePipe, LilyIconComponent,
-    LucideSearch, LucideFilter, LucideDownload, LucideTrash2,
-    LucideCheck, LucideReceipt, LucideChevronDown, LucideX,
   ],
   template: `
     <div class="transactions-page">
@@ -40,7 +32,7 @@ import { format } from 'date-fns';
       <div class="glass-toolbar" anim="slideUp">
         <div class="glass-toolbar__inner">
           <div class="search-field">
-            <svg lucideSearch [size]="18" class="icon"></svg>
+            <lily-icon name="search" [size]="18" class="icon" />
             <input type="text" 
                    placeholder="Search financial records..." 
                    [(ngModel)]="searchQuery" 
@@ -51,13 +43,13 @@ import { format } from 'date-fns';
             <button class="tool-btn" 
                     [class.active]="showFilters()"
                     (click)="showFilters.set(!showFilters())">
-              <svg lucideFilter [size]="18"></svg>
+              <lily-icon name="filter" [size]="18" />
               @if (activeFilterCount() > 0) {
                 <span class="count-badge">{{ activeFilterCount() }}</span>
               }
             </button>
             <button class="tool-btn" (click)="exportCSV()" title="Export CSV">
-              <svg lucideDownload [size]="18"></svg>
+              <lily-icon name="download" [size]="18" />
             </button>
           </div>
         </div>
@@ -69,7 +61,7 @@ import { format } from 'date-fns';
           <div class="filter-panel__header">
             <h3 class="panel-title">Refine Results</h3>
             <button class="close-panel" (click)="showFilters.set(false)">
-              <svg lucideX [size]="16"></svg>
+              <lily-icon name="x" [size]="16" />
             </button>
           </div>
 
@@ -100,7 +92,7 @@ import { format } from 'date-fns';
                   <option value="amount">Highest Magnitude</option>
                   <option value="category">Category Index</option>
                 </select>
-                <svg lucideChevronDown [size]="14"></svg>
+                <lily-icon name="chevron-down" [size]="14" />
               </div>
             </div>
           </div>
@@ -136,7 +128,7 @@ import { format } from 'date-fns';
             </div>
             <div class="selection-actions">
               <button class="btn-delete-bulk" (click)="bulkDelete()">
-                <svg lucideTrash2 [size]="16"></svg>
+                <lily-icon name="trash-2" [size]="16" />
                 <span>Remove Selection</span>
               </button>
               <button class="btn-cancel-bulk" (click)="clearSelection()">Deselect All</button>
@@ -205,14 +197,14 @@ import { format } from 'date-fns';
                           <option [value]="cat.id">{{ cat.name }}</option>
                         }
                       </select>
-                      <svg lucideChevronDown [size]="14"></svg>
+                      <lily-icon name="chevron-down" [size]="14" />
                     </div>
                   </div>
                 </div>
                 <div class="edit-sheet__footer">
                   <button class="btn-save" (click)="saveEdit(txn)">Commit Changes</button>
                   <button class="btn-delete" (click)="store.deleteTransaction(txn.id); toast.success('Entry removed')">
-                    <svg lucideTrash2 [size]="18"></svg>
+                    <lily-icon name="trash-2" [size]="18" />
                   </button>
                   <button class="btn-close" (click)="editingId.set(null)">Discard</button>
                 </div>
@@ -222,7 +214,7 @@ import { format } from 'date-fns';
         } @empty {
           <div class="empty-state" anim="fadeIn">
             <div class="empty-state__icon">
-              <svg lucideReceipt [size]="48"></svg>
+              <lily-icon name="receipt" [size]="48" />
             </div>
             <h3 class="empty-state__title">No activity found</h3>
             <p class="empty-state__text">Refine your search or clear filters to see more results.</p>

@@ -7,24 +7,13 @@ import { ToastService } from '../../core/services/toast.service';
 import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
 import { CURRENCIES } from '../../core/models/settings.model';
 import { IncomeSource } from '../../core/models/income.model';
-import {
-  LucidePalette, LucideCircleDollarSign, LucideDatabase,
-  LucideFlower2, LucideDownload, LucideUpload,
-  LucideTrash2, LucideTriangleAlert, LucideActivity,
-  LucideWallet, LucidePlus, LucidePencil, LucideCheck, LucideX,
-  LucideGlobe, LucideCpu, LucideShieldCheck
-} from '@lucide/angular';
+import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 
 @Component({
   selector: 'lily-settings',
   standalone: true,
   imports: [
-    FormsModule, CurrencyDisplayPipe,
-    LucidePalette, LucideCircleDollarSign, LucideDatabase,
-    LucideFlower2, LucideDownload, LucideUpload,
-    LucideTrash2, LucideTriangleAlert, LucideActivity,
-    LucideWallet, LucidePlus, LucidePencil, LucideCheck, LucideX,
-    LucideGlobe, LucideCpu, LucideShieldCheck
+    FormsModule, CurrencyDisplayPipe, LilyIconComponent
   ],
   template: `
     <div class="settings-page">
@@ -35,7 +24,7 @@ import {
         </div>
         <div class="header-actions">
           <div class="status-pill security">
-            <svg lucideShieldCheck [size]="14"></svg>
+            <lily-icon name="shield-check" [size]="14" />
             <span class="status-pill__text">Vault Encrypted</span>
           </div>
         </div>
@@ -50,7 +39,7 @@ import {
             <div class="section-header">
               <div class="section-title">
                 <div class="icon-orb emerald">
-                  <svg lucideWallet [size]="20"></svg>
+                  <lily-icon name="wallet" [size]="20" />
                 </div>
                 <div class="section-text">
                   <h3>Income Streams</h3>
@@ -58,7 +47,7 @@ import {
                 </div>
               </div>
               <button class="glass-btn primary" (click)="addNewSource()">
-                <svg lucidePlus [size]="16"></svg>
+                <lily-icon name="plus" [size]="16" />
                 <span>Add Stream</span>
               </button>
             </div>
@@ -98,10 +87,10 @@ import {
                           </div>
                           <div class="edit-actions">
                             <button class="commit-btn" (click)="saveEditSource(source.id)">
-                              <svg lucideCheck [size]="16"></svg>
+                              <lily-icon name="check" [size]="16" />
                             </button>
                             <button class="cancel-btn" (click)="editingSourceId.set(null)">
-                              <svg lucideX [size]="16"></svg>
+                              <lily-icon name="x" [size]="16" />
                             </button>
                           </div>
                         </div>
@@ -122,10 +111,10 @@ import {
                           
                           <div class="source-controls">
                             <button class="icon-btn edit" (click)="startEditSource(source)" title="Edit Source">
-                              <svg lucidePencil [size]="14"></svg>
+                            <lily-icon name="pencil" [size]="14" />
                             </button>
                             <button class="icon-btn delete" (click)="deleteSource(source.id)" title="Delete Source">
-                              <svg lucideTrash2 [size]="14"></svg>
+                            <lily-icon name="trash-2" [size]="14" />
                             </button>
                             <div class="toggle-wrap">
                               <label class="premium-toggle">
@@ -158,7 +147,7 @@ import {
                 </div>
               } @else {
                 <div class="empty-list" anim="fadeIn">
-                  <div class="empty-icon"><svg lucideActivity [size]="32"></svg></div>
+                  <div class="empty-icon"><lily-icon name="activity" [size]="32" /></div>
                   <p>No revenue streams detected. Initialize your first inflow to begin projections.</p>
                 </div>
               }
@@ -170,7 +159,7 @@ import {
             <div class="section-header">
               <div class="section-title">
                 <div class="icon-orb violet">
-                  <svg lucidePalette [size]="20"></svg>
+                  <lily-icon name="palette" [size]="20" />
                 </div>
                 <div class="section-text">
                   <h3>Preferences</h3>
@@ -192,7 +181,7 @@ import {
                       </div>
                       <span class="label">{{ theme.label }}</span>
                       @if (store.settings().theme === theme.value) {
-                        <div class="active-check"><svg lucideCheck [size]="12"></svg></div>
+                        <div class="active-check"><lily-icon name="check" [size]="12" /></div>
                       }
                     </button>
                   }
@@ -202,7 +191,7 @@ import {
               <div class="preference-group">
                 <div class="horizontal-setting glass">
                   <div class="setting-info">
-                    <div class="icon"><svg lucideGlobe [size]="18"></svg></div>
+                    <div class="icon"><lily-icon name="globe" [size]="18" /></div>
                     <div class="text">
                       <span class="label">Regional Currency</span>
                       <p>Primary unit for all valuations</p>
@@ -228,7 +217,7 @@ import {
           <!-- System Intelligence -->
           <div class="lily-card glass side-card" anim="slideUp" style="--anim-delay: 200ms">
             <div class="side-header">
-              <svg lucideCpu [size]="18"></svg>
+              <lily-icon name="cpu" [size]="18" />
               <span>System Metadata</span>
             </div>
             <div class="system-stats">
@@ -251,26 +240,26 @@ import {
           <!-- Maintenance Controls -->
           <div class="lily-card glass side-card" anim="slideUp" style="--anim-delay: 300ms">
             <div class="side-header">
-              <svg lucideDatabase [size]="18"></svg>
+              <lily-icon name="database" [size]="18" />
               <span>Data Operations</span>
             </div>
             <div class="action-stack">
               <button class="side-btn glass" (click)="exportJSON()">
-                <svg lucideDownload [size]="16"></svg>
+                <lily-icon name="download" [size]="16" />
                 <span>Export Vault</span>
               </button>
               <label class="side-btn glass clickable" for="import-file">
-                <svg lucideUpload [size]="16"></svg>
+                <lily-icon name="upload" [size]="16" />
                 <span>Restore Backup</span>
                 <input type="file" id="import-file" accept=".json" (change)="importJSON($event)" style="display: none">
               </label>
               <button class="side-btn glass" (click)="loadDemoData()">
-                <svg lucideActivity [size]="16"></svg>
+                <lily-icon name="activity" [size]="16" />
                 <span>Simulate Activity</span>
               </button>
               <div class="danger-zone">
                 <button class="side-btn danger" (click)="confirmReset()">
-                  <svg lucideTrash2 [size]="16"></svg>
+                  <lily-icon name="trash-2" [size]="16" />
                   <span>Purge Intelligence</span>
                 </button>
               </div>
@@ -285,7 +274,7 @@ import {
       <div class="overlay" (click)="showResetConfirm.set(false)" anim="fadeIn">
         <div class="lily-card glass modal-card" (click)="$event.stopPropagation()" anim="slideUp">
           <div class="modal-header">
-            <div class="modal-icon"><svg lucideTriangleAlert [size]="32"></svg></div>
+            <div class="modal-icon"><lily-icon name="triangle-alert" [size]="32" /></div>
             <h3 class="modal-title">Confirm Data Purge</h3>
           </div>
           <p class="modal-desc">This operation will permanently eliminate all financial records, goals, and customized logic. This state transition is irreversible.</p>

@@ -548,7 +548,7 @@ export class AnalyticsComponent {
           color: this.chartColors.text, 
           boxWidth: 8, 
           usePointStyle: true,
-          font: { size: 11, weight: '600' }, 
+          font: { size: 11, weight: 'bold' }, 
           padding: 20 
         } 
       },

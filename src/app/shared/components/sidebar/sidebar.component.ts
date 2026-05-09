@@ -1,19 +1,15 @@
 import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LilyIconComponent } from '../../icons/lily-icon.component';
-import {
-  LucideFlower2, LucideChevronLeft, LucideChevronRight,
-} from '@lucide/angular';
-
 @Component({
   selector: 'lily-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LilyIconComponent, LucideFlower2, LucideChevronLeft, LucideChevronRight],
+  imports: [RouterLink, RouterLinkActive, LilyIconComponent],
   template: `
     <nav class="sidebar" [class.collapsed]="collapsed()">
       <div class="sidebar__logo" routerLink="/">
         <div class="logo-wrapper">
-          <svg lucideFlower2 [size]="24" class="sidebar__logo-icon"></svg>
+          <lily-icon name="flower-2" [size]="24" class="sidebar__logo-icon" />
         </div>
         @if (!collapsed()) { 
           <div class="logo-text-wrapper">
@@ -43,13 +39,15 @@ import {
       </div>
 
       <div class="sidebar__footer">
-        <div class="sidebar__user" *ngIf="!collapsed()">
+        @if (!collapsed()) {
+          <div class="sidebar__user">
           <div class="user-avatar">JD</div>
           <div class="user-info">
             <span class="user-name">Jane Doe</span>
             <span class="user-plan">Premium Plan</span>
           </div>
         </div>
+      }
         
         <button class="sidebar__toggle" (click)="collapsed.set(!collapsed())" [title]="collapsed() ? 'Expand' : 'Collapse'">
           <div class="toggle-icon-wrapper">

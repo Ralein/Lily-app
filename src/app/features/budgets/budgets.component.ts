@@ -7,20 +7,11 @@ import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
 import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 import { BUDGET_RULE, NEEDS_CATEGORIES, WANTS_CATEGORIES } from '../../core/models/income.model';
 import { format } from 'date-fns';
-import {
-  LucidePencil, LucideTarget, LucideCheck, LucideZap,
-  LucideTriangleAlert, LucideArrowUpRight,
-  LucideTrendingUp,
-} from '@lucide/angular';
-
 @Component({
   selector: 'lily-budgets',
   standalone: true,
   imports: [
     FormsModule, CurrencyDisplayPipe, LilyIconComponent,
-    LucidePencil, LucideTarget, LucideCheck, LucideZap,
-    LucideTriangleAlert, LucideArrowUpRight,
-    LucideTrendingUp,
   ],
   template: `
     <div class="budgets-page">

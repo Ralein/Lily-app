@@ -8,20 +8,11 @@ import { CURRENCIES } from '../../core/models/settings.model';
 import { IncomeSource, BUDGET_RULE } from '../../core/models/income.model';
 import { format } from 'date-fns';
 import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
-import {
-  LucideFlower2, LucideCircleDollarSign, LucideBarChart3,
-  LucideActivity, LucideSparkles, LucideArrowRight, LucideArrowLeft,
-  LucidePlus, LucideTrash2, LucideWallet, LucideCheck,
-} from '@lucide/angular';
-
 @Component({
   selector: 'lily-onboarding',
   standalone: true,
   imports: [
     FormsModule, DecimalPipe, LilyIconComponent,
-    LucideFlower2, LucideCircleDollarSign, LucideBarChart3,
-    LucideActivity, LucideSparkles, LucideArrowRight, LucideArrowLeft,
-    LucidePlus, LucideTrash2, LucideWallet, LucideCheck,
   ],
   template: `
     <div class="onboarding-wrapper">
@@ -37,7 +28,7 @@ import {
                  [class.active]="step() === i" 
                  [class.completed]="step() > i">
               <div class="stepper__dot">
-                @if (step() > i) { <svg lucideCheck [size]="12"></svg> }
+                @if (step() > i) { <lily-icon name="check" [size]="12" /> }
                 @else { <span>{{ i + 1 }}</span> }
               </div>
               <span class="stepper__label">{{ s.label }}</span>
@@ -54,7 +45,7 @@ import {
               <!-- Welcome -->
               <div class="step-card" anim="slideUp">
                 <div class="step-card__icon welcome-icon">
-                  <svg lucideFlower2 [size]="64"></svg>
+                  <lily-icon name="flower-2" [size]="64" />
                   <div class="icon-glow"></div>
                 </div>
                 <h1 class="step-card__title">Welcome to <span class="text-gradient">Lily</span></h1>
@@ -68,7 +59,7 @@ import {
 
                 <button class="btn-premium primary" (click)="nextStep()">
                   <span>Begin Initialization</span>
-                  <svg lucideArrowRight [size]="18"></svg>
+                  <lily-icon name="arrow-right" [size]="18" />
                 </button>
               </div>
             }
@@ -98,12 +89,12 @@ import {
 
                 <div class="step-actions">
                   <button class="btn-premium ghost" (click)="prevStep()">
-                    <svg lucideArrowLeft [size]="18"></svg>
+                    <lily-icon name="arrow-left" [size]="18" />
                     <span>Back</span>
                   </button>
                   <button class="btn-premium primary" (click)="saveCurrency(); nextStep()">
                     <span>Continue</span>
-                    <svg lucideArrowRight [size]="18"></svg>
+                    <lily-icon name="arrow-right" [size]="18" />
                   </button>
                 </div>
               </div>
@@ -142,14 +133,14 @@ import {
                           </select>
                         </div>
                         <button class="btn-delete" (click)="removeSource(i)" [disabled]="tempSources().length === 1">
-                          <svg lucideTrash2 [size]="16"></svg>
+                          <lily-icon name="trash-2" [size]="16" />
                         </button>
                       </div>
                     }
                   </div>
 
                   <button class="btn-add-source" (click)="addSource()">
-                    <svg lucidePlus [size]="16"></svg>
+                    <lily-icon name="plus" [size]="16" />
                     <span>Register Another Source</span>
                   </button>
 
@@ -166,12 +157,12 @@ import {
 
                 <div class="step-actions">
                   <button class="btn-premium ghost" (click)="prevStep()">
-                    <svg lucideArrowLeft [size]="18"></svg>
+                    <lily-icon name="arrow-left" [size]="18" />
                     <span>Back</span>
                   </button>
                   <button class="btn-premium primary" (click)="saveIncome(); nextStep()" [disabled]="tempTotalIncome() <= 0">
                     <span>Continue</span>
-                    <svg lucideArrowRight [size]="18"></svg>
+                    <lily-icon name="arrow-right" [size]="18" />
                   </button>
                 </div>
               </div>
@@ -224,12 +215,12 @@ import {
 
                 <div class="step-actions">
                   <button class="btn-premium ghost" (click)="prevStep()">
-                    <svg lucideArrowLeft [size]="18"></svg>
+                    <lily-icon name="arrow-left" [size]="18" />
                     <span>Back</span>
                   </button>
                   <button class="btn-premium primary" (click)="saveBudget(); nextStep()">
                     <span>Finalize Setup</span>
-                    <svg lucideArrowRight [size]="18"></svg>
+                    <lily-icon name="arrow-right" [size]="18" />
                   </button>
                 </div>
               </div>
@@ -239,7 +230,7 @@ import {
               <!-- Completion -->
               <div class="step-card celebratory" anim="scaleIn">
                 <div class="sparkle-visual">
-                  <svg lucideSparkles [size]="80" class="main-sparkle"></svg>
+                  <lily-icon name="sparkles" [size]="80" class="main-sparkle" />
                   <div class="ring"></div>
                   <div class="ring"></div>
                 </div>
@@ -264,7 +255,7 @@ import {
 
                 <button class="btn-premium primary btn--lg" (click)="complete()">
                   <span>Enter Dashboard</span>
-                  <svg lucideActivity [size]="18"></svg>
+                  <lily-icon name="activity" [size]="18" />
                 </button>
               </div>
             }

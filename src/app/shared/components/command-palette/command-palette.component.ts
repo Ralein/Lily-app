@@ -105,7 +105,6 @@ interface CommandAction {
     }
   `,
   styles: [`
-    @use 'animations' as anim;
 
     .palette-overlay {
       position: fixed;

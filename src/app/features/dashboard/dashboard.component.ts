@@ -11,11 +11,6 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { format } from 'date-fns';
-import {
-  LucideFlame, LucideLightbulb, LucideX, LucideWallet,
-  LucideArrowUpRight, LucideArrowDownRight, LucidePlus,
-  LucideTrendingUp,
-} from '@lucide/angular';
 
 @Component({
   selector: 'lily-dashboard',
@@ -23,9 +18,6 @@ import {
   imports: [
     CurrencyDisplayPipe, RelativeDatePipe, NumberAnimateDirective,
     QuickAddComponent, BaseChartDirective, LilyIconComponent, RouterLink,
-    LucideFlame, LucideLightbulb, LucideX, LucideWallet,
-    LucideArrowUpRight, LucideArrowDownRight, LucidePlus,
-    LucideTrendingUp,
   ],
   template: `
     <div class="dashboard">
@@ -54,14 +46,14 @@ import {
             
             <div class="hero-card__indicators">
               <div class="indicator income" anim="fadeIn" style="--anim-delay: 400ms">
-                <div class="indicator__icon"><svg lucideArrowUpRight [size]="16"></svg></div>
+                <div class="indicator__icon"><lily-icon name="arrow-up-right" [size]="16" /></div>
                 <div class="indicator__data">
                   <span class="label">Monthly Inflow</span>
                   <span class="value">{{ store.totalIncome() | currencyDisplay }}</span>
                 </div>
               </div>
               <div class="indicator expense" anim="fadeIn" style="--anim-delay: 500ms">
-                <div class="indicator__icon"><svg lucideArrowDownRight [size]="16"></svg></div>
+                <div class="indicator__icon"><lily-icon name="arrow-down-right" [size]="16" /></div>
                 <div class="indicator__data">
                   <span class="label">Monthly Outflow</span>
                   <span class="value">{{ store.totalExpenses() | currencyDisplay }}</span>
@@ -85,7 +77,7 @@ import {
         
         <div class="hero-card__footer">
           <button class="btn-hero-action" (click)="logMonthlyIncome()" [disabled]="store.hasIncomeThisMonth()">
-            <svg lucideWallet [size]="18"></svg>
+            <lily-icon name="wallet" [size]="18" />
             <span>Log Expected Income</span>
           </button>
         </div>
@@ -110,7 +102,7 @@ import {
 
         <div class="lily-card glass stat-card" anim="slideUp" style="--anim-delay: 300ms">
           <div class="stat-card__header">
-            <div class="stat-card__icon streak"><svg lucideFlame [size]="18"></svg></div>
+            <div class="stat-card__icon streak"><lily-icon name="flame" [size]="18" /></div>
             <span class="stat-card__title">Financial Streak</span>
           </div>
           <div class="stat-card__body">
@@ -121,7 +113,7 @@ import {
 
         <div class="lily-card glass stat-card stat-card--highlight" anim="slideUp" style="--anim-delay: 400ms">
           <div class="stat-card__header">
-            <div class="stat-card__icon insight"><svg lucideLightbulb [size]="18"></svg></div>
+            <div class="stat-card__icon insight"><lily-icon name="lightbulb" [size]="18" /></div>
             <span class="stat-card__title">Artificial Intelligence</span>
           </div>
           <div class="stat-card__body">
@@ -206,7 +198,7 @@ import {
               </div>
             } @empty {
               <div class="empty-feed">
-                <div class="empty-icon"><svg lucidePlus [size]="32"></svg></div>
+                <div class="empty-icon"><lily-icon name="plus" [size]="32" /></div>
                 <p>Start your journey by adding a transaction.</p>
               </div>
             }
