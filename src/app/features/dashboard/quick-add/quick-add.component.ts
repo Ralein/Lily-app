@@ -4,15 +4,25 @@ import { LilyStore } from '../../../core/store/lily.store';
 import { ToastService } from '../../../core/services/toast.service';
 import { Transaction } from '../../../core/models/transaction.model';
 import { getCategoriesByType } from '../../../core/models/category.model';
-import { format } from 'date-fns';
+import { LilyIconComponent } from '../../../shared/icons/lily-icon.component';
+import {
+  LucidePlus, LucideTarget, LucideSparkles, LucideZap,
+  LucideArrowDownRight, LucideArrowUpRight,
+} from '@lucide/angular';
 
 @Component({
   selector: 'lily-quick-add',
   standalone: true,
-  imports: [FormsModule],
+  imports: [
+    FormsModule, LilyIconComponent,
+    LucidePlus, LucideTarget, LucideSparkles, LucideZap,
+    LucideArrowDownRight, LucideArrowUpRight,
+  ],
   template: `
     <button class="btn btn--fab" (click)="open()" aria-label="Add transaction">
-      <span class="fab-icon" [class.fab-icon--active]="isOpen()">+</span>
+      <span class="fab-icon" [class.fab-icon--active]="isOpen()">
+        <svg lucidePlus [size]="24"></svg>
+      </span>
     </button>
 
     @if (isOpen()) {
@@ -37,7 +47,7 @@ import { format } from 'date-fns';
         <div class="category-grid">
           @for (cat of filteredCategories(); track cat.id) {
             <button class="category-chip" [class.active]="selectedCategory() === cat.id" (click)="selectedCategory.set(cat.id)">
-              <span class="category-chip__icon">{{ cat.icon }}</span>
+              <lily-icon [name]="cat.icon" [size]="16" class="category-chip__icon" />
               <span class="category-chip__name">{{ cat.name }}</span>
             </button>
           }
@@ -57,16 +67,26 @@ import { format } from 'date-fns';
           </select>
           @if (txnType() === 'expense') {
             <div class="mood-pills">
-              <button class="pill" [class.active]="mood() === 'need'" (click)="mood.set(mood() === 'need' ? undefined : 'need')">🎯 Need</button>
-              <button class="pill" [class.active]="mood() === 'want'" (click)="mood.set(mood() === 'want' ? undefined : 'want')">✨ Want</button>
-              <button class="pill" [class.active]="mood() === 'impulse'" (click)="mood.set(mood() === 'impulse' ? undefined : 'impulse')">⚡ Impulse</button>
+              <button class="pill" [class.active]="mood() === 'need'" (click)="mood.set(mood() === 'need' ? undefined : 'need')">
+                <svg lucideTarget [size]="12"></svg> Need
+              </button>
+              <button class="pill" [class.active]="mood() === 'want'" (click)="mood.set(mood() === 'want' ? undefined : 'want')">
+                <svg lucideSparkles [size]="12"></svg> Want
+              </button>
+              <button class="pill" [class.active]="mood() === 'impulse'" (click)="mood.set(mood() === 'impulse' ? undefined : 'impulse')">
+                <svg lucideZap [size]="12"></svg> Impulse
+              </button>
             </div>
           }
         </div>
 
         <!-- Submit -->
         <button class="btn btn--primary btn--lg" style="width: 100%; margin-top: var(--space-4)" (click)="submit()" [disabled]="!amount || !selectedCategory()">
-          {{ txnType() === 'expense' ? '💸 Add Expense' : '💰 Add Income' }}
+          @if (txnType() === 'expense') {
+            <svg lucideArrowDownRight [size]="16"></svg> Add Expense
+          } @else {
+            <svg lucideArrowUpRight [size]="16"></svg> Add Income
+          }
         </button>
       </div>
     }
@@ -114,9 +134,7 @@ import { format } from 'date-fns';
         &::placeholder { color: var(--color-text-muted); }
       }
     }
-    .category-grid {
-      display: flex; flex-wrap: wrap; gap: var(--space-2);
-    }
+    .category-grid { display: flex; flex-wrap: wrap; gap: var(--space-2); }
     .category-chip {
       display: flex; align-items: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
@@ -125,13 +143,12 @@ import { format } from 'date-fns';
       transition: all var(--duration-fast);
       &:hover { border-color: var(--color-border-hover); color: var(--color-text-primary); }
       &.active { background: var(--color-violet-glow); border-color: var(--color-violet); color: var(--color-violet-light); }
-      &__icon { font-size: 1rem; }
       &__name { font-weight: var(--fw-medium); }
     }
     .drawer__row { display: flex; gap: var(--space-3); margin-top: var(--space-3); flex-wrap: wrap; align-items: start; }
     .mood-pills { display: flex; gap: var(--space-2); flex-wrap: wrap; }
     .fab-icon {
-      font-size: 1.5rem; font-weight: 300; transition: transform var(--duration-fast) var(--ease-spring); display: inline-block;
+      transition: transform var(--duration-fast) var(--ease-spring); display: inline-flex;
       &--active { transform: rotate(45deg); }
     }
     input[type="number"]::-webkit-inner-spin-button,

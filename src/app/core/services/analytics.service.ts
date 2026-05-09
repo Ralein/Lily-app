@@ -144,17 +144,17 @@ export class AnalyticsService {
     const insights: Insight[] = []; const month = format(new Date(), 'yyyy-MM'); const prev = format(subMonths(new Date(), 1), 'yyyy-MM');
     const cats = this.store.categories(); const cn = (id: string) => cats.find(c => c.id === id)?.name || id;
     const sym = this.store.settings().currency.symbol;
-    this.detectCategoryTrends().filter(t => t.trend === 'rising' && t.changePct > 25).forEach(t => insights.push({ id: `tr-${t.categoryId}`, emoji: '🚨', text: `${cn(t.categoryId)} spending is up ${t.changePct}% vs last month`, type: 'warning', priority: 1 }));
+    this.detectCategoryTrends().filter(t => t.trend === 'rising' && t.changePct > 25).forEach(t => insights.push({ id: `tr-${t.categoryId}`, emoji: '', text: `${cn(t.categoryId)} spending is up ${t.changePct}% vs last month`, type: 'warning', priority: 1 }));
     const cr = this.savingsRate(month); const pr = this.savingsRate(prev);
-    if (cr > pr && pr > 0) insights.push({ id: 'sr', emoji: '📈', text: `Savings rate improved from ${pr}% → ${cr}% this month`, type: 'success', priority: 2 });
+    if (cr > pr && pr > 0) insights.push({ id: 'sr', emoji: '', text: `Savings rate improved from ${pr}% → ${cr}% this month`, type: 'success', priority: 2 });
     const rec = this.detectRecurring();
-    if (rec.length > 0) insights.push({ id: 'rec', emoji: '🔁', text: `Detected ${rec.length} recurring expense${rec.length > 1 ? 's' : ''} totaling ${sym}${rec.reduce((s, r) => s + r.avgAmount, 0).toLocaleString()}/month`, type: 'info', priority: 3 });
+    if (rec.length > 0) insights.push({ id: 'rec', emoji: '', text: `Detected ${rec.length} recurring expense${rec.length > 1 ? 's' : ''} totaling ${sym}${rec.reduce((s, r) => s + r.avgAmount, 0).toLocaleString()}/month`, type: 'info', priority: 3 });
     const expByCat = this.store.expensesByCategory();
     if (expByCat.size > 0) { const top = [...expByCat.entries()].sort((a, b) => b[1] - a[1])[0]; const sim = this.simulate(top[0], 20);
-      if (sim.annualImpact > 0) insights.push({ id: 'wif', emoji: '💡', text: `Cut ${cn(top[0])} by 20% → save ${sym}${sim.annualImpact.toLocaleString()} extra/year`, type: 'info', priority: 2 });
+      if (sim.annualImpact > 0) insights.push({ id: 'wif', emoji: '', text: `Cut ${cn(top[0])} by 20% → save ${sym}${sim.annualImpact.toLocaleString()} extra/year`, type: 'info', priority: 2 });
     }
     const vel = this.spendingVelocity(month);
-    if (vel.budget > 0 && vel.projected > vel.budget * 1.1) insights.push({ id: 'vel', emoji: '⚡', text: `At current pace, you'll spend ${sym}${Math.round(vel.projected).toLocaleString()} — ${Math.round(((vel.projected / vel.budget) - 1) * 100)}% over budget`, type: 'danger', priority: 1 });
+    if (vel.budget > 0 && vel.projected > vel.budget * 1.1) insights.push({ id: 'vel', emoji: '', text: `At current pace, you'll spend ${sym}${Math.round(vel.projected).toLocaleString()} — ${Math.round(((vel.projected / vel.budget) - 1) * 100)}% over budget`, type: 'danger', priority: 1 });
     return insights.sort((a, b) => a.priority - b.priority);
   }
 

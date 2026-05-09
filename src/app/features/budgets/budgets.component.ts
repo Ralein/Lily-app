@@ -4,12 +4,16 @@ import { LilyStore } from '../../core/store/lily.store';
 import { ToastService } from '../../core/services/toast.service';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
+import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 import { format } from 'date-fns';
+import {
+  LucidePencil, LucideTarget, LucideCheck,
+} from '@lucide/angular';
 
 @Component({
   selector: 'lily-budgets',
   standalone: true,
-  imports: [FormsModule, CurrencyDisplayPipe],
+  imports: [FormsModule, CurrencyDisplayPipe, LilyIconComponent, LucidePencil, LucideTarget, LucideCheck],
   template: `
     <div class="page-header">
       <h1 class="page-header__title">Budget</h1>
@@ -45,7 +49,11 @@ import { format } from 'date-fns';
     <div class="lily-card animate-fade-in-up stagger-1" style="margin-top: var(--space-4)">
       <div class="lily-card__header">
         <span class="lily-card__title">{{ hasBudget() ? 'Budget Allocations' : 'Setup Budget' }}</span>
-        @if (!editing()) { <button class="btn btn--primary btn--sm" (click)="editing.set(true)">✏️ Edit</button> }
+        @if (!editing()) {
+          <button class="btn btn--primary btn--sm" (click)="editing.set(true)">
+            <svg lucidePencil [size]="14"></svg> Edit
+          </button>
+        }
       </div>
       @if (editing()) {
         <div class="budget-form">
@@ -59,13 +67,17 @@ import { format } from 'date-fns';
           <div class="budget-form__cats">
             @for (cat of expenseCategories(); track cat.id) {
               <div class="budget-cat-row">
-                <span class="budget-cat-row__label">{{ cat.icon }} {{ cat.name }}</span>
+                <span class="budget-cat-row__label">
+                  <lily-icon [name]="cat.icon" [size]="14" /> {{ cat.name }}
+                </span>
                 <input type="number" class="input input--sm" [(ngModel)]="catLimits[cat.id]" [placeholder]="'Limit'" style="max-width: 120px">
               </div>
             }
           </div>
           <div class="flex gap-2" style="margin-top: var(--space-4)">
-            <button class="btn btn--primary" (click)="saveBudget()">Save Budget</button>
+            <button class="btn btn--primary" (click)="saveBudget()">
+              <svg lucideCheck [size]="14"></svg> Save Budget
+            </button>
             <button class="btn btn--ghost" (click)="editing.set(false)">Cancel</button>
           </div>
         </div>
@@ -74,7 +86,9 @@ import { format } from 'date-fns';
           @for (item of budgetVariance(); track item.categoryId) {
             <div class="budget-item">
               <div class="budget-item__top">
-                <span class="budget-item__cat">{{ getCatIcon(item.categoryId) }} {{ getCatName(item.categoryId) }}</span>
+                <span class="budget-item__cat">
+                  <lily-icon [name]="getCatIcon(item.categoryId)" [size]="14" /> {{ getCatName(item.categoryId) }}
+                </span>
                 <span class="text-xs" [class.text-expense]="item.percentage > 100" [class.text-income]="item.percentage <= 80">
                   {{ item.actual | currencyDisplay }} / {{ item.budgeted | currencyDisplay }}
                 </span>
@@ -93,7 +107,7 @@ import { format } from 'date-fns';
         </div>
       } @else {
         <div class="empty-state">
-          <span class="empty-state__icon">🎯</span>
+          <span class="empty-state__icon"><svg lucideTarget [size]="40" style="opacity: 0.5"></svg></span>
           <p class="empty-state__title">No budget set for this month</p>
           <p class="empty-state__description">Set a budget to track your spending</p>
           <button class="btn btn--primary" (click)="editing.set(true)">Create Budget</button>
@@ -111,11 +125,11 @@ import { format } from 'date-fns';
     .amount-input { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-lg); font-weight: var(--fw-semibold); }
     .budget-form__cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--space-3); }
     .budget-cat-row { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-2); border-radius: var(--radius-md); background: var(--color-bg-input); }
-    .budget-cat-row__label { font-size: var(--fs-sm); font-weight: var(--fw-medium); white-space: nowrap; }
+    .budget-cat-row__label { font-size: var(--fs-sm); font-weight: var(--fw-medium); white-space: nowrap; display: inline-flex; align-items: center; gap: var(--space-2); }
     .budget-overview { display: flex; flex-direction: column; gap: var(--space-5); }
     .budget-item { display: flex; flex-direction: column; gap: var(--space-2); }
     .budget-item__top { display: flex; justify-content: space-between; align-items: center; }
-    .budget-item__cat { font-size: var(--fs-sm); font-weight: var(--fw-medium); }
+    .budget-item__cat { font-size: var(--fs-sm); font-weight: var(--fw-medium); display: inline-flex; align-items: center; gap: var(--space-2); }
   `],
 })
 export class BudgetsComponent {
@@ -140,7 +154,7 @@ export class BudgetsComponent {
 
   expenseCategories = computed(() => this.store.categories().filter(c => c.type === 'expense'));
 
-  getCatIcon(id: string): string { return this.store.categoryMap().get(id)?.icon || '📦'; }
+  getCatIcon(id: string): string { return this.store.categoryMap().get(id)?.icon || 'package'; }
   getCatName(id: string): string { return this.store.categoryMap().get(id)?.name || 'Other'; }
 
   saveBudget(): void {

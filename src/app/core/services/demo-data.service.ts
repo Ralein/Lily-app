@@ -62,12 +62,12 @@ export class DemoDataService {
     // Set a sample goal
     this.store.addGoal({
       id: crypto.randomUUID(),
-      name: 'Japan Trip ✈️',
+      name: 'Japan Trip',
       targetAmount: 200000,
       currentAmount: 45000,
       deadline: format(subMonths(today, -8), 'yyyy-MM-dd'),
       color: '#8b5cf6',
-      icon: '✈️',
+      icon: 'plane',
       createdAt: format(subMonths(today, 2), 'yyyy-MM-dd'),
       contributions: [
         { id: crypto.randomUUID(), amount: 25000, date: format(subMonths(today, 2), 'yyyy-MM-dd') },

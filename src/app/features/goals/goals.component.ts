@@ -5,12 +5,23 @@ import { ToastService } from '../../core/services/toast.service';
 import { ConfettiService } from '../../core/services/confetti.service';
 import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
 import { SavingsGoal } from '../../core/models/goal.model';
-import { format, differenceInDays, parseISO, addDays } from 'date-fns';
+import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
+import { differenceInDays, parseISO } from 'date-fns';
+import {
+  LucideTrash2, LucidePlus, LucideTrophy,
+  LucidePlane, LucideHouse, LucideCar, LucideGraduationCap,
+  LucideTarget,
+} from '@lucide/angular';
 
 @Component({
   selector: 'lily-goals',
   standalone: true,
-  imports: [FormsModule, CurrencyDisplayPipe],
+  imports: [
+    FormsModule, CurrencyDisplayPipe, LilyIconComponent,
+    LucideTrash2, LucidePlus, LucideTrophy,
+    LucidePlane, LucideHouse, LucideCar, LucideGraduationCap,
+    LucideTarget,
+  ],
   template: `
     <div class="page-header">
       <h1 class="page-header__title">Savings Goals</h1>
@@ -22,12 +33,16 @@ import { format, differenceInDays, parseISO, addDays } from 'date-fns';
       @for (goal of store.goals(); track goal.id) {
         <div class="lily-card goal-card animate-fade-in-up">
           <div class="goal-card__header">
-            <div class="goal-card__icon" [style.background]="goal.color + '22'">{{ goal.icon }}</div>
+            <div class="goal-card__icon" [style.background]="goal.color + '22'" [style.color]="goal.color">
+              <lily-icon [name]="goal.icon" [size]="22" />
+            </div>
             <div class="goal-card__info">
               <h3 class="goal-card__name">{{ goal.name }}</h3>
               <span class="text-xs text-tertiary">{{ daysLeft(goal) }} days left</span>
             </div>
-            <button class="btn btn--ghost btn--sm" (click)="deleteGoal(goal.id)">🗑️</button>
+            <button class="btn btn--ghost btn--sm" (click)="deleteGoal(goal.id)">
+              <svg lucideTrash2 [size]="14"></svg>
+            </button>
           </div>
 
           <div class="goal-card__progress">
@@ -47,12 +62,14 @@ import { format, differenceInDays, parseISO, addDays } from 'date-fns';
           <!-- Contribute -->
           <div class="goal-card__contribute">
             <input type="number" class="input input--sm" [(ngModel)]="contributeAmounts[goal.id]" placeholder="Amount" style="flex: 1; max-width: 120px" min="0">
-            <button class="btn btn--primary btn--sm" (click)="contribute(goal)">+ Add</button>
+            <button class="btn btn--primary btn--sm" (click)="contribute(goal)">
+              <svg lucidePlus [size]="14"></svg> Add
+            </button>
           </div>
         </div>
       } @empty {
         <div class="empty-state" style="grid-column: 1 / -1">
-          <span class="empty-state__icon">🏆</span>
+          <span class="empty-state__icon"><svg lucideTrophy [size]="40" style="opacity: 0.5"></svg></span>
           <p class="empty-state__title">No goals yet</p>
           <p class="empty-state__description">Set a savings goal and start building towards it</p>
         </div>
@@ -62,7 +79,7 @@ import { format, differenceInDays, parseISO, addDays } from 'date-fns';
       <div class="lily-card goal-card goal-card--add animate-fade-in-up" (click)="showAddForm.set(!showAddForm())">
         @if (!showAddForm()) {
           <div class="goal-card--add__placeholder">
-            <span class="text-3xl">+</span>
+            <svg lucidePlus [size]="28"></svg>
             <span class="text-sm text-tertiary">New Goal</span>
           </div>
         }
@@ -74,7 +91,7 @@ import { format, differenceInDays, parseISO, addDays } from 'date-fns';
       <div class="lily-card animate-fade-in-up" style="margin-top: var(--space-4)">
         <h3 class="lily-card__title" style="margin-bottom: var(--space-4)">Create New Goal</h3>
         <div class="goal-form">
-          <input type="text" class="input" [(ngModel)]="newGoal.name" placeholder="Goal name (e.g. Japan Trip ✈️)">
+          <input type="text" class="input" [(ngModel)]="newGoal.name" placeholder="Goal name (e.g. Japan Trip)">
           <div class="flex gap-3 flex-wrap">
             <div class="flex flex-col gap-1" style="flex: 1">
               <label class="filter-label">Target Amount</label>
@@ -96,13 +113,17 @@ import { format, differenceInDays, parseISO, addDays } from 'date-fns';
           <div class="flex flex-col gap-1">
             <label class="filter-label">Icon</label>
             <div class="flex gap-2 flex-wrap">
-              @for (icon of goalIcons; track icon) {
-                <button class="pill" [class.active]="newGoal.icon === icon" (click)="newGoal.icon = icon">{{ icon }}</button>
+              @for (icon of goalIcons; track icon.name) {
+                <button class="pill icon-pill" [class.active]="newGoal.icon === icon.name" (click)="newGoal.icon = icon.name">
+                  <lily-icon [name]="icon.name" [size]="16" /> {{ icon.label }}
+                </button>
               }
             </div>
           </div>
           <div class="flex gap-2">
-            <button class="btn btn--primary" (click)="createGoal()">Create Goal</button>
+            <button class="btn btn--primary" (click)="createGoal()">
+              <svg lucideTarget [size]="14"></svg> Create Goal
+            </button>
             <button class="btn btn--ghost" (click)="showAddForm.set(false)">Cancel</button>
           </div>
         </div>
@@ -113,7 +134,7 @@ import { format, differenceInDays, parseISO, addDays } from 'date-fns';
     .goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4); }
     .goal-card {
       &__header { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
-      &__icon { width: 44px; height: 44px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+      &__icon { width: 44px; height: 44px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
       &__info { flex: 1; }
       &__name { font-size: var(--fs-lg); font-weight: var(--fw-bold); }
       &__progress { margin-bottom: var(--space-3); }
@@ -127,6 +148,7 @@ import { format, differenceInDays, parseISO, addDays } from 'date-fns';
     .color-dot { width: 28px; height: 28px; border-radius: var(--radius-full); border: 2px solid transparent; cursor: pointer; transition: all var(--duration-fast);
       &.active { border-color: white; box-shadow: var(--shadow-glow); transform: scale(1.15); }
     }
+    .icon-pill { display: inline-flex; align-items: center; gap: var(--space-1); }
   `],
 })
 export class GoalsComponent {
@@ -138,9 +160,20 @@ export class GoalsComponent {
   contributeAmounts: Record<string, number> = {};
 
   goalColors = ['#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#0ea5e9', '#f43f5e', '#6366f1', '#14b8a6'];
-  goalIcons = ['✈️', '🏠', '🚗', '📚', '💻', '🎮', '🏋️', '💍', '🎓', '🏖️', '🎸', '📱'];
+  goalIcons = [
+    { name: 'plane', label: 'Travel' },
+    { name: 'house', label: 'Home' },
+    { name: 'car', label: 'Car' },
+    { name: 'graduation-cap', label: 'Education' },
+    { name: 'laptop', label: 'Tech' },
+    { name: 'smartphone', label: 'Phone' },
+    { name: 'target', label: 'Target' },
+    { name: 'trophy', label: 'Prize' },
+    { name: 'gift', label: 'Gift' },
+    { name: 'sparkles', label: 'Other' },
+  ];
 
-  newGoal = { name: '', targetAmount: 0, deadline: '', color: '#8b5cf6', icon: '✈️' };
+  newGoal = { name: '', targetAmount: 0, deadline: '', color: '#8b5cf6', icon: 'plane' };
 
   progressPct(goal: SavingsGoal): number {
     return Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100));
@@ -171,9 +204,9 @@ export class GoalsComponent {
       createdAt: new Date().toISOString(),
       contributions: [],
     });
-    this.toast.success('Goal created! 🎯');
+    this.toast.success('Goal created!');
     this.showAddForm.set(false);
-    this.newGoal = { name: '', targetAmount: 0, deadline: '', color: '#8b5cf6', icon: '✈️' };
+    this.newGoal = { name: '', targetAmount: 0, deadline: '', color: '#8b5cf6', icon: 'plane' };
   }
 
   contribute(goal: SavingsGoal): void {
@@ -184,7 +217,7 @@ export class GoalsComponent {
     const newTotal = goal.currentAmount + amount;
     if (newTotal >= goal.targetAmount) {
       this.confetti.fireworks();
-      this.toast.success('🎉 Goal reached! Congratulations!');
+      this.toast.success('Goal reached! Congratulations!');
     } else {
       this.toast.success(`Added ${this.store.currencySymbol()}${amount.toLocaleString()} to ${goal.name}`);
     }

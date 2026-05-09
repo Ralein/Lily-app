@@ -5,11 +5,21 @@ import { ExportService } from '../../core/services/export.service';
 import { DemoDataService } from '../../core/services/demo-data.service';
 import { ToastService } from '../../core/services/toast.service';
 import { CURRENCIES } from '../../core/models/settings.model';
+import {
+  LucidePalette, LucideCircleDollarSign, LucideDatabase,
+  LucideFlower2, LucideDownload, LucideUpload,
+  LucideTrash2, LucideTriangleAlert, LucideActivity,
+} from '@lucide/angular';
 
 @Component({
   selector: 'lily-settings',
   standalone: true,
-  imports: [FormsModule],
+  imports: [
+    FormsModule,
+    LucidePalette, LucideCircleDollarSign, LucideDatabase,
+    LucideFlower2, LucideDownload, LucideUpload,
+    LucideTrash2, LucideTriangleAlert, LucideActivity,
+  ],
   template: `
     <div class="page-header">
       <h1 class="page-header__title">Settings</h1>
@@ -19,7 +29,9 @@ import { CURRENCIES } from '../../core/models/settings.model';
     <div class="settings-grid">
       <!-- Theme -->
       <div class="lily-card animate-fade-in-up">
-        <h3 class="lily-card__title">🎨 Theme</h3>
+        <h3 class="lily-card__title settings-title">
+          <svg lucidePalette [size]="18"></svg> Theme
+        </h3>
         <div class="theme-options">
           @for (theme of themes; track theme.value) {
             <button class="theme-option" [class.active]="store.settings().theme === theme.value" (click)="setTheme(theme.value)">
@@ -32,7 +44,9 @@ import { CURRENCIES } from '../../core/models/settings.model';
 
       <!-- Currency -->
       <div class="lily-card animate-fade-in-up stagger-1">
-        <h3 class="lily-card__title">💱 Currency</h3>
+        <h3 class="lily-card__title settings-title">
+          <svg lucideCircleDollarSign [size]="18"></svg> Currency
+        </h3>
         <select class="select" [ngModel]="store.settings().currency.code" (ngModelChange)="setCurrency($event)">
           @for (cur of currencies; track cur.code) {
             <option [value]="cur.code">{{ cur.symbol }} {{ cur.code }} — {{ cur.name }}</option>
@@ -42,22 +56,34 @@ import { CURRENCIES } from '../../core/models/settings.model';
 
       <!-- Data Management -->
       <div class="lily-card animate-fade-in-up stagger-2">
-        <h3 class="lily-card__title">💾 Data</h3>
+        <h3 class="lily-card__title settings-title">
+          <svg lucideDatabase [size]="18"></svg> Data
+        </h3>
         <div class="flex flex-col gap-3">
-          <button class="btn btn--secondary" (click)="exportJSON()">📥 Export Backup (JSON)</button>
+          <button class="btn btn--secondary" (click)="exportJSON()">
+            <svg lucideDownload [size]="14"></svg> Export Backup (JSON)
+          </button>
           <div class="file-upload">
-            <label class="btn btn--secondary" for="import-file">📤 Import Backup</label>
+            <label class="btn btn--secondary" for="import-file">
+              <svg lucideUpload [size]="14"></svg> Import Backup
+            </label>
             <input type="file" id="import-file" accept=".json" (change)="importJSON($event)" style="display: none">
           </div>
-          <button class="btn btn--secondary" (click)="loadDemoData()">🎭 Load Demo Data</button>
+          <button class="btn btn--secondary" (click)="loadDemoData()">
+            <svg lucideActivity [size]="14"></svg> Load Demo Data
+          </button>
           <div class="divider"></div>
-          <button class="btn btn--danger" (click)="confirmReset()">🗑️ Reset All Data</button>
+          <button class="btn btn--danger" (click)="confirmReset()">
+            <svg lucideTrash2 [size]="14"></svg> Reset All Data
+          </button>
         </div>
       </div>
 
       <!-- About -->
       <div class="lily-card animate-fade-in-up stagger-3">
-        <h3 class="lily-card__title">🌸 About Lily</h3>
+        <h3 class="lily-card__title settings-title">
+          <svg lucideFlower2 [size]="18" style="color: var(--color-violet)"></svg> About Lily
+        </h3>
         <div class="about-info">
           <p class="text-sm text-secondary">Lily v1.0.0</p>
           <p class="text-sm text-tertiary">A premium personal finance tracker built with Angular 20, Chart.js, and GSAP.</p>
@@ -72,7 +98,9 @@ import { CURRENCIES } from '../../core/models/settings.model';
     @if (showResetConfirm()) {
       <div class="drawer-overlay" (click)="showResetConfirm.set(false)"></div>
       <div class="modal animate-fade-in-up">
-        <h3 class="text-lg font-bold" style="margin-bottom: var(--space-3)">⚠️ Reset All Data?</h3>
+        <h3 class="modal-title">
+          <svg lucideTriangleAlert [size]="20" style="color: var(--color-amber)"></svg> Reset All Data?
+        </h3>
         <p class="text-sm text-secondary" style="margin-bottom: var(--space-4)">This will permanently delete all transactions, budgets, goals, and settings. This cannot be undone.</p>
         <div class="flex gap-2">
           <button class="btn btn--danger" (click)="resetAll()">Yes, Delete Everything</button>
@@ -83,6 +111,7 @@ import { CURRENCIES } from '../../core/models/settings.model';
   `,
   styles: [`
     .settings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: var(--space-4); }
+    .settings-title { display: flex; align-items: center; gap: var(--space-2); }
     .theme-options { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-3); }
     .theme-option {
       display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-3);
@@ -98,6 +127,7 @@ import { CURRENCIES } from '../../core/models/settings.model';
       background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: var(--radius-2xl);
       padding: var(--space-6); max-width: 420px; width: 90%;
     }
+    .modal-title { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-lg); font-weight: var(--fw-bold); margin-bottom: var(--space-3); }
     .drawer-overlay { position: fixed; inset: 0; background: var(--color-bg-overlay); z-index: var(--z-drawer); }
   `],
 })
@@ -147,7 +177,7 @@ export class SettingsComponent {
 
   loadDemoData(): void {
     this.demoData.generateDemoData();
-    this.toast.success('Demo data loaded! 🎭');
+    this.toast.success('Demo data loaded!');
   }
 
   confirmReset(): void { this.showResetConfirm.set(true); }

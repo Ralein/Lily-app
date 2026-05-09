@@ -6,12 +6,20 @@ import { ToastService } from '../../core/services/toast.service';
 import { Transaction, TransactionFilter } from '../../core/models/transaction.model';
 import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
 import { RelativeDatePipe } from '../../shared/pipes/relative-date.pipe';
-import { format } from 'date-fns';
+import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
+import {
+  LucideSearch, LucideFilter, LucideDownload, LucideTrash2,
+  LucideCheck, LucideReceipt,
+} from '@lucide/angular';
 
 @Component({
   selector: 'lily-transactions',
   standalone: true,
-  imports: [FormsModule, CurrencyDisplayPipe, RelativeDatePipe],
+  imports: [
+    FormsModule, CurrencyDisplayPipe, RelativeDatePipe, LilyIconComponent,
+    LucideSearch, LucideFilter, LucideDownload, LucideTrash2,
+    LucideCheck, LucideReceipt,
+  ],
   template: `
     <div class="page-header">
       <h1 class="page-header__title">Transactions</h1>
@@ -21,14 +29,16 @@ import { format } from 'date-fns';
     <!-- Search & Actions Bar -->
     <div class="txn-toolbar">
       <div class="txn-search">
-        <span class="txn-search__icon">🔍</span>
+        <svg lucideSearch [size]="16" class="txn-search__icon"></svg>
         <input type="text" class="txn-search__input" placeholder="Search transactions..." [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()">
       </div>
       <div class="txn-actions">
         <button class="btn btn--secondary btn--sm" (click)="showFilters.set(!showFilters())">
-          🔽 Filters {{ activeFilterCount() > 0 ? '(' + activeFilterCount() + ')' : '' }}
+          <svg lucideFilter [size]="14"></svg> Filters {{ activeFilterCount() > 0 ? '(' + activeFilterCount() + ')' : '' }}
         </button>
-        <button class="btn btn--secondary btn--sm" (click)="exportCSV()">📥 Export</button>
+        <button class="btn btn--secondary btn--sm" (click)="exportCSV()">
+          <svg lucideDownload [size]="14"></svg> Export
+        </button>
       </div>
     </div>
 
@@ -63,7 +73,9 @@ import { format } from 'date-fns';
             <label class="filter-label">Categories</label>
             <div class="flex flex-wrap gap-2">
               @for (cat of store.categories(); track cat.id) {
-                <button class="pill" [class.active]="isCategorySelected(cat.id)" (click)="toggleCategory(cat.id)">{{ cat.icon }} {{ cat.name }}</button>
+                <button class="pill" [class.active]="isCategorySelected(cat.id)" (click)="toggleCategory(cat.id)">
+                  <lily-icon [name]="cat.icon" [size]="14" /> {{ cat.name }}
+                </button>
               }
             </div>
           </div>
@@ -76,8 +88,10 @@ import { format } from 'date-fns';
     @if (selectedIds().size > 0) {
       <div class="bulk-bar animate-slide-up">
         <span>{{ selectedIds().size }} selected</span>
-        <button class="btn btn--danger btn--sm" (click)="bulkDelete()">🗑️ Delete</button>
-        <button class="btn btn--secondary btn--sm" (click)="selectedIds.set(new Set())">Cancel</button>
+        <button class="btn btn--danger btn--sm" (click)="bulkDelete()">
+          <svg lucideTrash2 [size]="14"></svg> Delete
+        </button>
+        <button class="btn btn--secondary btn--sm" (click)="clearSelection()">Cancel</button>
       </div>
     }
 
@@ -87,7 +101,9 @@ import { format } from 'date-fns';
         <div class="txn-card" [class.txn-card--selected]="selectedIds().has(txn.id)" [class.txn-card--editing]="editingId() === txn.id">
           <div class="txn-card__main" (click)="toggleEdit(txn.id)">
             <input type="checkbox" class="txn-card__check" [checked]="selectedIds().has(txn.id)" (click)="toggleSelect($event, txn.id)" (change)="$event.stopPropagation()">
-            <div class="txn-card__icon" [style.background]="getCatColor(txn.categoryId) + '22'">{{ getCatIcon(txn.categoryId) }}</div>
+            <div class="txn-card__icon" [style.background]="getCatColor(txn.categoryId) + '22'" [style.color]="getCatColor(txn.categoryId)">
+              <lily-icon [name]="getCatIcon(txn.categoryId)" [size]="18" />
+            </div>
             <div class="txn-card__info">
               <span class="txn-card__category">{{ getCatName(txn.categoryId) }}</span>
               <span class="txn-card__note">{{ txn.note || '—' }} · {{ txn.paymentMethod }}</span>
@@ -107,12 +123,16 @@ import { format } from 'date-fns';
                 <input type="number" class="input" style="max-width: 140px" [ngModel]="txn.amount" (ngModelChange)="editAmount = $event" placeholder="Amount">
                 <input type="text" class="input" style="flex: 1" [ngModel]="txn.note" (ngModelChange)="editNote = $event" placeholder="Note">
                 <select class="select" style="max-width: 160px" [ngModel]="txn.categoryId" (ngModelChange)="editCategory = $event">
-                  @for (cat of store.categories(); track cat.id) { <option [value]="cat.id">{{ cat.icon }} {{ cat.name }}</option> }
+                  @for (cat of store.categories(); track cat.id) { <option [value]="cat.id">{{ cat.name }}</option> }
                 </select>
               </div>
               <div class="flex gap-2" style="margin-top: var(--space-3)">
-                <button class="btn btn--primary btn--sm" (click)="saveEdit(txn)">Save</button>
-                <button class="btn btn--danger btn--sm" (click)="store.deleteTransaction(txn.id); toast.success('Deleted')">Delete</button>
+                <button class="btn btn--primary btn--sm" (click)="saveEdit(txn)">
+                  <svg lucideCheck [size]="14"></svg> Save
+                </button>
+                <button class="btn btn--danger btn--sm" (click)="store.deleteTransaction(txn.id); toast.success('Deleted')">
+                  <svg lucideTrash2 [size]="14"></svg> Delete
+                </button>
                 <button class="btn btn--ghost btn--sm" (click)="editingId.set(null)">Cancel</button>
               </div>
             </div>
@@ -120,7 +140,7 @@ import { format } from 'date-fns';
         </div>
       } @empty {
         <div class="empty-state">
-          <span class="empty-state__icon">📝</span>
+          <span class="empty-state__icon"><svg lucideReceipt [size]="40" style="opacity: 0.5"></svg></span>
           <p class="empty-state__title">No transactions found</p>
           <p class="empty-state__description">Try adjusting your filters or add a new transaction</p>
         </div>
@@ -130,7 +150,7 @@ import { format } from 'date-fns';
   styles: [`
     .txn-toolbar { display: flex; gap: var(--space-3); margin-bottom: var(--space-4); flex-wrap: wrap; align-items: center; }
     .txn-search { display: flex; align-items: center; gap: var(--space-2); flex: 1; min-width: 200px; background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 0 var(--space-3); }
-    .txn-search__icon { flex-shrink: 0; }
+    .txn-search__icon { flex-shrink: 0; color: var(--color-text-muted); }
     .txn-search__input { flex: 1; border: none; background: transparent; padding: var(--space-3) 0; color: var(--color-text-primary); outline: none; font-size: var(--fs-base); &::placeholder { color: var(--color-text-muted); } }
     .txn-actions { display: flex; gap: var(--space-2); }
     .filter-panel { margin-bottom: var(--space-4); }
@@ -146,7 +166,7 @@ import { format } from 'date-fns';
     }
     .txn-card__main { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); cursor: pointer; }
     .txn-card__check { flex-shrink: 0; accent-color: var(--color-violet); }
-    .txn-card__icon { width: 36px; height: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .txn-card__icon { width: 36px; height: 36px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .txn-card__info { flex: 1; min-width: 0; }
     .txn-card__category { display: block; font-size: var(--fs-sm); font-weight: var(--fw-medium); }
     .txn-card__note { display: block; font-size: var(--fs-xs); color: var(--color-text-tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -205,6 +225,8 @@ export class TransactionsComponent {
 
   clearFilters(): void { this.filter.set({ sortBy: 'date', sortOrder: 'desc' }); this.searchQuery = ''; }
 
+  clearSelection(): void { this.selectedIds.set(new Set()); }
+
   toggleSelect(e: Event, id: string): void {
     e.stopPropagation();
     this.selectedIds.update(set => { const s = new Set(set); s.has(id) ? s.delete(id) : s.add(id); return s; });
@@ -235,7 +257,7 @@ export class TransactionsComponent {
     this.toast.success('CSV exported');
   }
 
-  getCatIcon(id: string): string { return this.store.categoryMap().get(id)?.icon || '📦'; }
+  getCatIcon(id: string): string { return this.store.categoryMap().get(id)?.icon || 'package'; }
   getCatName(id: string): string { return this.store.categoryMap().get(id)?.name || 'Other'; }
   getCatColor(id: string): string { return this.store.categoryMap().get(id)?.color || '#64748b'; }
 }

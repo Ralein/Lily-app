@@ -21,7 +21,6 @@ import { format, parseISO, subMonths } from 'date-fns';
       <div class="insights-panel animate-fade-in-up">
         @for (insight of insights(); track insight.id) {
           <div class="insight-card insight-card--{{ insight.type }}">
-            <span class="insight-card__emoji">{{ insight.emoji }}</span>
             <span class="insight-card__text">{{ insight.text }}</span>
           </div>
         }
@@ -65,7 +64,7 @@ import { format, parseISO, subMonths } from 'date-fns';
       <div class="lily-card chart-card animate-fade-in-up stagger-5">
         <div class="lily-card__header"><span class="lily-card__title">Payment Methods</span></div>
         <div class="chart-wrapper chart-wrapper--donut">
-          <canvas baseChart [data]="paymentPieData()" [options]="donutOptions" type="pie" aria-label="Payment method pie chart"></canvas>
+          <canvas baseChart [data]="paymentPieData()" [options]="donutOptions" type="doughnut" aria-label="Payment method pie chart"></canvas>
         </div>
       </div>
 
@@ -107,7 +106,6 @@ import { format, parseISO, subMonths } from 'date-fns';
       &--info { background: rgba(14, 165, 233, 0.08); border-color: rgba(14, 165, 233, 0.2); }
       &--danger { background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.2); }
     }
-    .insight-card__emoji { font-size: 1.25rem; flex-shrink: 0; }
     .insight-card__text { font-size: var(--fs-sm); color: var(--color-text-secondary); }
     .chart-card { min-height: 300px; }
     .chart-wrapper { height: 250px; position: relative; }
@@ -173,16 +171,16 @@ export class AnalyticsComponent {
     return { labels: data.map(d => d.day), datasets: [{ data: data.map(d => d.average), backgroundColor: data.map(d => d.average === max ? this.chartColors.expense + 'cc' : this.chartColors.violet + '88'), borderRadius: 8 }] };
   });
 
-  paymentPieData = computed<ChartData<'pie'>>(() => {
+  paymentPieData = computed<ChartData<'doughnut'>>(() => {
     const data = this.analytics.getPaymentMethodBreakdown();
     const colors = [this.chartColors.violet, this.chartColors.income, this.chartColors.amber, this.chartColors.sky, this.chartColors.pink];
-    return { labels: data.map(d => d.method.toUpperCase()), datasets: [{ data: data.map(d => d.amount), backgroundColor: colors.slice(0, data.length), borderWidth: 0 }] };
+    return { labels: data.map(d => d.method.toUpperCase()), datasets: [{ data: data.map(d => d.amount), backgroundColor: colors.slice(0, data.length), borderWidth: 0, cutout: '40%' }] };
   });
 
   moodDonutData = computed<ChartData<'doughnut'>>(() => {
     const data = this.analytics.getMoodBreakdown();
     const moodColors: Record<string, string> = { need: this.chartColors.income, want: this.chartColors.amber, impulse: this.chartColors.expense };
-    const moodLabels: Record<string, string> = { need: '🎯 Need', want: '✨ Want', impulse: '⚡ Impulse' };
+    const moodLabels: Record<string, string> = { need: 'Need', want: 'Want', impulse: 'Impulse' };
     return { labels: data.map(d => moodLabels[d.mood] || d.mood), datasets: [{ data: data.map(d => d.amount), backgroundColor: data.map(d => (moodColors[d.mood] || '#64748b') + 'cc'), borderWidth: 0, cutout: '55%' }] };
   });
 }

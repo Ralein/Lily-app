@@ -5,26 +5,36 @@ import { LilyStore } from '../../core/store/lily.store';
 import { DemoDataService } from '../../core/services/demo-data.service';
 import { ConfettiService } from '../../core/services/confetti.service';
 import { CURRENCIES } from '../../core/models/settings.model';
+import {
+  LucideFlower2, LucideCircleDollarSign, LucideBarChart3,
+  LucideActivity, LucideSparkles, LucideArrowRight, LucideArrowLeft,
+} from '@lucide/angular';
 
 @Component({
   selector: 'lily-onboarding',
   standalone: true,
-  imports: [FormsModule],
+  imports: [
+    FormsModule,
+    LucideFlower2, LucideCircleDollarSign, LucideBarChart3,
+    LucideActivity, LucideSparkles, LucideArrowRight, LucideArrowLeft,
+  ],
   template: `
     <div class="onboarding">
       <div class="onboarding__content">
         @switch (step()) {
           @case (0) {
             <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__emoji">🌸</div>
+              <div class="onboarding__icon"><svg lucideFlower2 [size]="56" style="color: var(--color-violet)"></svg></div>
               <h1 class="onboarding__title">Welcome to Lily</h1>
               <p class="onboarding__desc">Your personal finance companion. Track expenses, visualize spending, and build better money habits.</p>
-              <button class="btn btn--primary btn--lg" (click)="step.set(1)">Get Started →</button>
+              <button class="btn btn--primary btn--lg" (click)="step.set(1)">
+                Get Started <svg lucideArrowRight [size]="16"></svg>
+              </button>
             </div>
           }
           @case (1) {
             <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__emoji">💱</div>
+              <div class="onboarding__icon"><svg lucideCircleDollarSign [size]="48" style="color: var(--color-emerald)"></svg></div>
               <h2 class="onboarding__title">Choose Your Currency</h2>
               <p class="onboarding__desc">Select the currency you primarily use.</p>
               <div class="currency-grid">
@@ -36,14 +46,18 @@ import { CURRENCIES } from '../../core/models/settings.model';
                 }
               </div>
               <div class="onboarding__nav">
-                <button class="btn btn--ghost" (click)="step.set(0)">← Back</button>
-                <button class="btn btn--primary" (click)="saveCurrency(); step.set(2)">Next →</button>
+                <button class="btn btn--ghost" (click)="step.set(0)">
+                  <svg lucideArrowLeft [size]="14"></svg> Back
+                </button>
+                <button class="btn btn--primary" (click)="saveCurrency(); step.set(2)">
+                  Next <svg lucideArrowRight [size]="14"></svg>
+                </button>
               </div>
             </div>
           }
           @case (2) {
             <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__emoji">📊</div>
+              <div class="onboarding__icon"><svg lucideBarChart3 [size]="48" style="color: var(--color-violet)"></svg></div>
               <h2 class="onboarding__title">Monthly Budget</h2>
               <p class="onboarding__desc">Set a rough monthly budget target — you can always adjust later.</p>
               <div class="budget-input">
@@ -52,24 +66,28 @@ import { CURRENCIES } from '../../core/models/settings.model';
               </div>
               <p class="text-sm text-tertiary" style="margin-top: var(--space-2)">This is optional — skip if unsure</p>
               <div class="onboarding__nav">
-                <button class="btn btn--ghost" (click)="step.set(1)">← Back</button>
-                <button class="btn btn--primary" (click)="saveBudget(); step.set(3)">Next →</button>
+                <button class="btn btn--ghost" (click)="step.set(1)">
+                  <svg lucideArrowLeft [size]="14"></svg> Back
+                </button>
+                <button class="btn btn--primary" (click)="saveBudget(); step.set(3)">
+                  Next <svg lucideArrowRight [size]="14"></svg>
+                </button>
               </div>
             </div>
           }
           @case (3) {
             <div class="onboarding__step animate-fade-in-up">
-              <div class="onboarding__emoji">🎭</div>
+              <div class="onboarding__icon"><svg lucideActivity [size]="48" style="color: var(--color-amber)"></svg></div>
               <h2 class="onboarding__title">Start with Demo Data?</h2>
               <p class="onboarding__desc">Load 3 months of sample data to explore Lily's features, or start fresh with your own.</p>
               <div class="demo-options">
                 <button class="demo-card" (click)="loadDemo()">
-                  <span class="demo-card__icon">📊</span>
+                  <span class="demo-card__icon"><svg lucideBarChart3 [size]="28"></svg></span>
                   <span class="demo-card__title">Load Demo Data</span>
                   <span class="demo-card__desc">See Lily in action</span>
                 </button>
                 <button class="demo-card" (click)="complete()">
-                  <span class="demo-card__icon">✨</span>
+                  <span class="demo-card__icon"><svg lucideSparkles [size]="28"></svg></span>
                   <span class="demo-card__title">Start Fresh</span>
                   <span class="demo-card__desc">Begin with a clean slate</span>
                 </button>
@@ -94,7 +112,7 @@ import { CURRENCIES } from '../../core/models/settings.model';
     }
     .onboarding__content { max-width: 480px; width: 100%; text-align: center; }
     .onboarding__step { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); }
-    .onboarding__emoji { font-size: 4rem; animation: float 3s ease-in-out infinite; }
+    .onboarding__icon { animation: float 3s ease-in-out infinite; }
     .onboarding__title {
       font-size: var(--fs-3xl); font-weight: var(--fw-bold);
       background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
@@ -128,7 +146,7 @@ import { CURRENCIES } from '../../core/models/settings.model';
       padding: var(--space-6) var(--space-4); border-radius: var(--radius-xl);
       border: 2px solid var(--color-border); cursor: pointer; transition: all var(--duration-fast);
       &:hover { border-color: var(--color-violet); transform: translateY(-2px); background: var(--color-violet-glow); }
-      &__icon { font-size: 2rem; }
+      &__icon { color: var(--color-text-secondary); }
       &__title { font-size: var(--fs-base); font-weight: var(--fw-bold); }
       &__desc { font-size: var(--fs-xs); color: var(--color-text-tertiary); }
     }

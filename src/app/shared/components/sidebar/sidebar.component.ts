@@ -1,28 +1,32 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { LilyStore } from '../../../core/store/lily.store';
+import { LilyIconComponent } from '../../icons/lily-icon.component';
+import {
+  LucideFlower2, LucideChevronLeft, LucideChevronRight,
+} from '@lucide/angular';
 
 @Component({
   selector: 'lily-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, LilyIconComponent, LucideFlower2, LucideChevronLeft, LucideChevronRight],
   template: `
     <nav class="sidebar" [class.collapsed]="collapsed()">
       <div class="sidebar__logo">
-        <span class="sidebar__logo-icon">🌸</span>
+        <svg lucideFlower2 [size]="28" class="sidebar__logo-icon"></svg>
         @if (!collapsed()) { <span class="sidebar__logo-text">Lily</span> }
       </div>
       <div class="sidebar__nav">
         @for (item of navItems; track item.path) {
           <a [routerLink]="item.path" routerLinkActive="active" class="sidebar__link">
-            <span class="sidebar__link-icon">{{ item.icon }}</span>
+            <lily-icon [name]="item.icon" [size]="20" class="sidebar__link-icon" />
             @if (!collapsed()) { <span class="sidebar__link-label">{{ item.label }}</span> }
           </a>
         }
       </div>
       <div class="sidebar__footer">
         <button class="sidebar__toggle" (click)="collapsed.set(!collapsed())">
-          {{ collapsed() ? '→' : '←' }}
+          @if (collapsed()) { <svg lucideChevronRight [size]="18"></svg> }
+          @else { <svg lucideChevronLeft [size]="18"></svg> }
         </button>
       </div>
     </nav>
@@ -37,8 +41,8 @@ import { LilyStore } from '../../../core/store/lily.store';
     .sidebar__logo {
       display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-2);
       margin-bottom: var(--space-8);
+      svg { color: var(--color-violet); }
     }
-    .sidebar__logo-icon { font-size: 1.75rem; }
     .sidebar__logo-text {
       font-size: var(--fs-2xl); font-weight: var(--fw-bold);
       background: var(--gradient-primary); -webkit-background-clip: text;
@@ -56,11 +60,11 @@ import { LilyStore } from '../../../core/store/lily.store';
         .sidebar__link-icon { transform: scale(1.1); }
       }
     }
-    .sidebar__link-icon { font-size: 1.25rem; flex-shrink: 0; transition: transform var(--duration-fast) var(--ease-spring); }
+    .sidebar__link-icon { flex-shrink: 0; transition: transform var(--duration-fast) var(--ease-spring); }
     .sidebar__footer { padding-top: var(--space-4); border-top: 1px solid var(--color-border); }
     .sidebar__toggle {
       width: 100%; padding: var(--space-2); border-radius: var(--radius-md);
-      color: var(--color-text-tertiary); font-size: var(--fs-base);
+      color: var(--color-text-tertiary); display: flex; align-items: center; justify-content: center;
       &:hover { background: var(--color-bg-input); color: var(--color-text-primary); }
     }
   `],
@@ -69,11 +73,11 @@ export class SidebarComponent {
   collapsed = signal(false);
 
   navItems = [
-    { path: '/dashboard', icon: '📊', label: 'Dashboard' },
-    { path: '/transactions', icon: '💳', label: 'Transactions' },
-    { path: '/analytics', icon: '📈', label: 'Analytics' },
-    { path: '/budgets', icon: '🎯', label: 'Budgets' },
-    { path: '/goals', icon: '🏆', label: 'Goals' },
-    { path: '/settings', icon: '⚙️', label: 'Settings' },
+    { path: '/dashboard', icon: 'layout-dashboard', label: 'Dashboard' },
+    { path: '/transactions', icon: 'credit-card', label: 'Transactions' },
+    { path: '/analytics', icon: 'chart-line', label: 'Analytics' },
+    { path: '/budgets', icon: 'target', label: 'Budgets' },
+    { path: '/goals', icon: 'trophy', label: 'Goals' },
+    { path: '/settings', icon: 'settings', label: 'Settings' },
   ];
 }
