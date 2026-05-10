@@ -8,13 +8,14 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
   template: `
     <nav class="sidebar" [class.collapsed]="collapsed()">
       <div class="sidebar__logo" routerLink="/">
-        <div class="logo-wrapper">
-          <lily-icon name="flower-2" [size]="24" class="sidebar__logo-icon" />
+        <div class="icon-zone">
+          <div class="logo-wrapper">
+            <lily-icon name="flower-2" [size]="24" class="sidebar__logo-icon" />
+          </div>
         </div>
         @if (!collapsed()) { 
           <div class="logo-text-wrapper">
             <span class="sidebar__logo-text">Lily</span> 
-            <span class="sidebar__logo-tag">Fintech</span>
           </div>
         }
       </div>
@@ -22,36 +23,42 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
       <div class="sidebar__nav custom-scrollbar">
         @for (item of navItems; track item.path) {
           <a [routerLink]="item.path" routerLinkActive="active" class="sidebar__link" [title]="collapsed() ? item.label : ''">
-            <div class="link-icon-wrapper">
-              <lily-icon [name]="item.icon" [size]="20" class="sidebar__link-icon" />
-              @if (collapsed() && item.path === '/dashboard') {
-                <span class="sidebar__dot"></span>
-              }
+            <div class="icon-zone">
+              <div class="link-icon-wrapper">
+                <lily-icon [name]="item.icon" [size]="20" class="sidebar__link-icon" />
+                @if (collapsed() && item.path === '/dashboard') {
+                  <span class="sidebar__dot"></span>
+                }
+              </div>
             </div>
             @if (!collapsed()) { 
               <span class="sidebar__link-label">{{ item.label }}</span> 
-            }
-            @if (!collapsed() && item.path === '/dashboard') {
-              <span class="sidebar__badge">New</span>
+              @if (item.path === '/dashboard') {
+                <span class="sidebar__badge">New</span>
+              }
             }
           </a>
         }
       </div>
 
       <div class="sidebar__footer">
-        @if (!collapsed()) {
-          <div class="sidebar__user">
-          <div class="user-avatar">JD</div>
-          <div class="user-info">
-            <span class="user-name">Jane Doe</span>
-            <span class="user-plan">Premium Plan</span>
+        <div class="sidebar__user" [title]="collapsed() ? 'Jane Doe (Premium)' : ''">
+          <div class="icon-zone">
+            <div class="user-avatar">JD</div>
           </div>
+          @if (!collapsed()) {
+            <div class="user-info">
+              <span class="user-name">Jane Doe</span>
+              <span class="user-plan">Premium Plan</span>
+            </div>
+          }
         </div>
-      }
         
         <button class="sidebar__toggle" (click)="collapsed.set(!collapsed())" [title]="collapsed() ? 'Expand' : 'Collapse'">
-          <div class="toggle-icon-wrapper">
-            <lily-icon [name]="collapsed() ? 'chevron-right' : 'chevron-left'" [size]="16" />
+          <div class="icon-zone">
+            <div class="toggle-icon-wrapper">
+              <lily-icon [name]="collapsed() ? 'chevron-right' : 'chevron-left'" [size]="16" />
+            </div>
           </div>
           @if (!collapsed()) {
             <span class="toggle-text">Collapse Menu</span>
@@ -67,31 +74,39 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
       flex-direction: column;
       background: var(--color-bg-secondary);
       border-right: 1px solid var(--color-border);
-      padding: var(--space-6) var(--space-3);
+      padding: var(--space-6) 0;
       transition: width var(--duration-slow) var(--ease-out);
       position: relative;
       z-index: var(--z-sticky);
       
       &.collapsed {
         width: var(--sidebar-collapsed);
-        padding: var(--space-6) var(--space-2);
         
-        .sidebar__logo {
+        .sidebar__logo, .sidebar__link, .sidebar__user, .sidebar__toggle {
           justify-content: center;
           padding: 0;
         }
-        
-        .sidebar__footer {
-          align-items: center;
+
+        .sidebar__link:hover {
+          transform: none;
         }
       }
+    }
+
+    .icon-zone {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
     .sidebar__logo {
       display: flex;
       align-items: center;
       gap: var(--space-3);
-      padding: 0 var(--space-3);
+      padding: 0 var(--space-4);
       margin-bottom: var(--space-10);
       cursor: pointer;
       
@@ -140,16 +155,17 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       overflow-y: auto;
-      padding-right: 4px;
+      padding: 0 var(--space-2);
     }
 
     .sidebar__link {
       display: flex;
       align-items: center;
       gap: var(--space-3);
-      padding: var(--space-3);
+      padding: 0 var(--space-2);
+      height: 48px;
       border-radius: var(--radius-xl);
       color: var(--color-text-secondary);
       transition: all var(--duration-fast) var(--ease-out);
@@ -198,7 +214,7 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
         &::before {
           content: '';
           position: absolute;
-          left: -12px;
+          left: -4px;
           top: 50%;
           transform: translateY(-50%);
           width: 4px;
@@ -224,25 +240,26 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
       color: var(--color-violet-light);
       border: 1px solid var(--color-violet-dark);
       margin-left: auto;
+      margin-right: var(--space-2);
     }
 
     .sidebar__footer {
-      padding-top: var(--space-4);
-      margin-top: var(--space-4);
+      padding: var(--space-4) 0;
+      margin: var(--space-4) var(--space-3) 0;
       border-top: 1px solid var(--color-border);
       display: flex;
       flex-direction: column;
-      gap: var(--space-4);
+      gap: var(--space-2);
     }
 
     .sidebar__user {
       display: flex;
       align-items: center;
       gap: var(--space-3);
-      padding: var(--space-2) var(--space-3);
+      padding: 0 var(--space-1);
+      height: 56px;
       border-radius: var(--radius-xl);
-      background: var(--color-bg-input);
-      border: 1px solid var(--color-border);
+      transition: all var(--duration-fast);
       
       .user-avatar {
         width: 32px;
@@ -281,7 +298,7 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
 
     .sidebar__toggle {
       width: 100%;
-      padding: var(--space-3);
+      height: 48px;
       border-radius: var(--radius-xl);
       color: var(--color-text-tertiary);
       display: flex;
@@ -290,6 +307,7 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
       background: transparent;
       border: 1px solid transparent;
       transition: all var(--duration-fast);
+      padding: 0 var(--space-1);
       
       &:hover {
         background: var(--color-bg-input);
@@ -312,7 +330,7 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
 
     .custom-scrollbar {
       &::-webkit-scrollbar {
-        width: 3px;
+        width: 2px;
       }
       &::-webkit-scrollbar-track {
         background: transparent;
@@ -320,9 +338,6 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
       &::-webkit-scrollbar-thumb {
         background: var(--color-border);
         border-radius: var(--radius-full);
-      }
-      &:hover::-webkit-scrollbar-thumb {
-        background: var(--color-border-hover);
       }
     }
   `],
