@@ -10,7 +10,7 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
       <div class="sidebar__logo" routerLink="/">
         <div class="icon-zone">
           <div class="logo-wrapper">
-            <lily-icon name="flower-2" [size]="24" class="sidebar__logo-icon" />
+            <img src="logo.png" alt="Lily Logo" class="sidebar__logo-image">
           </div>
         </div>
         @if (!collapsed()) { 
@@ -116,11 +116,15 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
         justify-content: center;
         width: 40px;
         height: 40px;
-        background: var(--gradient-primary);
         border-radius: var(--radius-xl);
-        color: white;
-        box-shadow: 0 8px 16px -4px var(--color-violet-glow);
+        overflow: hidden;
         transition: all var(--duration-normal) var(--ease-spring);
+        
+        .sidebar__logo-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
       }
 
       .logo-text-wrapper {
