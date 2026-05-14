@@ -111,17 +111,51 @@ import { format } from 'date-fns';
           </div>
         </div>
 
-        <div class="lily-card glass stat-card stat-card--highlight" anim="slideUp" style="--anim-delay: 400ms">
+        <!-- Financial Health -->
+        <div class="stat-card stat-card--health" anim="slideUp" style="--anim-delay: 300ms">
           <div class="stat-card__header">
-            <div class="stat-card__icon insight"><lily-icon name="lightbulb" [size]="18" /></div>
-            <span class="stat-card__title">Artificial Intelligence</span>
+            <div class="stat-card__icon health"><lily-icon name="heart" [size]="18" /></div>
+            <span class="stat-card__title">Financial Health</span>
           </div>
           <div class="stat-card__body">
-            @if (currentInsight(); as insight) {
-              <p class="insight-preview">{{ insight.text }}</p>
+            @if (healthScore(); as health) {
+              <div class="health-display">
+                <div class="health-main">
+                  <span class="score">{{ health.total }}</span>
+                  <span class="status">{{ health.status }}</span>
+                </div>
+                <div class="health-factors">
+                  @for (factor of health.factors; track factor.label) {
+                    <div class="health-factor" [title]="factor.description">
+                      <div class="factor-bar">
+                        <div class="fill" [style.width.%]="(factor.score / 40) * 100"></div>
+                      </div>
+                      <span class="label">{{ factor.label }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
             } @else {
-              <p class="insight-preview muted">Patterns will emerge as you log activity.</p>
+              <p class="muted">Initializing health metrics...</p>
             }
+          </div>
+        </div>
+
+        <div class="stat-card stat-card--insight-group" anim="slideUp" style="--anim-delay: 400ms">
+          <div class="stat-card__header">
+            <div class="stat-card__icon insight"><lily-icon name="sparkles" [size]="18" /></div>
+            <span class="stat-card__title">Intelligence Engine</span>
+          </div>
+          <div class="stat-card__body">
+            <div class="insight-carousel">
+              @for (insight of insights(); track insight.id) {
+                <div class="insight-item" anim="fadeIn">
+                  <p class="insight-preview">{{ insight.text }}</p>
+                </div>
+              } @empty {
+                <p class="insight-preview muted">Patterns will emerge as you log activity.</p>
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -297,7 +331,57 @@ import { format } from 'date-fns';
         }
       }
       &--highlight { background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, transparent 100%); }
+      &--insight-group {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%);
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        padding: var(--space-6);
+        border-radius: var(--radius-2xl);
+        position: relative;
+        overflow: hidden;
+      }
+      &--health {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(20, 184, 166, 0.05) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+      }
+      .health-display {
+        display: flex; gap: var(--space-6); align-items: center;
+        .health-main {
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          width: 80px; height: 80px; border-radius: 50%; background: rgba(0,0,0,0.2);
+          border: 2px solid var(--color-emerald);
+          .score { font-size: 24px; font-weight: 900; color: white; line-height: 1; }
+          .status { font-size: 10px; font-weight: 800; color: var(--color-emerald); text-transform: uppercase; margin-top: 4px; }
+        }
+        .health-factors {
+          flex: 1; display: flex; flex-direction: column; gap: 8px;
+          .health-factor {
+            display: flex; align-items: center; gap: 12px;
+            .factor-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;
+              .fill { height: 100%; background: var(--color-emerald); border-radius: 2px; }
+            }
+            .label { font-size: 10px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; min-width: 80px; }
+          }
+        }
+      }
       .insight-preview { font-size: var(--fs-sm); line-height: 1.6; color: var(--color-text-secondary); margin: 0; font-weight: 500; }
+      
+      .insight-carousel {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        max-height: 120px;
+        overflow-y: auto;
+        padding-right: 4px;
+        
+        &::-webkit-scrollbar { width: 2px; }
+        &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+      }
+      
+      .insight-item {
+        padding-bottom: var(--space-2);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        &:last-child { border-bottom: none; }
+      }
     }
 
     .content-split { display: grid; grid-template-columns: 1fr 1.4fr; gap: var(--space-6); }
@@ -407,10 +491,8 @@ export class DashboardComponent {
     plugins: { legend: { display: false }, tooltip: { enabled: false } },
   };
 
-  currentInsight = computed(() => {
-    const insights = this.analytics.generateInsights();
-    return insights.length > 0 ? insights[0] : null;
-  });
+  insights = computed(() => this.analytics.generateInsights());
+  healthScore = computed(() => this.analytics.calculateHealthScore());
 
   budgetPulseData = computed(() => {
     const budget = this.store.currentBudget();

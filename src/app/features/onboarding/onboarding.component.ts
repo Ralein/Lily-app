@@ -44,8 +44,8 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
             @case (0) {
               <!-- Welcome -->
               <div class="step-card" anim="slideUp">
-                <div class="step-card__icon welcome-icon">
-                  <lily-icon name="flower-2" [size]="64" />
+                <div class="step-card__logo welcome-logo">
+                  <img src="logo.png" alt="Lily Logo" class="logo-image">
                   <div class="icon-glow"></div>
                 </div>
                 <h1 class="step-card__title">Welcome to <span class="text-gradient">Lily</span></h1>
@@ -380,16 +380,25 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
       
       &--large { max-width: 720px; align-self: center; width: 100%; }
 
-      &__icon.welcome-icon {
+      &__logo.welcome-logo {
         position: relative;
-        margin-bottom: var(--space-6);
-        color: var(--color-violet);
+        margin-bottom: var(--space-8);
+        width: 80px;
+        height: 80px;
+        
+        .logo-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          position: relative;
+          z-index: 1;
+        }
         
         .icon-glow {
           position: absolute;
-          inset: -20px;
+          inset: -30px;
           background: radial-gradient(circle, var(--color-violet-glow) 0%, transparent 70%);
-          filter: blur(20px);
+          filter: blur(30px);
           animation: pulse 4s infinite;
         }
       }
@@ -675,7 +684,7 @@ export class OnboardingComponent {
   complete(): void {
     const sources = this.tempSources().filter(s => s.amount > 0 && s.name.trim());
     sources.forEach(s => this.store.addIncomeSource(s));
-    
+
     this.store.completeOnboarding();
     this.confetti.burst();
     this.router.navigate(['/dashboard']);

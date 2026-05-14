@@ -1,4 +1,5 @@
 import { Component, inject, computed } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { LilyStore } from '../../core/store/lily.store';
 import { AnalyticsService } from '../../core/services/analytics.service';
 import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
@@ -11,7 +12,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
 @Component({
   selector: 'lily-analytics',
   standalone: true,
-  imports: [BaseChartDirective, CurrencyDisplayPipe, LilyIconComponent],
+  imports: [BaseChartDirective, CurrencyDisplayPipe, LilyIconComponent, FormsModule],
   animations: [fadeIn, listAnimation],
   template: `
     <div class="analytics-page">
@@ -127,6 +128,103 @@ import { fadeIn, listAnimation } from '../../shared/animations';
           <div class="chart-container donut">
             <canvas baseChart [data]="moodDonutData()" [options]="donutOptions" type="doughnut"></canvas>
           </div>
+        </div>
+
+        <!-- NEW: Recurring Patterns -->
+        <div class="lily-card chart-card glass-card">
+          <div class="chart-header">
+            <div class="title-group">
+              <h3 class="chart-title">Recurring Bills</h3>
+              <span class="chart-subtitle">Detected payment cycles</span>
+            </div>
+          </div>
+          <div class="patterns-list custom-scrollbar">
+            @for (pat of recurringPatterns(); track pat.note) {
+              <div class="pattern-item">
+                <div class="pattern-item__icon" [style.color]="getCatRawColor(pat.categoryId)">
+                  <lily-icon [name]="getCatIcon(pat.categoryId)" [size]="20" />
+                </div>
+                <div class="pattern-item__content">
+                  <div class="name">{{ pat.note }}</div>
+                  <div class="meta">{{ pat.frequency }} • Next: {{ pat.nextExpected }}</div>
+                </div>
+                <div class="pattern-item__amount">{{ pat.avgAmount | currencyDisplay }}</div>
+              </div>
+            } @empty {
+              <div class="empty-list">No recurring patterns detected yet</div>
+            }
+          </div>
+        </div>
+
+        <!-- NEW: Correlations -->
+        <div class="lily-card chart-card glass-card">
+          <div class="chart-header">
+            <div class="title-group">
+              <h3 class="chart-title">Correlations</h3>
+              <span class="chart-subtitle">Connected spending habits</span>
+            </div>
+          </div>
+          <div class="correlations-list">
+            @for (cor of correlations(); track cor.catA + cor.catB) {
+              <div class="cor-item">
+                <div class="cor-item__cats">
+                  <span class="cat">{{ getCatName(cor.catA) }}</span>
+                  <lily-icon name="arrow-right-left" [size]="12" />
+                  <span class="cat">{{ getCatName(cor.catB) }}</span>
+                </div>
+                <div class="cor-item__val">
+                  <div class="bar" [style.width.%]="Math.abs(cor.correlation) * 100" [class.negative]="cor.correlation < 0"></div>
+                  <span class="label">{{ Math.round(cor.correlation * 100) }}%</span>
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-list">Data needed for category correlation</div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW: What-If Simulation -->
+      <div class="lily-card simulation-card glass-card" [@fadeIn]>
+        <div class="chart-header">
+          <div class="title-group">
+            <h3 class="chart-title">What-If Simulator</h3>
+            <span class="chart-subtitle">Project annual impact of spending changes</span>
+          </div>
+        </div>
+        <div class="sim-grid">
+          <div class="sim-controls">
+            <div class="sim-control">
+              <label>Select Category</label>
+              <div class="glass-select">
+                <select [(ngModel)]="simCatId">
+                  @for (cat of store.categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="sim-control">
+              <label>Reduction Goal: {{ simReduction }}%</label>
+              <input type="range" min="0" max="100" step="5" [(ngModel)]="simReduction">
+            </div>
+          </div>
+          
+          @if (simulation(); as sim) {
+            <div class="sim-results">
+              <div class="sim-stat">
+                <span class="label">Monthly Impact</span>
+                <span class="value success">+{{ (sim.newMonthlySavings - (store.totalIncome() - store.totalExpenses())) | currencyDisplay }}</span>
+              </div>
+              <div class="sim-stat highlight">
+                <span class="label">Annual Potential Savings</span>
+                <span class="value">{{ sim.annualImpact | currencyDisplay }}</span>
+              </div>
+              <div class="sim-desc">
+                Reducing <strong>{{ getCatName(simCatId) }}</strong> spend from {{ sim.currentCategorySpend | currencyDisplay }} to {{ sim.reducedCategorySpend | currencyDisplay }} could increase your annual net worth by {{ sim.annualImpact | currencyDisplay }}.
+              </div>
+            </div>
+          }
         </div>
       </div>
 
@@ -325,6 +423,59 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       gap: var(--space-8); 
       min-height: 400px;
 
+      .patterns-list, .correlations-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .pattern-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-3);
+        background: rgba(255,255,255,0.03);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255,255,255,0.05);
+
+        &__icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); }
+        &__content {
+          flex: 1;
+          .name { font-size: var(--fs-sm); font-weight: 700; color: var(--color-text-primary); }
+          .meta { font-size: 10px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; margin-top: 2px; }
+        }
+        &__amount { font-family: var(--font-mono); font-weight: 700; color: var(--color-text-primary); }
+      }
+
+      .cor-item {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding: var(--space-3);
+        
+        &__cats {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--color-text-secondary);
+          .cat { background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; }
+        }
+        
+        &__val {
+          display: flex;
+          align-items: center;
+          gap: var(--space-4);
+          .bar { height: 4px; border-radius: var(--radius-full); background: var(--color-violet); }
+          .label { font-size: 10px; font-weight: 800; color: var(--color-text-tertiary); min-width: 32px; }
+        }
+      }
+
+      .empty-list { padding: var(--space-10); text-align: center; font-size: var(--fs-sm); color: var(--color-text-muted); opacity: 0.6; }
+
       .chart-header { 
         display: flex; 
         justify-content: space-between;
@@ -386,6 +537,89 @@ import { fadeIn, listAnimation } from '../../shared/animations';
           margin: 0 auto; 
           width: 100%; 
         } 
+      }
+    }
+
+    .simulation-card {
+      padding: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-8);
+      
+      .sim-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-12);
+        align-items: center;
+      }
+      
+      .sim-controls {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-8);
+        
+        .sim-control {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-4);
+          label { font-size: 10px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 1px; }
+          
+          input[type="range"] {
+            width: 100%;
+            accent-color: var(--color-violet);
+          }
+        }
+      }
+      
+      .sim-results {
+        background: rgba(0,0,0,0.2);
+        padding: var(--space-8);
+        border-radius: var(--radius-2xl);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+        border: 1px solid rgba(255,255,255,0.05);
+        
+        .sim-stat {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          .label { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; }
+          .value { font-size: 24px; font-weight: 900; color: var(--color-text-primary); }
+          .value.success { color: var(--color-emerald); }
+          
+          &.highlight {
+            padding: var(--space-4);
+            background: var(--color-violet-glow);
+            border-radius: var(--radius-xl);
+            .value { font-size: 32px; color: var(--color-violet-light); }
+          }
+        }
+        
+        .sim-desc {
+          font-size: var(--fs-sm);
+          line-height: 1.6;
+          color: var(--color-text-secondary);
+          strong { color: var(--color-text-primary); }
+        }
+      }
+    }
+
+    .glass-select {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 0 12px;
+      
+      select {
+        width: 100%;
+        height: 48px;
+        background: transparent;
+        border: none;
+        color: var(--color-text-primary);
+        font-size: 14px;
+        font-weight: 700;
+        outline: none;
       }
     }
 
@@ -465,8 +699,8 @@ import { fadeIn, listAnimation } from '../../shared/animations';
   `],
 })
 export class AnalyticsComponent {
-  private store = inject(LilyStore);
-  private analytics = inject(AnalyticsService);
+  public store = inject(LilyStore);
+  public analytics = inject(AnalyticsService);
 
   insights = computed(() => this.analytics.generateInsights());
   heatmapData = computed(() => this.analytics.getCalendarHeatmapData(4));
@@ -623,4 +857,16 @@ export class AnalyticsComponent {
     const moodLabels: Record<string, string> = { need: 'Need', want: 'Want', impulse: 'Impulse' };
     return { labels: data.map(d => moodLabels[d.mood] || d.mood), datasets: [{ data: data.map(d => d.amount), backgroundColor: data.map(d => (moodColors[d.mood] || '#64748b') + 'cc'), borderWidth: 0, cutout: '55%' }] };
   });
+
+  recurringPatterns = computed(() => this.analytics.detectRecurring());
+  correlations = computed(() => this.analytics.findCorrelatedCategories());
+  
+  simCatId = 'food-dining';
+  simReduction = 20;
+  simulation = computed(() => this.analytics.simulate(this.simCatId, this.simReduction));
+
+  Math = Math;
+  getCatName(id: string) { return this.store.categories().find(c => c.id === id)?.name || id; }
+  getCatIcon(id: string) { return this.store.categories().find(c => c.id === id)?.icon || 'package'; }
+  getCatRawColor(id: string) { return this.store.categories().find(c => c.id === id)?.color || '#64748b'; }
 }

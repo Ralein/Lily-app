@@ -312,39 +312,33 @@ export class LilyStore {
    * Auto-log monthly income transactions for recurring sources.
    * Call on app init — checks if income already logged for current month.
    */
-  autoLogMonthlyIncome(): void {
+  autoLogMonthlyIncome(force = false): void {
     const settings = this._settings();
-    if (!settings.autoLogIncome || !settings.incomeSources?.length) return;
+    if (!settings.autoLogIncome && !force) return;
+    if (!settings.incomeSources?.length) return;
 
-    const month = this.currentMonth();
-    const existingIncome = this._transactions()
-      .filter(t => t.type === 'income' && t.date.startsWith(month));
+    if (this.hasIncomeThisMonth()) return;
 
-    for (const source of settings.incomeSources) {
-      if (!source.isActive || source.frequency === 'one-time') continue;
-
-      // Check if this source already has a transaction this month
-      const alreadyLogged = existingIncome.some(t =>
-        t.note.includes(source.name) || t.categoryId === source.categoryId
-      );
-
-      if (!alreadyLogged) {
-        this.addTransaction({
-          id: crypto.randomUUID(),
-          amount: source.amount,
-          type: 'income',
-          categoryId: source.categoryId,
-          note: source.name,
-          date: `${month}-01T09:00:00.000Z`,
-          tags: ['auto-logged'],
-          isRecurring: true,
-          recurringFrequency: 'monthly',
-          paymentMethod: 'netbanking',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-      }
-    }
+    const monthStr = format(new Date(), 'yyyy-MM-dd');
+    const incomeSources = settings.incomeSources || [];
+    
+    incomeSources.forEach(source => {
+      if (!source.isActive) return;
+      const txn: Transaction = {
+        id: crypto.randomUUID(),
+        amount: source.amount,
+        type: 'income',
+        categoryId: source.categoryId,
+        note: `Automatic: ${source.name}`,
+        date: monthStr,
+        tags: ['auto-logged'],
+        isRecurring: true,
+        paymentMethod: 'other',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      this.addTransaction(txn);
+    });
   }
 
   // ── Settings Actions ──

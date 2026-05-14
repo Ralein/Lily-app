@@ -3,11 +3,24 @@ export interface SavingsGoal {
   name: string;
   targetAmount: number;
   currentAmount: number;
-  deadline: string; // ISO 8601
+  deadline: string; // ISO date
   color: string;
-  icon: string; // emoji
+  icon: string;
   createdAt: string;
-  contributions: GoalContribution[];
+  contributions: { date: string; amount: number }[];
+}
+
+export interface HealthFactor {
+  label: string;
+  score: number;
+  impact: 'high' | 'medium' | 'low';
+  description: string;
+}
+
+export interface HealthScore {
+  total: number;
+  status: 'Excellent' | 'Good' | 'Fair' | 'Poor';
+  factors: HealthFactor[];
 }
 
 export interface GoalContribution {

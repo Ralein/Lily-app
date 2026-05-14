@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { LilyStore } from '../store/lily.store';
 import { Transaction } from '../models/transaction.model';
+import { SavingsGoal, HealthScore, HealthFactor } from '../models/goal.model';
 import { format, subMonths, subDays, parseISO, differenceInDays, getDaysInMonth } from 'date-fns';
 
 export interface BudgetVarianceResult { categoryId: string; budgeted: number; actual: number; variance: number; percentage: number; }
@@ -212,5 +213,66 @@ export class AnalyticsService {
     const sx2 = x.reduce((s, xi) => s + xi * xi, 0); const sy2 = y.reduce((s, yi) => s + yi * yi, 0);
     const d = Math.sqrt((n * sx2 - sx * sx) * (n * sy2 - sy * sy));
     return d === 0 ? 0 : (n * sxy - sx * sy) / d;
+  }
+
+  calculateHealthScore(): HealthScore {
+    const txns = this.store.transactions();
+    if (txns.length === 0) return { total: 0, status: 'Poor', factors: [] };
+
+    const factors: HealthFactor[] = [];
+
+    // 1. Savings Rate Factor (0-30 points)
+    const income = this.store.totalIncome();
+    const expenses = this.store.totalExpenses();
+    const savingsRate = income > 0 ? ((income - expenses) / income) * 100 : 0;
+    const savingsScore = Math.min(30, Math.max(0, (savingsRate / 20) * 30));
+    factors.push({
+      label: 'Savings Rate',
+      score: Math.round(savingsScore),
+      impact: 'high',
+      description: savingsRate > 20 ? 'Excellent savings buffer.' : 'Try to save 20% of income.'
+    });
+
+    // 2. Budget Adherence (0-40 points)
+    const budget = this.store.currentBudget();
+    let budgetScore = 0;
+    if (budget) {
+      const variance = this.budgetVariance(format(new Date(), 'yyyy-MM'));
+      const overBudgetCount = variance.filter(v => v.variance < 0).length;
+      budgetScore = Math.max(0, 40 - (overBudgetCount * 10));
+      factors.push({
+        label: 'Budget Discipline',
+        score: Math.round(budgetScore),
+        impact: 'high',
+        description: overBudgetCount === 0 ? 'Perfect budget adherence.' : `Over budget in ${overBudgetCount} categories.`
+      });
+    } else {
+      factors.push({ label: 'Budget Setup', score: 0, impact: 'high', description: 'Create a budget to track discipline.' });
+    }
+
+    // 3. Goal Momentum (0-30 points)
+    const goals = this.store.goals();
+    let goalScore = 0;
+    if (goals.length > 0) {
+      const avgProgress = goals.reduce((acc, g) => acc + (g.currentAmount / g.targetAmount), 0) / goals.length;
+      goalScore = Math.min(30, avgProgress * 30);
+      factors.push({
+        label: 'Goal Momentum',
+        score: Math.round(goalScore),
+        impact: 'medium',
+        description: 'Consistent progress towards milestones.'
+      });
+    } else {
+      factors.push({ label: 'Future Planning', score: 0, impact: 'medium', description: 'Set goals to build momentum.' });
+    }
+
+    const total = Math.round(savingsScore + budgetScore + goalScore);
+    
+    let status: 'Excellent' | 'Good' | 'Fair' | 'Poor' = 'Poor';
+    if (total > 80) status = 'Excellent';
+    else if (total > 60) status = 'Good';
+    else if (total > 40) status = 'Fair';
+
+    return { total, status, factors };
   }
 }
