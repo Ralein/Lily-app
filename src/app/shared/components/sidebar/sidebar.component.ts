@@ -94,8 +94,8 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
     }
 
     .icon-zone {
-      width: 100px;
-      height: 100px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -114,8 +114,8 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 40px;
-        height: 40px;
+        width: 60px;
+        height: 60px;
         border-radius: var(--radius-xl);
         overflow: hidden;
         transition: all var(--duration-normal) var(--ease-spring);

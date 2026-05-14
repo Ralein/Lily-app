@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { LilyStore } from '../../core/store/lily.store';
 import { ExportService } from '../../core/services/export.service';
 import { DemoDataService } from '../../core/services/demo-data.service';
@@ -260,7 +261,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
               <div class="danger-zone">
                 <button class="side-btn danger" (click)="confirmReset()">
                   <lily-icon name="trash-2" [size]="16" />
-                  <span>Purge Intelligence</span>
+                  <span>Delete All Data</span>
                 </button>
               </div>
             </div>
@@ -279,7 +280,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
           </div>
           <p class="modal-desc">This operation will permanently eliminate all financial records, goals, and customized logic. This state transition is irreversible.</p>
           <div class="modal-actions">
-            <button class="btn-purge" (click)="resetAll()">Eliminate All Records</button>
+            <button class="btn-purge" (click)="resetAll()">Purge All Data</button>
             <button class="btn-abort" (click)="showResetConfirm.set(false)">Abort Operation</button>
           </div>
         </div>
@@ -470,6 +471,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 })
 export class SettingsComponent {
   store = inject(LilyStore);
+  private router = inject(Router);
   private exportService = inject(ExportService);
   private demoData = inject(DemoDataService);
   private toast = inject(ToastService);
@@ -575,5 +577,6 @@ export class SettingsComponent {
     this.store.resetAll();
     this.showResetConfirm.set(false);
     this.toast.success('Global purge complete');
+    this.router.navigate(['/onboarding']);
   }
 }
