@@ -17,21 +17,22 @@ import { fadeIn, listAnimation } from '../../shared/animations';
   template: `
     <div class="analytics-page">
       <header class="page-header" [@fadeIn]>
-        <div class="page-header__content">
+        <div class="header-content">
           <h1 class="page-header__title">Financial Analytics</h1>
           <p class="page-header__subtitle">Deep dive into your spending habits</p>
         </div>
         <div class="header-actions">
-          <div class="pulse-badge">
-            <span class="pulse-ring"></span>
-            <span class="badge-text">Real-time Insights</span>
+          <div class="status-pill">
+            <span class="status-pill__dot"></span>
+            <span class="status-pill__text">Financial Insights Live</span>
           </div>
+        </div>
+      </header>
 
-
-      <!-- Insights Carousel -->
+      <!-- Insights Section -->
       @if (insights().length > 0) {
-        <div class="insights-container" [@listAnimation]="insights().length">
-          <div class="insights-scroll">
+        <div class="insights-section" [@listAnimation]="insights().length">
+          <div class="insights-scroll custom-scrollbar">
             @for (insight of insights(); track insight.id) {
               <div class="insight-pill insight-pill--{{ insight.type }}">
                 <div class="insight-pill__icon">
@@ -46,7 +47,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         </div>
       }
 
-      <div class="analytics-grid" [@listAnimation]="6">
+      <div class="grid grid--4 analytics-grid" [@listAnimation]="6">
         <!-- Monthly Performance -->
         <div class="lily-card lily-card--glass chart-card span-2">
           <div class="chart-header">
@@ -415,17 +416,17 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       100% { transform: scale(2);   opacity: 0;   }
     }
 
-    /* ─── Insights Carousel ─── */
-    .insights-container {
-      margin-bottom: var(--space-2);
+    /* ─── Insights Section ─── */
+    .insights-section {
+      margin-bottom: var(--space-4);
 
       .insights-scroll {
         display: flex;
         gap: var(--space-4);
         overflow-x: auto;
-        padding: var(--space-2) 0;
-        scrollbar-width: none;
-        &::-webkit-scrollbar { display: none; }
+        padding: var(--space-1) 0 var(--space-3);
+        
+        &::-webkit-scrollbar { height: 4px; }
       }
     }
 
@@ -576,11 +577,12 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+        margin-bottom: var(--space-4);
 
         .title-group {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 2px;
         }
       }
 
