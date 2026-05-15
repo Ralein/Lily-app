@@ -183,47 +183,57 @@ import { fadeIn, listAnimation } from '../../shared/animations';
           </div>
         </div>
 
-        <!-- What-If Simulation -->
-        <div class="lily-card lily-card--glass chart-card span-4" [@fadeIn]>
+        <!-- What-If Simulator -->
+        <div class="lily-card lily-card--glass sim-card span-4">
           <div class="chart-header">
             <div class="title-group">
               <h3 class="chart-title">What-If Simulator</h3>
-              <span class="chart-subtitle">Project annual impact of spending changes</span>
+              <p class="chart-subtitle">Project annual impact of spending changes</p>
             </div>
           </div>
+          
           <div class="sim-grid">
             <div class="sim-controls">
-              <div class="sim-control">
-                <label>Select Category</label>
-                <div class="glass-select">
-                  <select [(ngModel)]="simCatId">
-                    @for (cat of store.categories(); track cat.id) {
-                      <option [value]="cat.id">{{ cat.name }}</option>
-                    }
-                  </select>
+              <div class="form-group">
+                <label class="form-label">Select Category</label>
+                <select class="select" [(ngModel)]="simCatId">
+                  @for (cat of store.categories(); track cat.id) {
+                    <option [value]="cat.id">{{ cat.name }}</option>
+                  }
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">Reduction Goal: {{ simReduction }}%</label>
+                <input type="range" class="range-input" min="0" max="100" step="5" [(ngModel)]="simReduction">
+              </div>
+
+              @if (simulation(); as sim) {
+                <div class="sim-results">
+                  <div class="sim-stat">
+                    <span class="label">Monthly Impact</span>
+                    <span class="value success">+{{ (sim.newMonthlySavings - (store.totalIncome() - store.totalExpenses())) | currencyDisplay }}</span>
+                  </div>
+                  <div class="sim-stat highlight">
+                    <span class="label">Annual Potential Savings</span>
+                    <span class="value">{{ sim.annualImpact | currencyDisplay }}</span>
+                  </div>
+                  <p class="sim-desc">
+                    Reducing <strong>{{ getCatName(simCatId) }}</strong> spend from {{ sim.currentCategorySpend | currencyDisplay }} to {{ sim.reducedCategorySpend | currencyDisplay }} could increase your annual net worth by {{ sim.annualImpact | currencyDisplay }}.
+                  </p>
                 </div>
-              </div>
-              <div class="sim-control">
-                <label>Reduction Goal: {{ simReduction }}%</label>
-                <input type="range" min="0" max="100" step="5" [(ngModel)]="simReduction">
-              </div>
+              }
             </div>
 
-            @if (simulation(); as sim) {
-              <div class="sim-results">
-                <div class="sim-stat">
-                  <span class="label">Monthly Impact</span>
-                  <span class="value success">+{{ (sim.newMonthlySavings - (store.totalIncome() - store.totalExpenses())) | currencyDisplay }}</span>
-                </div>
-                <div class="sim-stat highlight">
-                  <span class="label">Annual Potential Savings</span>
-                  <span class="value">{{ sim.annualImpact | currencyDisplay }}</span>
-                </div>
-                <div class="sim-desc">
-                  Reducing <strong>{{ getCatName(simCatId) }}</strong> spend from {{ sim.currentCategorySpend | currencyDisplay }} to {{ sim.reducedCategorySpend | currencyDisplay }} could increase your annual net worth by {{ sim.annualImpact | currencyDisplay }}.
-                </div>
+            <div class="sim-preview-card">
+              <div class="preview-icon">
+                <lily-icon [name]="getCatIcon(simCatId)" [size]="48" />
               </div>
-            }
+              <div class="preview-content">
+                <span class="preview-label">Optimizing</span>
+                <h4 class="preview-title">{{ getCatName(simCatId) }}</h4>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -290,15 +300,15 @@ import { fadeIn, listAnimation } from '../../shared/animations';
             <div class="heatmap-footer">
               <a href="javascript:void(0)" class="help-link">Learn how we count activities</a>
               <div class="heatmap-legend">
-                <span class="label">Less</span>
+                <span class="legend-label">Less</span>
                 <div class="legend-cells">
-                  <div class="heatmap__cell heatmap__cell--0"></div>
-                  <div class="heatmap__cell heatmap__cell--1"></div>
-                  <div class="heatmap__cell heatmap__cell--2"></div>
-                  <div class="heatmap__cell heatmap__cell--3"></div>
-                  <div class="heatmap__cell heatmap__cell--4"></div>
+                  <div class="legend-cell level-0"></div>
+                  <div class="legend-cell level-1"></div>
+                  <div class="legend-cell level-2"></div>
+                  <div class="legend-cell level-3"></div>
+                  <div class="legend-cell level-4"></div>
                 </div>
-                <span class="label">More</span>
+                <span class="legend-label">More</span>
               </div>
             </div>
           </div>
@@ -480,7 +490,6 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     /* ─── Analytics Grid ─── */
-    /* ─── Analytics Grid ─── */
     .analytics-grid {
       padding-bottom: var(--space-8);
 
@@ -635,7 +644,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     /* ─── Simulation Card ─── */
     .sim-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1.2fr;
       gap: var(--space-12);
       align-items: center;
 
@@ -645,67 +654,105 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       }
     }
 
-    .sim-controls {
+    .form-group {
       display: flex;
       flex-direction: column;
-      gap: var(--space-8);
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
 
-      .sim-control {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-4);
-
-        label {
-          font-size: 10px;
-          font-weight: 800;
-          color: var(--color-text-tertiary);
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-
-        input[type="range"] {
-          width: 100%;
-          accent-color: var(--color-violet);
-        }
+      .form-label {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--color-text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
     }
 
+    .range-input {
+      width: 100%;
+      height: 6px;
+      background: var(--color-bg-input);
+      border-radius: var(--radius-full);
+      appearance: none;
+      outline: none;
+
+      &::-webkit-slider-thumb {
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        background: var(--color-violet);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        transition: transform 0.2s;
+      }
+
+      &::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    }
+
     .sim-results {
-      background: rgba(0,0,0,0.2);
-      padding: var(--space-8);
-      border-radius: var(--radius-2xl);
+      margin-top: var(--space-6);
       display: flex;
       flex-direction: column;
-      gap: var(--space-6);
-      border: 1px solid rgba(255,255,255,0.05);
+      gap: var(--space-4);
+      padding: var(--space-6);
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--color-border);
 
       .sim-stat {
         display: flex;
-        flex-direction: column;
-        gap: 4px;
+        justify-content: space-between;
+        align-items: baseline;
 
-        .label { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; }
-        .value { font-size: 24px; font-weight: 900; color: var(--color-text-primary); }
+        .label { font-size: var(--fs-xs); color: var(--color-text-tertiary); font-weight: 700; text-transform: uppercase; }
+        .value { font-size: var(--fs-xl); font-weight: 800; color: var(--color-text-primary); }
         .value.success { color: var(--color-emerald); }
-
+        
         &.highlight {
-          padding: var(--space-4);
-          background: var(--color-violet-glow);
-          border-radius: var(--radius-xl);
-          .value { font-size: 32px; color: var(--color-violet-light); }
+          padding-top: var(--space-4);
+          border-top: 1px solid var(--color-border);
+          .value { font-size: var(--fs-2xl); color: var(--color-violet-light); }
         }
       }
 
       .sim-desc {
         font-size: var(--fs-sm);
-        line-height: 1.6;
         color: var(--color-text-secondary);
-        strong { color: var(--color-text-primary); }
+        line-height: 1.6;
+        margin: 0;
+        opacity: 0.8;
+      }
+    }
+
+    .sim-preview-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: var(--radius-2xl);
+      padding: var(--space-8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-6);
+      text-align: center;
+      min-height: 300px;
+      justify-content: center;
+
+      .preview-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-violet-light);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       }
 
-      @media (max-width: 768px) {
-        padding: var(--space-6);
-      }
+      .preview-label { font-size: 11px; font-weight: 900; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; }
+      .preview-title { font-size: var(--fs-3xl); font-weight: 900; color: white; margin: 0; }
     }
 
     .glass-select {
