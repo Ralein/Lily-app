@@ -16,6 +16,10 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
   ],
   template: `
     <div class="onboarding-wrapper">
+      <!-- Background Elements -->
+      <div class="bg-blur bg-blur--1"></div>
+      <div class="bg-blur bg-blur--2"></div>
+
       <div class="onboarding-container">
         <!-- Progress Stepper -->
         <div class="stepper" anim="fadeIn">
@@ -42,7 +46,6 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
               <div class="step-card" anim="slideUp">
                 <div class="step-card__logo welcome-logo">
                   <img src="logo.png" alt="Lily Logo" class="logo-image">
-                  <span class="logo-text">Lily</span>
                 </div>
                 <h1 class="step-card__title">Welcome to <span class="text-gradient">Lily</span></h1>
                 <p class="step-card__desc">Your financial ecosystem, refined. Lily helps you orchestrate your income, budgets, and goals with surgical precision and beautiful clarity.</p>
@@ -175,9 +178,9 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
                 <div class="budget-planner">
                   <div class="visualization glass">
                     <div class="progress-labels">
-                      <div class="l needs">Needs <span>{{ needsPct() }}%</span></div>
-                      <div class="l wants">Wants <span>{{ wantsPct() }}%</span></div>
-                      <div class="l savings">Savings <span>{{ savingsPct() }}%</span></div>
+                      <div class="l needs" [style.width.%]="needsPct()">Needs <span>{{ needsPct() }}%</span></div>
+                      <div class="l wants" [style.width.%]="wantsPct()">Wants <span>{{ wantsPct() }}%</span></div>
+                      <div class="l savings" [style.width.%]="savingsPct()">Savings <span>{{ savingsPct() }}%</span></div>
                     </div>
                     <div class="progress-bar">
                       <div class="segment needs" [style.width.%]="needsPct()"></div>
@@ -264,7 +267,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     .onboarding-wrapper {
       min-height: 100vh;
       min-height: 100dvh;
-      background: transparent;
+      background: var(--color-bg-primary);
       color: var(--color-text-primary);
       position: relative;
       overflow: hidden;
@@ -272,6 +275,20 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
       align-items: center;
       justify-content: center;
       padding: var(--space-6);
+    }
+
+    .bg-blur {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      z-index: 0;
+      pointer-events: none;
+      
+      &--1 { background: var(--color-violet); top: -100px; right: -100px; }
+      &--2 { background: var(--color-pink); bottom: -100px; left: -100px; }
     }
 
     .onboarding-container {
@@ -370,8 +387,8 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
         gap: 16px;
         
         .logo-image {
-          width: 80px;
-          height: 80px;
+          width: 150px;
+          height: 150px;
           object-fit: contain;
           position: relative;
           z-index: 1;
@@ -472,11 +489,20 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     .budget-planner { width: 100%; display: flex; flex-direction: column; gap: var(--space-6); margin-bottom: var(--space-8); }
     .visualization {
       padding: var(--space-6); border-radius: 24px;
-      .progress-labels { display: flex; justify-content: space-between; margin-bottom: var(--space-3); }
-      .l { font-size: 11px; font-weight: 800; text-transform: uppercase; span { font-weight: 900; opacity: 1; margin-left: 4px; } }
-      .needs { color: var(--color-sky); }
-      .wants { color: var(--color-amber); }
-      .savings { color: var(--color-emerald); }
+      .progress-labels { display: flex; margin-bottom: var(--space-3); }
+      .l { 
+        font-size: 11px; font-weight: 800; text-transform: uppercase; 
+        transition: width 0.8s var(--ease-spring);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        
+        span { font-weight: 900; opacity: 1; margin-left: 4px; } 
+        
+        &.needs { color: var(--color-sky); text-align: left; }
+        &.wants { color: var(--color-amber); text-align: center; }
+        &.savings { color: var(--color-emerald); text-align: right; }
+      }
       
       .progress-bar { height: 12px; border-radius: var(--radius-full); background: var(--color-bg-input); display: flex; overflow: hidden; gap: 2px; }
       .segment { transition: width 0.8s var(--ease-spring); }
@@ -641,11 +667,20 @@ export class OnboardingComponent {
       const needsCats = this.budgetCategories.filter(c => c.type === 'needs');
       const wantsCats = this.budgetCategories.filter(c => c.type === 'wants');
 
-      const perNeed = Math.round(needsBudget / needsCats.length / 100) * 100;
-      const perWant = Math.round(wantsBudget / wantsCats.length / 100) * 100;
+      const perNeed = Math.floor(needsBudget / needsCats.length / 50) * 50;
+      const perWant = Math.floor(wantsBudget / wantsCats.length / 50) * 50;
 
-      needsCats.forEach(c => c.limit = perNeed);
-      wantsCats.forEach(c => c.limit = perWant);
+      needsCats.forEach((c, i) => {
+        c.limit = perNeed;
+        // Distribute remainder to the first category
+        if (i === 0) c.limit += (needsBudget - (perNeed * needsCats.length));
+      });
+      
+      wantsCats.forEach((c, i) => {
+        c.limit = perWant;
+        // Distribute remainder to the first category
+        if (i === 0) c.limit += (wantsBudget - (perWant * wantsCats.length));
+      });
     }
   }
 
