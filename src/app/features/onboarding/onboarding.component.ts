@@ -190,12 +190,12 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
                   </div>
 
                   <div class="category-grid custom-scrollbar">
-                    @for (cat of budgetCategories; track cat.id; let i = $index) {
+                    @for (cat of budgetCategories(); track cat.id; let i = $index) {
                       <div class="cat-pill glass">
                         <span class="cat-name">{{ cat.name }}</span>
                         <div class="cat-input">
                           <span class="symbol">{{ currencySymbol() }}</span>
-                          <input type="number" [(ngModel)]="cat.limit" (ngModelChange)="onBudgetChange()" min="0" step="100" />
+                          <input type="number" [ngModel]="cat.limit" (ngModelChange)="updateBudget(i, $event)" min="0" step="100" />
                         </div>
                       </div>
                     }
@@ -670,7 +670,7 @@ export class OnboardingComponent {
     }, 0)
   );
 
-  budgetCategories = [
+  budgetCategories = signal([
     { id: 'food', name: 'Food & Dining', limit: 0, type: 'wants' },
     { id: 'transport', name: 'Transport', limit: 0, type: 'needs' },
     { id: 'entertainment', name: 'Entertainment', limit: 0, type: 'wants' },
@@ -680,23 +680,23 @@ export class OnboardingComponent {
     { id: 'groceries', name: 'Groceries', limit: 0, type: 'needs' },
     { id: 'subscriptions', name: 'Subscriptions', limit: 0, type: 'wants' },
     { id: 'personal', name: 'Personal', limit: 0, type: 'wants' },
-  ];
+  ]);
 
   totalBudgetAllocated = computed(() =>
-    this.budgetCategories.reduce((sum, c) => sum + (c.limit || 0), 0)
+    this.budgetCategories().reduce((sum, c) => sum + (c.limit || 0), 0)
   );
 
   needsPct = computed(() => {
     const total = this.tempTotalIncome();
     if (total <= 0) return 0;
-    const needs = this.budgetCategories.filter(c => c.type === 'needs').reduce((s, c) => s + (c.limit || 0), 0);
+    const needs = this.budgetCategories().filter(c => c.type === 'needs').reduce((s, c) => s + (c.limit || 0), 0);
     return Math.round((needs / total) * 100);
   });
 
   wantsPct = computed(() => {
     const total = this.tempTotalIncome();
     if (total <= 0) return 0;
-    const wants = this.budgetCategories.filter(c => c.type === 'wants').reduce((s, c) => s + (c.limit || 0), 0);
+    const wants = this.budgetCategories().filter(c => c.type === 'wants').reduce((s, c) => s + (c.limit || 0), 0);
     return Math.round((wants / total) * 100);
   });
 
@@ -728,6 +728,14 @@ export class OnboardingComponent {
     this.tempSources.update(s => s.filter((_, i) => i !== index));
   }
 
+  updateBudget(index: number, limit: number): void {
+    this.budgetCategories.update(cats => {
+      const newCats = [...cats];
+      newCats[index] = { ...newCats[index], limit };
+      return newCats;
+    });
+  }
+
   onBudgetChange(): void {
     // Force computed update if needed
   }
@@ -745,30 +753,31 @@ export class OnboardingComponent {
       const needsBudget = Math.round(income * BUDGET_RULE.needs);
       const wantsBudget = Math.round(income * BUDGET_RULE.wants);
 
-      const needsCats = this.budgetCategories.filter(c => c.type === 'needs');
-      const wantsCats = this.budgetCategories.filter(c => c.type === 'wants');
+      const needsCats = this.budgetCategories().filter(c => c.type === 'needs');
+      const wantsCats = this.budgetCategories().filter(c => c.type === 'wants');
 
       const perNeed = Math.floor(needsBudget / needsCats.length / 50) * 50;
       const perWant = Math.floor(wantsBudget / wantsCats.length / 50) * 50;
 
       needsCats.forEach((c, i) => {
         c.limit = perNeed;
-        // Distribute remainder to the first category
         if (i === 0) c.limit += (needsBudget - (perNeed * needsCats.length));
       });
       
       wantsCats.forEach((c, i) => {
         c.limit = perWant;
-        // Distribute remainder to the first category
         if (i === 0) c.limit += (wantsBudget - (perWant * wantsCats.length));
       });
+
+      // Update the signal to trigger UI refresh
+      this.budgetCategories.set([...this.budgetCategories()]);
     }
   }
 
   saveBudget(): void {
     const month = format(new Date(), 'yyyy-MM');
     const categoryLimits: Record<string, number> = {};
-    for (const cat of this.budgetCategories) {
+    for (const cat of this.budgetCategories()) {
       if (cat.limit > 0) categoryLimits[cat.id] = cat.limit;
     }
     this.store.setBudget({
