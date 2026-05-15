@@ -16,10 +16,6 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
   ],
   template: `
     <div class="onboarding-wrapper">
-      <!-- Background Elements -->
-      <div class="bg-blur bg-blur--1"></div>
-      <div class="bg-blur bg-blur--2"></div>
-
       <div class="onboarding-container">
         <!-- Progress Stepper -->
         <div class="stepper" anim="fadeIn">
@@ -46,7 +42,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
               <div class="step-card" anim="slideUp">
                 <div class="step-card__logo welcome-logo">
                   <img src="logo.png" alt="Lily Logo" class="logo-image">
-                  <div class="icon-glow"></div>
+                  <span class="logo-text">Lily</span>
                 </div>
                 <h1 class="step-card__title">Welcome to <span class="text-gradient">Lily</span></h1>
                 <p class="step-card__desc">Your financial ecosystem, refined. Lily helps you orchestrate your income, budgets, and goals with surgical precision and beautiful clarity.</p>
@@ -268,7 +264,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     .onboarding-wrapper {
       min-height: 100vh;
       min-height: 100dvh;
-      background: var(--color-bg-primary);
+      background: transparent;
       color: var(--color-text-primary);
       position: relative;
       overflow: hidden;
@@ -276,20 +272,6 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
       align-items: center;
       justify-content: center;
       padding: var(--space-6);
-    }
-
-    .bg-blur {
-      position: absolute;
-      width: 500px;
-      height: 500px;
-      border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.15;
-      z-index: 0;
-      pointer-events: none;
-      
-      &--1 { background: var(--color-violet); top: -100px; right: -100px; }
-      &--2 { background: var(--color-pink); bottom: -100px; left: -100px; }
     }
 
     .onboarding-container {
@@ -383,23 +365,24 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
       &__logo.welcome-logo {
         position: relative;
         margin-bottom: var(--space-8);
-        width: 80px;
-        height: 80px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
         
         .logo-image {
-          width: 100%;
-          height: 100%;
+          width: 80px;
+          height: 80px;
           object-fit: contain;
           position: relative;
           z-index: 1;
         }
         
-        .icon-glow {
-          position: absolute;
-          inset: -30px;
-          background: radial-gradient(circle, var(--color-violet-glow) 0%, transparent 70%);
-          filter: blur(30px);
-          animation: pulse 4s infinite;
+        .logo-text {
+          font-size: 48px;
+          font-weight: 800;
+          letter-spacing: -0.5px;
+          color: var(--color-text-primary);
+          line-height: 1;
         }
       }
 
