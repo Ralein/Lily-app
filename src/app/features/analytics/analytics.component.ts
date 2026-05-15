@@ -16,8 +16,8 @@ import { fadeIn, listAnimation } from '../../shared/animations';
   animations: [fadeIn, listAnimation],
   template: `
     <div class="analytics-page">
-      <div class="page-header" [@fadeIn]>
-        <div class="header-content">
+      <header class="page-header" [@fadeIn]>
+        <div class="page-header__content">
           <h1 class="page-header__title">Financial Analytics</h1>
           <p class="page-header__subtitle">Deep dive into your spending habits</p>
         </div>
@@ -26,13 +26,12 @@ import { fadeIn, listAnimation } from '../../shared/animations';
             <span class="pulse-ring"></span>
             <span class="badge-text">Real-time Insights</span>
           </div>
-        </div>
-      </div>
+
 
       <!-- Insights Carousel -->
       @if (insights().length > 0) {
         <div class="insights-container" [@listAnimation]="insights().length">
-          <div class="insights-scroll custom-scrollbar">
+          <div class="insights-scroll">
             @for (insight of insights(); track insight.id) {
               <div class="insight-pill insight-pill--{{ insight.type }}">
                 <div class="insight-pill__icon">
@@ -47,7 +46,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         </div>
       }
 
-      <div class="analytics-grid grid grid--4" [@listAnimation]="8">
+      <div class="analytics-grid" [@listAnimation]="6">
         <!-- Monthly Performance -->
         <div class="lily-card lily-card--glass chart-card span-2">
           <div class="chart-header">
@@ -184,7 +183,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         </div>
 
         <!-- What-If Simulation -->
-        <div class="lily-card lily-card--glass simulation-card span-4" [@fadeIn]>
+        <div class="lily-card lily-card--glass chart-card span-4" [@fadeIn]>
           <div class="chart-header">
             <div class="title-group">
               <h3 class="chart-title">What-If Simulator</h3>
@@ -228,7 +227,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         </div>
 
         <!-- Calendar Heatmap -->
-        <div class="lily-card lily-card--glass heatmap-card span-4" [@fadeIn]>
+        <div class="lily-card lily-card--glass chart-card span-4" [@fadeIn]>
           <div class="chart-header">
             <div class="title-group">
               <h3 class="chart-title">Activity Heatmap</h3>
@@ -254,7 +253,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
             </div>
           </div>
 
-          <div class="heatmap-container custom-scrollbar">
+          <div class="heatmap-container">
             <!-- Month Labels -->
             <div class="heatmap-months">
               @for (label of heatmapData().monthLabels; track label.index) {
@@ -304,6 +303,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- FIX 1: Tooltip rendered at root level, uses position:fixed — escapes all card overflow -->
@@ -425,6 +425,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         overflow-x: auto;
         padding: var(--space-2) 0;
         scrollbar-width: none;
+        &::-webkit-scrollbar { display: none; }
       }
     }
 
@@ -479,6 +480,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     /* ─── Analytics Grid ─── */
+    /* ─── Analytics Grid ─── */
     .analytics-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -494,11 +496,11 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     .chart-card {
-      padding: var(--space-6);
       display: flex;
       flex-direction: column;
       gap: var(--space-6);
       min-height: 400px;
+      overflow: visible;
 
       .patterns-list,
       .correlations-list {
@@ -622,7 +624,6 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         flex: 1;
         min-height: 240px;
         position: relative;
-        overflow: visible;
 
         &.donut {
           min-height: 300px;
@@ -634,101 +635,78 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     /* ─── Simulation Card ─── */
-    .simulation-card {
-      padding: var(--space-8);
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+      align-items: center;
+
+      @media (max-width: 1024px) {
+        grid-template-columns: 1fr;
+        gap: var(--space-8);
+      }
+    }
+
+    .sim-controls {
       display: flex;
       flex-direction: column;
       gap: var(--space-8);
 
-      .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-
-        .title-group {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .chart-title {
-          font-size: var(--fs-xl);
-          font-weight: 700;
-          color: var(--color-text-primary);
-          letter-spacing: -0.02em;
-        }
-
-        .chart-subtitle {
-          font-size: var(--fs-sm);
-          color: var(--color-text-muted);
-          font-weight: 500;
-        }
-      }
-
-      .sim-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--space-12);
-        align-items: center;
-      }
-
-      .sim-controls {
+      .sim-control {
         display: flex;
         flex-direction: column;
-        gap: var(--space-8);
+        gap: var(--space-4);
 
-        .sim-control {
-          display: flex;
-          flex-direction: column;
-          gap: var(--space-4);
+        label {
+          font-size: 10px;
+          font-weight: 800;
+          color: var(--color-text-tertiary);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
 
-          label {
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--color-text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-          }
+        input[type="range"] {
+          width: 100%;
+          accent-color: var(--color-violet);
+        }
+      }
+    }
 
-          input[type="range"] {
-            width: 100%;
-            accent-color: var(--color-violet);
-          }
+    .sim-results {
+      background: rgba(0,0,0,0.2);
+      padding: var(--space-8);
+      border-radius: var(--radius-2xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+      border: 1px solid rgba(255,255,255,0.05);
+
+      .sim-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .label { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; }
+        .value { font-size: 24px; font-weight: 900; color: var(--color-text-primary); }
+        .value.success { color: var(--color-emerald); }
+
+        &.highlight {
+          padding: var(--space-4);
+          background: var(--color-violet-glow);
+          border-radius: var(--radius-xl);
+          .value { font-size: 32px; color: var(--color-violet-light); }
         }
       }
 
-      .sim-results {
-        background: rgba(0,0,0,0.2);
-        padding: var(--space-8);
-        border-radius: var(--radius-2xl);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-6);
-        border: 1px solid rgba(255,255,255,0.05);
+      .sim-desc {
+        font-size: var(--fs-sm);
+        line-height: 1.6;
+        color: var(--color-text-secondary);
+        strong { color: var(--color-text-primary); }
+      }
 
-        .sim-stat {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-
-          .label { font-size: 11px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; }
-          .value { font-size: 24px; font-weight: 900; color: var(--color-text-primary); }
-          .value.success { color: var(--color-emerald); }
-
-          &.highlight {
-            padding: var(--space-4);
-            background: var(--color-violet-glow);
-            border-radius: var(--radius-xl);
-            .value { font-size: 32px; color: var(--color-violet-light); }
-          }
-        }
-
-        .sim-desc {
-          font-size: var(--fs-sm);
-          line-height: 1.6;
-          color: var(--color-text-secondary);
-          strong { color: var(--color-text-primary); }
-        }
+      @media (max-width: 768px) {
+        padding: var(--space-6);
       }
     }
 
@@ -751,205 +729,180 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     /* ─── Heatmap Card ─── */
-    .heatmap-card {
-      padding: var(--space-8);
+    .activity-summary {
+      font-size: var(--fs-sm);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      margin-top: 2px;
+      strong { color: var(--color-violet-light); }
+    }
+
+    /* FIX 3: flex-shrink:0 + white-space:nowrap prevents label+value concatenation */
+    .heatmap-analysis {
       display: flex;
-      flex-direction: column;
       gap: var(--space-8);
+      padding: var(--space-3) var(--space-6);
+      background: rgba(255,255,255,0.03);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,0.05);
+      flex-shrink: 0;
 
-      .chart-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: var(--space-6);
-
-        .title-group {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .chart-title {
-          font-size: var(--fs-xl);
-          font-weight: 700;
-          color: var(--color-text-primary);
-          letter-spacing: -0.02em;
-        }
-      }
-
-      .activity-summary {
-        font-size: var(--fs-sm);
-        font-weight: 500;
-        color: var(--color-text-secondary);
-        margin-top: 2px;
-        strong { color: var(--color-violet-light); }
-      }
-
-      /* FIX 3: flex-shrink:0 + white-space:nowrap prevents label+value concatenation */
-      .heatmap-analysis {
-        display: flex;
-        gap: var(--space-8);
-        padding: var(--space-3) var(--space-6);
-        background: rgba(255,255,255,0.03);
-        border-radius: var(--radius-xl);
-        border: 1px solid rgba(255,255,255,0.05);
-        flex-shrink: 0; /* FIX 3 */
-
-        .analysis-item {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;       /* FIX 3: was 2px */
-          min-width: 80px; /* FIX 3 */
-
-          .label {
-            font-size: 9px;
-            font-weight: 800;
-            color: var(--color-text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            white-space: nowrap; /* FIX 3 */
-          }
-
-          .value {
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--color-text-primary);
-            white-space: nowrap; /* FIX 3 */
-
-            &.income  { color: var(--color-emerald); }
-            &.expense { color: var(--color-rose); }
-          }
-        }
-      }
-
-      .heatmap-container {
+      .analysis-item {
         display: flex;
         flex-direction: column;
-        gap: var(--space-2);
-        max-width: 100%;
-        overflow-x: auto;
-        padding: var(--space-2) 0;
-
-        &::-webkit-scrollbar { height: 6px; }
-        &::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-        &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-      }
-
-      .heatmap-months {
-        display: grid;
-        grid-auto-columns: 16px;
-        column-gap: 3px; /* FIX 4: matches cell gap */
-        margin-left: 32px;
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--color-text-tertiary);
-        margin-bottom: 4px;
-        height: 14px;
-        position: relative;
-
-        .month-label {
-          grid-row: 1;
-          white-space: nowrap;
-        }
-      }
-
-      .heatmap-body {
-        display: flex;
-        gap: 8px;
-      }
-
-      /* FIX 4: gap matches cell gap for correct weekday alignment */
-      .heatmap-weekdays {
-        display: grid;
-        grid-template-rows: repeat(7, 13px); /* FIX 4: match cell height */
-        gap: 3px;                             /* FIX 4: match cell gap */
-        font-size: 10px;
-        font-weight: 700;
-        color: var(--color-text-tertiary);
-        width: 24px;
-        text-align: left;
-
-        span { height: 13px; display: flex; align-items: center; }
-      }
-
-      .heatmap-grid-wrapper {
-        flex: 1;
-        margin-top: var(--space-4);
-        padding-bottom: 12px;
-        cursor: crosshair;
-      }
-
-      /* FIX 4: GitHub-style tight grid */
-      .heatmap-grid {
-        display: grid;
-        grid-template-rows: repeat(7, 13px); /* FIX 4: 13px cells */
-        grid-auto-flow: column;
-        gap: 3px;                             /* FIX 4: was 6px */
-        width: max-content;
-        position: relative;
-      }
-
-      /* FIX 4: GitHub-style cell sizing and colors */
-      .heatmap__cell {
-        width: 13px;          /* FIX 4: was 16px */
-        height: 13px;         /* FIX 4: was 16px */
-        border-radius: 2px;   /* FIX 4: was 3px — GitHub uses 2px */
-        background: rgba(255,255,255,0.04);
-        transition: transform 80ms ease, outline 80ms ease;
-        border: 1px solid rgba(255,255,255,0.04);
-
-        /* FIX 4: Lightest → darkest gradient (GitHub convention) */
-        &--0 { background: var(--color-bg-input); }
-        &--1 { background: color-mix(in srgb, var(--color-violet), transparent 80%); }
-        &--2 { background: color-mix(in srgb, var(--color-violet), transparent 50%); }
-        &--3 { background: color-mix(in srgb, var(--color-violet), transparent 20%); }
-        &--4 {
-          background: var(--color-violet);
-          box-shadow: 0 0 12px var(--color-violet-glow);
-        }
-
-        &:hover {
-          transform: scale(1.4);
-          z-index: 10;
-          outline: 1px solid rgba(255,255,255,0.6);
-          outline-offset: 1px;
-        }
-      }
-
-      .heatmap-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: var(--space-4);
-
-        .help-link {
-          font-size: 11px;
-          color: var(--color-text-muted);
-          text-decoration: none;
-          font-weight: 600;
-          &:hover { color: var(--color-text-secondary); text-decoration: underline; }
-        }
-      }
-
-      .heatmap-legend {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        padding: 4px 12px;
-        background: rgba(0,0,0,0.2);
-        border-radius: var(--radius-full);
-        border: 1px solid var(--color-bg-glass-border);
+        gap: 4px;
+        min-width: 80px;
 
         .label {
           font-size: 9px;
           font-weight: 800;
           color: var(--color-text-tertiary);
           text-transform: uppercase;
+          letter-spacing: 0.05em;
+          white-space: nowrap;
         }
 
-        .legend-cells { display: flex; gap: 4px; }
+        .value {
+          font-size: 14px;
+          font-weight: 800;
+          color: var(--color-text-primary);
+          white-space: nowrap;
+
+          &.income  { color: var(--color-emerald); }
+          &.expense { color: var(--color-rose); }
+        }
+      }
+
+      @media (max-width: 768px) {
+        flex-wrap: wrap;
+        gap: var(--space-4);
       }
     }
+
+    .heatmap-container {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      max-width: 100%;
+      overflow-x: auto;
+      padding: var(--space-2) 0;
+
+      &::-webkit-scrollbar { height: 6px; }
+      &::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+      &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    }
+
+    .heatmap-months {
+      display: grid;
+      grid-auto-columns: 16px;
+      column-gap: 3px;
+      margin-left: 32px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--color-text-tertiary);
+      margin-bottom: 4px;
+      height: 14px;
+      position: relative;
+
+      .month-label {
+        grid-row: 1;
+        white-space: nowrap;
+      }
+    }
+
+    .heatmap-body {
+      display: flex;
+      gap: 8px;
+    }
+
+    .heatmap-weekdays {
+      display: grid;
+      grid-template-rows: repeat(7, 13px);
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--color-text-tertiary);
+      width: 24px;
+      text-align: left;
+
+      span { height: 13px; display: flex; align-items: center; }
+    }
+
+    .heatmap-grid-wrapper {
+      flex: 1;
+      margin-top: var(--space-4);
+      padding-bottom: 12px;
+      cursor: crosshair;
+    }
+
+    .heatmap-grid {
+      display: grid;
+      grid-template-rows: repeat(7, 13px);
+      grid-auto-flow: column;
+      gap: 3px;
+      width: max-content;
+      position: relative;
+    }
+
+    .heatmap__cell {
+      width: 13px;
+      height: 13px;
+      border-radius: 2px;
+      background: rgba(255,255,255,0.04);
+      transition: transform 80ms ease, outline 80ms ease;
+      border: 1px solid rgba(255,255,255,0.04);
+
+      &--0 { background: var(--color-bg-input); }
+      &--1 { background: color-mix(in srgb, var(--color-violet), transparent 80%); }
+      &--2 { background: color-mix(in srgb, var(--color-violet), transparent 50%); }
+      &--3 { background: color-mix(in srgb, var(--color-violet), transparent 20%); }
+      &--4 {
+        background: var(--color-violet);
+        box-shadow: 0 0 12px var(--color-violet-glow);
+      }
+
+      &:hover {
+        transform: scale(1.4);
+        z-index: 10;
+        outline: 1px solid rgba(255,255,255,0.6);
+        outline-offset: 1px;
+      }
+    }
+
+    .heatmap-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--space-4);
+
+      .help-link {
+        font-size: 11px;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        font-weight: 600;
+        &:hover { color: var(--color-text-secondary); text-decoration: underline; }
+      }
+    }
+
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: 4px 12px;
+      background: rgba(0,0,0,0.2);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-bg-glass-border);
+
+      .label {
+        font-size: 9px;
+        font-weight: 800;
+        color: var(--color-text-tertiary);
+        text-transform: uppercase;
+      }
+
+      .legend-cells { display: flex; gap: 4px; }
+    }
+
 
     /* ─── FIX 1: Global tooltip — position:fixed, escapes all card/layout overflow ─── */
     .heatmap-tooltip {
@@ -1036,22 +989,24 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     /* ─── Responsive ─── */
-    @media (max-width: 1200px) {
+    @media (max-width: 1024px) {
       .analytics-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+      .analytics-grid .span-4 { grid-column: span 2; }
     }
 
     @media (max-width: 768px) {
       .analytics-grid {
         grid-template-columns: 1fr;
-        gap: var(--space-6);
+        gap: var(--space-5);
       }
+      .analytics-grid .span-2, 
+      .analytics-grid .span-4 { grid-column: span 1; }
 
       .chart-card {
-        &.span-2 { grid-column: span 1; }
-        padding: var(--space-6);
-        min-height: 360px;
+        padding: var(--space-5);
+        min-height: auto;
       }
 
       .page-header {
@@ -1059,15 +1014,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         align-items: flex-start;
         gap: var(--space-4);
 
-        .page-header__title { font-size: 1.8rem; }
-      }
-
-      .sim-grid { grid-template-columns: 1fr; gap: var(--space-8); }
-      .sim-results { padding: var(--space-6); }
-
-      .heatmap-analysis {
-        flex-wrap: wrap;
-        gap: var(--space-4);
+        .page-header__title { font-size: var(--fs-2xl); }
       }
 
       .insights-container { margin: 0; }
