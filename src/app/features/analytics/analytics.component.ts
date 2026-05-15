@@ -358,7 +358,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       display: flex;
       flex-direction: column;
       gap: var(--space-8);
-      padding-bottom: var(--space-12);
+      padding-bottom: var(--space-20);
     }
 
     /* ─── Page Header ─── */
@@ -366,10 +366,9 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: var(--space-4);
 
       .page-header__title {
-        font-size: var(--fs-3xl);
+        font-size: 32px;
         font-weight: 900;
         letter-spacing: -0.04em;
         color: var(--color-text-primary);
@@ -378,9 +377,8 @@ import { fadeIn, listAnimation } from '../../shared/animations';
 
       .page-header__subtitle {
         font-size: var(--fs-base);
-        color: var(--color-text-secondary);
+        color: var(--color-text-tertiary);
         font-weight: 500;
-        margin-top: var(--space-1);
       }
 
       .status-pill {
@@ -427,8 +425,6 @@ import { fadeIn, listAnimation } from '../../shared/animations';
 
     /* ─── Insights Section ─── */
     .insights-section {
-      margin-bottom: var(--space-4);
-
       .insights-scroll {
         display: flex;
         gap: var(--space-4);
@@ -491,12 +487,15 @@ import { fadeIn, listAnimation } from '../../shared/animations';
 
     /* ─── Analytics Grid ─── */
     .analytics-grid {
-      padding-bottom: var(--space-8);
-
       .span-2 { grid-column: span 2; }
       .span-4 { grid-column: span 4; }
 
       @media (max-width: 1024px) {
+        .span-2 { grid-column: span 1; }
+        .span-4 { grid-column: 1 / -1; }
+      }
+
+      @media (max-width: 768px) {
         .span-2, .span-4 { grid-column: span 1; }
       }
     }
@@ -505,7 +504,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       display: flex;
       flex-direction: column;
       gap: var(--space-6);
-      min-height: 400px;
+      min-height: 320px;
       overflow: visible;
 
       .patterns-list,
@@ -1049,21 +1048,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     /* ─── Responsive ─── */
-    @media (max-width: 1024px) {
-      .analytics-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .analytics-grid .span-4 { grid-column: span 2; }
-    }
-
     @media (max-width: 768px) {
-      .analytics-grid {
-        grid-template-columns: 1fr;
-        gap: var(--space-5);
-      }
-      .analytics-grid .span-2, 
-      .analytics-grid .span-4 { grid-column: span 1; }
-
       .chart-card {
         padding: var(--space-5);
         min-height: auto;
@@ -1076,8 +1061,6 @@ import { fadeIn, listAnimation } from '../../shared/animations';
 
         .page-header__title { font-size: var(--fs-2xl); }
       }
-
-      .insights-container { margin: 0; }
     }
   `],
 })
