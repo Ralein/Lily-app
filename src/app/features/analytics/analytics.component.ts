@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LilyStore } from '../../core/store/lily.store';
 import { AnalyticsService } from '../../core/services/analytics.service';
@@ -232,21 +232,98 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       <div class="lily-card heatmap-card glass-card" [@fadeIn]>
         <div class="chart-header">
           <div class="title-group">
-            <h3 class="chart-title">Spending Intensity</h3>
-            <span class="chart-subtitle">Daily transaction density over the last 4 months</span>
+            <h3 class="chart-title">Activity Heatmap</h3>
+            <div class="activity-summary">
+              <strong>{{ totalActivityCount() }}</strong> activities tracked this year
+            </div>
+          </div>
+          <div class="heatmap-analysis" @fadeIn>
+            <div class="analysis-item">
+              <span class="label">Consistency</span>
+              <span class="value">{{ heatmapInsights().consistency }}%</span>
+            </div>
+            <div class="analysis-item">
+              <span class="label">Total Earned</span>
+              <span class="value income">{{ heatmapInsights().totalIncome | currencyDisplay }}</span>
+            </div>
+            <div class="analysis-item">
+              <span class="label">Net Flow</span>
+              <span class="value" [class.income]="heatmapInsights().netFlow >= 0" [class.expense]="heatmapInsights().netFlow < 0">
+                {{ heatmapInsights().netFlow | currencyDisplay }}
+              </span>
+            </div>
           </div>
         </div>
-        <div class="heatmap-wrapper">
-          <div class="heatmap">
-            @for (day of heatmapData(); track day.date) {
-              <div class="heatmap__cell heatmap__cell--{{ day.level }}" 
-                   [title]="day.date + ': ' + (day.amount | currencyDisplay)">
-              </div>
+        
+        <div class="heatmap-container">
+          <!-- Month Labels -->
+          <div class="heatmap-months">
+            @for (label of heatmapData().monthLabels; track label.index) {
+              <div class="month-label" [style.grid-column-start]="label.index + 1">{{ label.name }}</div>
             }
           </div>
+          
+          <div class="heatmap-body">
+            <!-- Weekday Labels -->
+            <div class="heatmap-weekdays">
+              <span></span>
+              <span>Mon</span>
+              <span></span>
+              <span>Wed</span>
+              <span></span>
+              <span>Fri</span>
+              <span></span>
+            </div>
+            
+            <!-- Heatmap Grid -->
+            <div class="heatmap-grid-wrapper" (mouseleave)="activeHeatmapCell.set(null)">
+              <div class="heatmap-grid">
+                @for (day of heatmapData().cells; track day.date) {
+                  <div class="heatmap__cell heatmap__cell--{{ day.level }}" 
+                       (mouseenter)="showTooltip($event, day)">
+                  </div>
+                }
+
+                <!-- Custom Tooltip -->
+                @if (activeHeatmapCell(); as cell) {
+                  <div class="heatmap-tooltip" 
+                       [style.left.px]="tooltipPos().x" 
+                       [style.top.px]="tooltipPos().y">
+                    <div class="tooltip-content">
+                      <div class="tooltip-date">{{ formatTooltipDate(cell.date) }}</div>
+                      
+                      @if (cell.totalActivity > 0) {
+                        <div class="tooltip-stats">
+                          <div class="stat-line">
+                            <lily-icon name="arrow-up-right" [size]="10" class="income" />
+                            <span class="label">Income:</span>
+                            <span class="value income">{{ cell.income | currencyDisplay }}</span>
+                          </div>
+                          <div class="stat-line">
+                            <lily-icon name="arrow-down-right" [size]="10" class="expense" />
+                            <span class="label">Spent:</span>
+                            <span class="value expense">{{ cell.expenses | currencyDisplay }}</span>
+                          </div>
+                          <div class="stat-divider"></div>
+                          <div class="stat-line total">
+                            <span class="label">{{ cell.totalActivity }} Transactions</span>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="tooltip-empty">No activity recorded</div>
+                      }
+                    </div>
+                    <div class="tooltip-arrow"></div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
           <div class="heatmap-footer">
+            <a href="javascript:void(0)" class="help-link">Learn how we count activities</a>
             <div class="heatmap-legend">
-              <span class="label">Quiet</span>
+              <span class="label">Less</span>
               <div class="legend-cells">
                 <div class="heatmap__cell heatmap__cell--0"></div>
                 <div class="heatmap__cell heatmap__cell--1"></div>
@@ -254,7 +331,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
                 <div class="heatmap__cell heatmap__cell--3"></div>
                 <div class="heatmap__cell heatmap__cell--4"></div>
               </div>
-              <span class="label">Active</span>
+              <span class="label">More</span>
             </div>
           </div>
         </div>
@@ -495,12 +572,37 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         letter-spacing: -0.02em;
       }
 
-      .chart-subtitle { 
-        font-size: var(--fs-xs); 
-        font-weight: 600; 
-        color: var(--color-text-tertiary); 
-        text-transform: uppercase; 
-        letter-spacing: 0.1em; 
+      .activity-summary {
+        font-size: var(--fs-sm);
+        font-weight: 500;
+        color: var(--color-text-secondary);
+        margin-top: 2px;
+        strong { color: var(--color-violet-light); }
+      }
+
+      .heatmap-analysis {
+        display: flex;
+        gap: var(--space-8);
+        padding: var(--space-3) var(--space-6);
+        background: rgba(255,255,255,0.03);
+        border-radius: var(--radius-xl);
+        border: 1px solid rgba(255,255,255,0.05);
+
+        .analysis-item {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          
+          .label { font-size: 9px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; }
+          .value { 
+            font-size: 14px; 
+            font-weight: 800; 
+            color: var(--color-text-primary); 
+            
+            &.income { color: var(--color-emerald); }
+            &.expense { color: var(--color-rose); }
+          }
+        }
       }
 
       .chart-legend {
@@ -596,12 +698,32 @@ import { fadeIn, listAnimation } from '../../shared/animations';
           }
         }
         
-        .sim-desc {
-          font-size: var(--fs-sm);
-          line-height: 1.6;
+      .ghost-btn {
+        background: transparent;
+        border: none;
+        color: var(--color-text-muted);
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all var(--duration-fast);
+        
+        &:hover {
+          background: rgba(255,255,255,0.05);
           color: var(--color-text-secondary);
-          strong { color: var(--color-text-primary); }
         }
+      }
+
+      .sim-desc {
+        font-size: var(--fs-sm);
+        line-height: 1.6;
+        color: var(--color-text-secondary);
+        strong { color: var(--color-text-primary); }
+      }
       }
     }
 
@@ -627,65 +749,211 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       padding: var(--space-8); 
       display: flex; 
       flex-direction: column; 
-      gap: var(--space-10);
+      gap: var(--space-8);
 
-      .heatmap-wrapper { 
-        display: flex; 
-        flex-direction: column; 
-        gap: var(--space-6); 
-        overflow-x: auto; 
-        padding-bottom: var(--space-2);
+      .heatmap-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        max-width: 100%;
+        overflow-x: auto;
+        padding: var(--space-2) 0;
+        
+        &::-webkit-scrollbar { height: 6px; }
+        &::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
       }
 
-      .heatmap { 
+      .heatmap-months {
+        display: grid;
+        grid-auto-columns: 16px;
+        column-gap: 6px;
+        margin-left: 32px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--color-text-tertiary);
+        margin-bottom: 4px;
+        height: 14px;
+        position: relative;
+        
+        .month-label {
+          grid-row: 1;
+          white-space: nowrap;
+        }
+      }
+
+      .heatmap-body {
+        display: flex;
+        gap: 8px;
+      }
+
+      .heatmap-weekdays {
+        display: grid;
+        grid-template-rows: repeat(7, 1fr);
+        gap: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--color-text-tertiary);
+        width: 24px;
+        text-align: left;
+        
+        span { height: 16px; display: flex; align-items: center; }
+      }
+
+      .heatmap-grid-wrapper {
+        flex: 1;
+        margin-top: var(--space-4);
+        padding-bottom: 12px;
+        cursor: crosshair;
+      }
+
+      .heatmap-grid { 
         display: grid; 
         grid-template-rows: repeat(7, 1fr); 
         grid-auto-flow: column; 
         gap: 6px; 
-        padding: 4px 0; 
+        width: max-content;
+        position: relative;
       }
 
       .heatmap__cell { 
         width: 16px; 
         height: 16px; 
-        border-radius: 4px; 
-        background: var(--color-bg-secondary); 
+        border-radius: 3px; 
+        background: rgba(255,255,255,0.03); 
         transition: all var(--duration-fast) var(--ease-out);
-        border: 1px solid var(--color-bg-glass-border);
+        border: 1px solid rgba(255,255,255,0.05);
 
-        &--1 { background: var(--color-violet-alpha-low); border-color: transparent; }
-        &--2 { background: var(--color-violet-alpha-medium); border-color: transparent; }
-        &--3 { background: var(--color-violet-alpha-high); border-color: transparent; }
+        &--1 { background: #2e1065; border-color: transparent; }
+        &--2 { background: #4c1d95; border-color: transparent; }
+        &--3 { background: #7c3aed; border-color: transparent; }
         &--4 { 
-          background: var(--color-violet); 
-          box-shadow: 0 0 15px var(--color-violet-alpha); 
+          background: #a78bfa; 
+          box-shadow: 0 0 12px rgba(167, 139, 250, 0.3); 
           border-color: transparent;
         }
 
         &:hover { 
-          transform: scale(1.4); 
-          z-index: 2; 
+          transform: scale(1.3); 
+          z-index: 10; 
           border-color: white;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
       }
 
-      .heatmap-footer { display: flex; justify-content: flex-end; }
+      .heatmap-tooltip {
+        position: absolute;
+        pointer-events: none;
+        z-index: 100;
+        transform: translate(-50%, -100%);
+        margin-top: -8px;
+        transition: all 0.15s var(--ease-out);
+        filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+
+        .tooltip-content {
+          background: rgba(15, 23, 42, 0.95);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          padding: 12px;
+          border-radius: 12px;
+          min-width: 160px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .tooltip-date {
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--color-text-primary);
+          padding-bottom: 4px;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .tooltip-stats {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+
+          .stat-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 600;
+
+            .label { color: var(--color-text-muted); flex: 1; }
+            .value { font-family: var(--font-mono); font-weight: 700; }
+            
+            &.total {
+              font-size: 10px;
+              color: var(--color-text-tertiary);
+              text-transform: uppercase;
+              letter-spacing: 0.02em;
+            }
+
+            .income { color: var(--color-emerald); }
+            .expense { color: var(--color-rose); }
+          }
+
+          .stat-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.05);
+            margin: 2px 0;
+          }
+        }
+
+        .tooltip-arrow {
+          position: absolute;
+          bottom: -4px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-top: 6px solid rgba(15, 23, 42, 0.9);
+        }
+      }
+
+      .heatmap-footer { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center;
+        margin-top: var(--space-4);
+
+        .help-link {
+          font-size: 11px;
+          color: var(--color-text-muted);
+          text-decoration: none;
+          font-weight: 600;
+          &:hover { color: var(--color-text-secondary); text-decoration: underline; }
+        }
+      }
+
+      .tooltip-empty {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        padding: 4px 0;
+      }
+      
       .heatmap-legend { 
         display: flex; 
         align-items: center; 
-        gap: var(--space-4);
-        padding: var(--space-2) var(--space-4);
-        background: var(--color-bg-secondary);
+        gap: var(--space-3);
+        padding: 4px 12px;
+        background: rgba(0,0,0,0.2);
         border-radius: var(--radius-full);
         border: 1px solid var(--color-bg-glass-border);
 
         .label { 
-          font-size: 10px; 
+          font-size: 9px; 
           font-weight: 800; 
           color: var(--color-text-tertiary); 
           text-transform: uppercase; 
-          letter-spacing: 0.05em;
         }
         .legend-cells { display: flex; gap: 4px; }
       }
@@ -707,9 +975,50 @@ import { fadeIn, listAnimation } from '../../shared/animations';
 export class AnalyticsComponent {
   public store = inject(LilyStore);
   public analytics = inject(AnalyticsService);
+  protected Math = Math;
+
+  activeHeatmapCell = signal<any | null>(null);
+  tooltipPos = signal({ x: 0, y: 0 });
 
   insights = computed(() => this.analytics.generateInsights());
-  heatmapData = computed(() => this.analytics.getCalendarHeatmapData(4));
+  heatmapData = computed(() => this.analytics.getCalendarHeatmapData(12));
+  totalActivityCount = computed(() => this.heatmapData().cells.reduce((s, c) => s + c.totalActivity, 0));
+
+  heatmapInsights = computed(() => {
+    const data = this.heatmapData().cells;
+    const totalDays = data.length;
+    const activeDays = data.filter(c => c.totalActivity > 0).length;
+    const consistency = (activeDays / totalDays) * 100;
+    
+    const totalIncome = data.reduce((s, c) => s + (c.income || 0), 0);
+    const totalExpenses = data.reduce((s, c) => s + (c.expenses || 0), 0);
+    
+    return {
+      consistency: consistency.toFixed(1),
+      totalIncome,
+      totalExpenses,
+      netFlow: totalIncome - totalExpenses
+    };
+  });
+
+  showTooltip(event: MouseEvent, day: any) {
+    const cell = event.target as HTMLElement;
+    const rect = cell.getBoundingClientRect();
+    const wrapper = cell.closest('.heatmap-grid-wrapper') as HTMLElement;
+    const wrapperRect = wrapper.getBoundingClientRect();
+
+    // Calculate position relative to the scrollable wrapper
+    this.tooltipPos.set({
+      x: rect.left - wrapperRect.left + rect.width / 2 + wrapper.scrollLeft,
+      y: rect.top - wrapperRect.top
+    });
+    
+    this.activeHeatmapCell.set(day);
+  }
+
+  formatTooltipDate(dateStr: string): string {
+    return format(parseISO(dateStr), 'MMM d, yyyy');
+  }
 
   private chartColors = { 
     income: '#10b981', 
@@ -871,7 +1180,6 @@ export class AnalyticsComponent {
   simReduction = 20;
   simulation = computed(() => this.analytics.simulate(this.simCatId, this.simReduction));
 
-  Math = Math;
   getCatName(id: string) { return this.store.categories().find(c => c.id === id)?.name || id; }
   getCatIcon(id: string) { return this.store.categories().find(c => c.id === id)?.icon || 'package'; }
   getCatRawColor(id: string) { return this.store.categories().find(c => c.id === id)?.color || '#64748b'; }

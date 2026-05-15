@@ -41,6 +41,17 @@
   }
 }
 
+// ── Collapsed State ──
+.app-shell--collapsed {
+  .app-sidebar {
+    width: var(--sidebar-collapsed);
+  }
+
+  .app-main {
+    margin-left: var(--sidebar-collapsed);
+  }
+}
+
 .app-bottom-nav {
   display: none;
   position: fixed;

@@ -28,6 +28,9 @@ export class LilyStore {
   private _settings = signal<AppSettings>(
     this.storage.get<AppSettings>('settings', DEFAULT_SETTINGS)
   );
+  private _sidebarCollapsed = signal<boolean>(
+    this.storage.get<boolean>('sidebarCollapsed', false)
+  );
 
   // ── Public Read-Only Selectors ──
   readonly transactions = this._transactions.asReadonly();
@@ -35,6 +38,7 @@ export class LilyStore {
   readonly budgets = this._budgets.asReadonly();
   readonly goals = this._goals.asReadonly();
   readonly settings = this._settings.asReadonly();
+  readonly sidebarCollapsed = this._sidebarCollapsed.asReadonly();
 
   // ── Derived State ──
   readonly currentMonth = signal(format(new Date(), 'yyyy-MM'));
@@ -186,6 +190,7 @@ export class LilyStore {
     effect(() => this.storage.set('budgets', this._budgets()));
     effect(() => this.storage.set('goals', this._goals()));
     effect(() => this.storage.set('settings', this._settings()));
+    effect(() => this.storage.set('sidebarCollapsed', this._sidebarCollapsed()));
 
     // Apply theme on settings change
     effect(() => {
@@ -356,6 +361,10 @@ export class LilyStore {
 
   setMonth(month: string): void {
     this.currentMonth.set(month);
+  }
+
+  toggleSidebar(): void {
+    this._sidebarCollapsed.update(v => !v);
   }
 
   // ── Filtered Transactions ──

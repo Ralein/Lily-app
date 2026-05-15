@@ -191,13 +191,63 @@ export class AnalyticsService {
     return [...map.entries()].map(([mood, d]) => ({ mood, ...d }));
   }
 
-  getCalendarHeatmapData(months = 6): { date: string; amount: number; level: number }[] {
-    const totalDays = months * 30; const result: { date: string; amount: number; level: number }[] = []; const amounts: number[] = [];
-    for (let i = totalDays - 1; i >= 0; i--) { const d = format(subDays(new Date(), i), 'yyyy-MM-dd'); const a = this.store.transactions().filter(t => t.type === 'expense' && t.date.startsWith(d)).reduce((s, t) => s + t.amount, 0); amounts.push(a); result.push({ date: d, amount: a, level: 0 }); }
-    const nz = amounts.filter(a => a > 0).sort((a, b) => a - b);
-    if (nz.length > 0) { const q = [nz[Math.floor(nz.length * 0.25)], nz[Math.floor(nz.length * 0.5)], nz[Math.floor(nz.length * 0.75)], nz[nz.length - 1]];
-      result.forEach(r => { if (r.amount === 0) r.level = 0; else if (r.amount <= q[0]) r.level = 1; else if (r.amount <= q[1]) r.level = 2; else if (r.amount <= q[2]) r.level = 3; else r.level = 4; }); }
-    return result;
+  getCalendarHeatmapData(months = 4): { 
+    cells: { date: string; expenses: number; income: number; totalActivity: number; level: number }[];
+    monthLabels: { name: string; index: number }[];
+  } {
+    const today = new Date();
+    const startDate = subMonths(today, months);
+    // Align to the start of the week (Sunday)
+    const startOfWeekDate = new Date(startDate);
+    startOfWeekDate.setDate(startDate.getDate() - startDate.getDay());
+
+    const days = differenceInDays(today, startOfWeekDate) + 1;
+    const cells: { date: string; expenses: number; income: number; totalActivity: number; level: number }[] = [];
+    const activities: number[] = [];
+    const monthLabels: { name: string; index: number }[] = [];
+    let lastMonth = -1;
+
+    const allTxns = this.store.transactions();
+
+    for (let i = 0; i < days; i++) {
+      const d = subDays(today, days - 1 - i);
+      const dateStr = format(d, 'yyyy-MM-dd');
+      const dayTxns = allTxns.filter(t => t.date.startsWith(dateStr));
+      
+      const expenses = dayTxns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      const income = dayTxns.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const totalActivity = dayTxns.length; // GitHub uses contribution COUNT, let's use transaction count
+      // Alternatively, we could use total volume: income + expenses
+      // Let's use count for "Activity" and show amounts in tooltip
+      
+      activities.push(totalActivity);
+      cells.push({ date: dateStr, expenses, income, totalActivity, level: 0 });
+
+      if (d.getMonth() !== lastMonth) {
+        lastMonth = d.getMonth();
+        monthLabels.push({ name: format(d, 'MMM'), index: Math.floor(i / 7) });
+      }
+    }
+
+    const nz = activities.filter(a => a > 0).sort((a, b) => a - b);
+    if (nz.length > 0) {
+      // Use quantiles for levels 1-4
+      const q = [
+        nz[Math.floor(nz.length * 0.25)], 
+        nz[Math.floor(nz.length * 0.5)], 
+        nz[Math.floor(nz.length * 0.75)], 
+        nz[nz.length - 1]
+      ];
+      cells.forEach(r => {
+        if (r.totalActivity === 0) r.level = 0;
+        else if (r.totalActivity <= q[0]) r.level = 1;
+        else if (r.totalActivity <= q[1]) r.level = 2;
+        else if (r.totalActivity <= q[2]) r.level = 3;
+        else r.level = 4;
+      });
+    }
+
+    return { cells, monthLabels };
   }
 
   private monthCatSpend(month: string): Map<string, number> {

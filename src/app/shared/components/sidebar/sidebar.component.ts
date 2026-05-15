@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LilyIconComponent } from '../../icons/lily-icon.component';
+import { LilyStore } from '../../../core/store/lily.store';
 @Component({
   selector: 'lily-sidebar',
   standalone: true,
@@ -54,7 +55,7 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
           }
         </div>
         
-        <button class="sidebar__toggle" (click)="collapsed.set(!collapsed())" [title]="collapsed() ? 'Expand' : 'Collapse'">
+        <button class="sidebar__toggle" (click)="toggle()" [title]="collapsed() ? 'Expand' : 'Collapse'">
           <div class="icon-zone">
             <div class="toggle-icon-wrapper">
               <lily-icon [name]="collapsed() ? 'chevron-right' : 'chevron-left'" [size]="16" />
@@ -347,7 +348,12 @@ import { LilyIconComponent } from '../../icons/lily-icon.component';
   `],
 })
 export class SidebarComponent {
-  collapsed = signal(false);
+  private store = inject(LilyStore);
+  collapsed = this.store.sidebarCollapsed;
+
+  toggle() {
+    this.store.toggleSidebar();
+  }
 
   navItems = [
     { path: '/dashboard', icon: 'layout-dashboard', label: 'Dashboard' },

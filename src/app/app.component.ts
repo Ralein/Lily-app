@@ -14,7 +14,7 @@ import { LilyStore } from './core/store/lily.store';
     <lily-command-palette />
     <lily-toast-container />
     @if (showShell()) {
-      <div class="app-shell">
+      <div class="app-shell" [class.app-shell--collapsed]="sidebarCollapsed()">
         <aside class="app-sidebar">
           <lily-sidebar />
         </aside>
@@ -38,4 +38,5 @@ export class App {
   private router = inject(Router);
 
   showShell = computed(() => this.store.onboardingComplete());
+  sidebarCollapsed = this.store.sidebarCollapsed;
 }
