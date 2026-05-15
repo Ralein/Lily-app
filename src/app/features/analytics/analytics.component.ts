@@ -372,48 +372,47 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         font-weight: 500;
         margin-top: var(--space-1);
       }
-    }
 
-    .pulse-badge {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      padding: var(--space-2) var(--space-4);
-      background: var(--color-bg-card);
-      border: 1px solid var(--color-bg-glass-border);
-      border-radius: var(--radius-full);
-      box-shadow: var(--shadow-sm);
+      .status-pill {
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        background: var(--color-bg-secondary); 
+        padding: 8px 16px; 
+        border-radius: var(--radius-full); 
+        border: 1px solid var(--color-border);
 
-      .pulse-ring {
-        width: 8px;
-        height: 8px;
-        background: var(--color-emerald);
-        border-radius: 50%;
-        position: relative;
-
-        &::after {
-          content: '';
-          position: absolute;
-          inset: -4px;
-          border: 2px solid var(--color-emerald);
-          border-radius: 50%;
-          animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-          opacity: 0;
+        &__dot { 
+          width: 8px; 
+          height: 8px; 
+          border-radius: 50%; 
+          background: var(--color-emerald); 
+          position: relative;
+          
+          &::after { 
+            content: ''; 
+            position: absolute; 
+            inset: -4px; 
+            border-radius: 50%; 
+            border: 2px solid var(--color-emerald); 
+            opacity: 0.4; 
+            animation: ripple 2s infinite; 
+          }
+        }
+        
+        &__text { 
+          font-size: 11px; 
+          font-weight: 800; 
+          color: var(--color-text-secondary); 
+          text-transform: uppercase; 
+          letter-spacing: 0.05em; 
         }
       }
-
-      .badge-text {
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--color-text-secondary);
-      }
     }
 
-    @keyframes pulse-ring {
-      0%   { transform: scale(0.8); opacity: 0.5; }
-      100% { transform: scale(2);   opacity: 0;   }
+    @keyframes ripple { 
+      0% { transform: scale(1); opacity: 0.4; } 
+      100% { transform: scale(2.5); opacity: 0; } 
     }
 
     /* ─── Insights Section ─── */
@@ -483,9 +482,6 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     /* ─── Analytics Grid ─── */
     /* ─── Analytics Grid ─── */
     .analytics-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: var(--space-6);
       padding-bottom: var(--space-8);
 
       .span-2 { grid-column: span 2; }
