@@ -763,16 +763,34 @@ import { format } from 'date-fns';
     }
 
     @media (max-width: 768px) {
+      .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+      .page-header__title { font-size: 2rem; }
+      
       .hero-velocity-card { 
         padding: var(--space-6); 
-        .card-content { flex-direction: column; text-align: center; } 
+        .card-content { flex-direction: column; gap: var(--space-6); text-align: center; } 
       }
-      .velocity-info .velocity-value { justify-content: center; font-size: 2.8rem; }
-      .velocity-info .velocity-insight { margin: 0 auto; }
-      .velocity-stats { grid-template-columns: 1fr; gap: var(--space-4); }
-      .allocation-card .allocation-header { flex-direction: column; gap: var(--space-4); }
-      .viz-legend { grid-template-columns: 1fr; gap: var(--space-4); }
-      .page-header__title { font-size: 2rem; }
+      .velocity-info {
+        .velocity-value { justify-content: center; font-size: 2.8rem; }
+        .velocity-insight { margin: 0 auto; }
+      }
+      .velocity-stats { grid-template-columns: 1fr; gap: var(--space-4); padding-top: var(--space-6); }
+      
+      .allocation-card {
+        padding: var(--space-6);
+        .allocation-header { flex-direction: column; gap: var(--space-2); }
+        .viz-legend { grid-template-columns: 1fr; gap: var(--space-4); }
+      }
+      
+      .budget-list-card { padding: var(--space-6); }
+      .budget-editor {
+        .editor-top { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+        .limit-input-group .amount-input { font-size: 2rem; input { width: 100%; } }
+        .editor-grid { grid-template-columns: 1fr; }
+        .editor-footer { flex-direction: column; gap: var(--space-3); .btn-premium, .btn-ghost { width: 100%; } }
+      }
+      
+      .budget-row .amount-group { flex-direction: column; align-items: flex-end; gap: 0; }
     }
   `],
 })

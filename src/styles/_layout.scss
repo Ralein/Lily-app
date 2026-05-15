@@ -35,8 +35,8 @@
 
   @media (max-width: 768px) {
     margin-left: 0;
-    padding: var(--space-4);
-    padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + var(--space-8));
+    padding: var(--space-5);
+    padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + var(--space-10));
     padding-top: calc(var(--safe-area-top) + var(--space-4));
   }
 }
@@ -107,6 +107,10 @@
 .page-header {
   margin-bottom: var(--space-8);
 
+  @media (max-width: 768px) {
+    margin-bottom: var(--space-5);
+  }
+
   &__title {
     font-size: var(--fs-3xl);
     font-weight: var(--fw-bold);
@@ -124,12 +128,23 @@
     display: flex;
     gap: var(--space-3);
     margin-top: var(--space-4);
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      width: 100%;
+      
+      button, a { width: 100%; justify-content: center; }
+    }
   }
 }
 
 // ── Section ──
 .section {
   margin-bottom: var(--space-8);
+
+  @media (max-width: 768px) {
+    margin-bottom: var(--space-6);
+  }
 
   &__header {
     display: flex;
@@ -243,3 +258,42 @@ button, a, .clickable {
 @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
 @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+// ── Responsive Grids ──
+.grid {
+  display: grid;
+  gap: var(--space-6);
+
+  &--2 { grid-template-columns: repeat(2, 1fr); }
+  &--3 { grid-template-columns: repeat(3, 1fr); }
+  &--4 { grid-template-columns: repeat(4, 1fr); }
+
+  @media (max-width: 1024px) {
+    &--4 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 768px) {
+    &--3, &--2 { grid-template-columns: 1fr; }
+    gap: var(--space-5);
+  }
+}
+
+// ── Shared Layout Utils ──
+.flex-column-mobile {
+  @media (max-width: 768px) {
+    flex-direction: column !important;
+  }
+}
+
+.hide-mobile {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.show-mobile-only {
+  display: none;
+  @media (max-width: 768px) {
+    display: block !important;
+  }
+}

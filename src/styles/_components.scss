@@ -38,6 +38,11 @@
     padding: var(--space-8);
     border-radius: var(--radius-4xl);
 
+    @media (max-width: 768px) {
+      padding: var(--space-6);
+      border-radius: var(--radius-3xl);
+    }
+
     &::after {
       content: '';
       position: absolute;
@@ -182,6 +187,11 @@
     padding: var(--space-3) var(--space-6);
     font-size: var(--fs-md);
     border-radius: var(--radius-xl);
+
+    @media (max-width: 480px) {
+      width: 100%;
+      height: 56px;
+    }
   }
 
   &--icon {

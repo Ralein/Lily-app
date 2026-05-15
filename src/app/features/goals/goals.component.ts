@@ -404,6 +404,37 @@ import {
       &__description { font-size: var(--fs-base); color: var(--color-text-tertiary); max-width: 380px; line-height: 1.6; }
     }
 
+    @media (max-width: 1024px) {
+      .goals-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+      .page-header__title { font-size: 28px; }
+      
+      .goals-grid { grid-template-columns: 1fr; }
+      .goal-card { padding: var(--space-5); gap: var(--space-5); }
+      .goal-card__header { flex-direction: column; align-items: flex-start; gap: var(--space-4); 
+        .goal-card__info { width: 100%; }
+        .btn-action { position: absolute; top: var(--space-5); right: var(--space-5); }
+      }
+      .goal-card__content { 
+        .percentage { font-size: 24px; }
+        .amount-summary { flex-direction: column; gap: var(--space-3); .amount-item.text-right { text-align: left; } }
+      }
+      .goal-card__footer .contribution-control { flex-direction: column; 
+        .btn-contribute { width: 100%; justify-content: center; }
+      }
+      
+      .form-card { padding: var(--space-6); 
+        &__title { font-size: 24px; }
+        .form-row.split { flex-direction: column; gap: var(--space-8); }
+        .icon-selection { grid-template-columns: repeat(2, 1fr); }
+      }
+      
+      .add-goal-premium { padding: var(--space-8) var(--space-4); }
+    }
+
     @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 0.8; } }
   `],
 })

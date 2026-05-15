@@ -47,7 +47,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         </div>
       }
 
-      <div class="analytics-grid" [@listAnimation]="6">
+      <div class="analytics-grid grid grid--4" [@listAnimation]="6">
         <!-- Monthly Performance -->
         <div class="lily-card chart-card glass-card" style="grid-column: span 2">
           <div class="chart-header">
@@ -692,9 +692,15 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     @media (max-width: 768px) {
-      .analytics-grid { grid-template-columns: 1fr; }
-      .chart-card { grid-column: span 1 !important; }
+      .analytics-grid { grid-template-columns: 1fr; gap: var(--space-6); }
+      .chart-card { grid-column: span 1 !important; padding: var(--space-6); min-height: 360px; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
       .page-header__title { font-size: 1.8rem; }
+      
+      .sim-grid { grid-template-columns: 1fr; gap: var(--space-8); }
+      .sim-results { padding: var(--space-6); }
+      
+      .insights-container { margin: 0 calc(var(--space-5) * -1); }
     }
   `],
 })

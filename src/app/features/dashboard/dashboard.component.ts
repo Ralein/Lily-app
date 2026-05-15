@@ -84,7 +84,7 @@ import { format } from 'date-fns';
         <div class="hero-card__glow"></div>
       </div>
 
-      <div class="stats-row">
+      <div class="stats-row grid grid--4">
         <!-- Snapshot Stats -->
         <div class="lily-card glass stat-card" anim="slideUp" style="--anim-delay: 200ms">
           <div class="stat-card__header">
@@ -454,13 +454,22 @@ import { format } from 'date-fns';
     }
 
     @media (max-width: 768px) {
-      .hero-card { padding: var(--space-6);
-        &__main { flex-direction: column; align-items: flex-start; }
-        &__balance .value { font-size: 48px; }
-        &__indicators { gap: var(--space-6); flex-wrap: wrap; }
-        &__viz { align-self: center; margin-top: var(--space-6); }
+      .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+      .hero-card { padding: var(--space-6); border-radius: 24px;
+        &__main { flex-direction: column; align-items: flex-start; gap: var(--space-6); }
+        &__balance { margin-bottom: var(--space-6); 
+          .currency { font-size: 28px; }
+          .value { font-size: 48px; }
+        }
+        &__indicators { gap: var(--space-4); flex-direction: column; width: 100%; }
+        &__viz { align-self: center; margin-top: 0; width: 140px; height: 140px; }
+        &__footer { margin-top: var(--space-6); padding-top: var(--space-6);
+          .btn-hero-action { width: 100%; justify-content: center; }
+        }
       }
       .stats-row { grid-template-columns: 1fr; }
+      .stat-card { padding: var(--space-5); }
+      .health-display { flex-direction: column; align-items: flex-start; }
     }
   `],
 })

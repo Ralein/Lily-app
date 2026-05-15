@@ -402,11 +402,45 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     @keyframes ripple { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(2.5); opacity: 0; } }
 
     @media (max-width: 768px) {
-      .glass-toolbar { top: 8px; }
-      .transaction-item__main { padding: 16px; }
-      .icon-orb { width: 44px; height: 44px; border-radius: 14px; }
-      .info .note { max-width: 140px; }
-      .selection-overlay { width: calc(100% - 32px); min-width: unset; .selection-card { gap: 12px; padding: 10px 16px; } }
+      .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+      .page-header__title { font-size: 28px; }
+      
+      .glass-toolbar { top: 8px; border-radius: 16px; 
+        &__inner { gap: var(--space-2); }
+      }
+      .search-field { padding: 0 var(--space-1); 
+        input { font-size: 14px; }
+      }
+      
+      .filter-panel { padding: var(--space-6); gap: var(--space-6); 
+        &__grid { grid-template-columns: 1fr; gap: var(--space-6); }
+      }
+
+      .transaction-item {
+        &__main { padding: var(--space-4); gap: var(--space-3); }
+        .main-left { gap: var(--space-3); }
+        .icon-orb { width: 44px; height: 44px; border-radius: 14px; }
+        .info { 
+          .category { font-size: 14px; }
+          .note { max-width: 140px; font-size: 12px; }
+        }
+        .main-right {
+          .amount-wrap { font-size: 16px; }
+        }
+      }
+      
+      .edit-sheet { padding: var(--space-5);
+        &__grid { grid-template-columns: 1fr; gap: var(--space-5); }
+        &__footer { flex-wrap: wrap; 
+          .btn-save { width: calc(100% - 64px); }
+          .btn-close { width: 100%; text-align: center; margin-top: var(--space-4); }
+        }
+      }
+
+      .selection-overlay { width: calc(100% - 32px); min-width: unset; bottom: calc(var(--bottom-nav-height) + 16px);
+        .selection-card { gap: 12px; padding: 10px 16px; flex-direction: column; border-radius: 24px; }
+        .selection-actions { width: 100%; justify-content: space-between; }
+      }
     }
   `],
 })

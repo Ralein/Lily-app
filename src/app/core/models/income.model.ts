@@ -13,7 +13,7 @@ export const FREQUENCY_TO_MONTHLY: Record<IncomeSource['frequency'], number> = {
   'monthly': 1,
   'biweekly': 26 / 12, // ~2.167
   'weekly': 52 / 12,   // ~4.333
-  'one-time': 0,       // not recurring
+  'one-time': 1,       // treat as current month income
 };
 
 /** Calculate monthly equivalent for an income source */

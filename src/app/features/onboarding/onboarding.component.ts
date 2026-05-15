@@ -5,7 +5,7 @@ import { DecimalPipe } from '@angular/common';
 import { LilyStore } from '../../core/store/lily.store';
 import { ConfettiService } from '../../core/services/confetti.service';
 import { CURRENCIES } from '../../core/models/settings.model';
-import { IncomeSource, BUDGET_RULE } from '../../core/models/income.model';
+import { IncomeSource, BUDGET_RULE, FREQUENCY_TO_MONTHLY } from '../../core/models/income.model';
 import { format } from 'date-fns';
 import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 @Component({
@@ -569,8 +569,8 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 
     // ── Mobile Responsiveness ──
     @media (max-width: 640px) {
-      .onboarding-wrapper { padding: var(--space-4); align-items: flex-start; padding-top: var(--space-10); }
-      .onboarding-container { gap: var(--space-6); }
+      .onboarding-wrapper { padding: var(--space-4); align-items: flex-start; padding-top: var(--space-10); min-height: 100dvh; }
+      .onboarding-container { gap: var(--space-6); width: 100%; }
 
       .stepper__label { display: none; }
       .stepper__dot { width: 28px; height: 28px; font-size: 11px; }
@@ -579,6 +579,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
       .step-card { 
         padding: var(--space-6); 
         border-radius: 24px; 
+        width: 100%;
         
         &__title { font-size: 26px; }
         &__desc { font-size: 14px; }
@@ -591,48 +592,50 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
       }
 
       .currency-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
-      .currency-card { padding: var(--space-3); .symbol { font-size: 20px; } .name { font-size: 11px; } }
+      .currency-card { padding: var(--space-4); .symbol { font-size: 20px; } .name { font-size: 11px; } }
 
       .income-item { 
         grid-template-columns: 1fr; 
-        padding: var(--space-4);
+        padding: var(--space-5);
+        gap: var(--space-4);
         
         .income-item__freq, .income-item__amount { width: 100%; }
-        .btn-delete { width: 100%; margin-top: 4px; height: 40px; }
+        .btn-delete { width: 100%; margin-top: 4px; height: 44px; justify-content: center; }
       }
 
       .total-bar { 
-        flex-direction: column; align-items: flex-start; gap: 8px;
+        flex-direction: column; align-items: flex-start; gap: 8px; padding: var(--space-5);
         .value { font-size: 24px; }
       }
 
-      .category-grid { grid-template-columns: 1fr; gap: var(--space-2); }
+      .category-grid { grid-template-columns: 1fr; gap: var(--space-2); max-height: 320px; }
       
       .visualization {
         padding: var(--space-4);
         .l { font-size: 9px; }
       }
 
-      .snapshot-grid { grid-template-columns: 1fr; }
+      .snapshot-grid { grid-template-columns: 1fr; gap: var(--space-3); }
       
       .btn-premium { 
-        height: 48px; padding: 0 20px; font-size: 14px; border-radius: 14px;
-        lily-icon { --icon-size: 16px; }
+        height: 52px; padding: 0 20px; font-size: 15px; border-radius: 16px; width: 100%; justify-content: center;
+        lily-icon { --icon-size: 18px; }
         
-        &.btn--lg { width: 100%; justify-content: center; }
+        &.btn--lg { height: 60px; font-size: 17px; }
       }
 
-      .feature-pills { flex-wrap: wrap; justify-content: center; .pill { padding: 6px 12px; font-size: 10px; } }
+      .feature-pills { flex-wrap: wrap; justify-content: center; gap: var(--space-2); .pill { padding: 6px 12px; font-size: 10px; } }
       
       .total-status {
-        flex-direction: column; align-items: flex-start; gap: 12px;
+        flex-direction: column; align-items: flex-start; gap: 12px; padding: var(--space-5);
         .status-value { font-size: 20px; }
       }
+
+      .step-actions { flex-direction: column; gap: var(--space-3); }
     }
 
     @media (max-width: 400px) {
       .currency-grid { grid-template-columns: 1fr; }
-      .step-actions { flex-direction: column; gap: var(--space-3); .btn-premium { width: 100%; justify-content: center; } }
     }
   `],
 })
@@ -662,7 +665,7 @@ export class OnboardingComponent {
 
   tempTotalIncome = computed(() =>
     this.tempSources().reduce((sum, s) => {
-      const multiplier = s.frequency === 'monthly' ? 1 : s.frequency === 'biweekly' ? 26 / 12 : s.frequency === 'weekly' ? 52 / 12 : 0;
+      const multiplier = FREQUENCY_TO_MONTHLY[s.frequency] || 0;
       return sum + (s.amount * multiplier);
     }, 0)
   );
