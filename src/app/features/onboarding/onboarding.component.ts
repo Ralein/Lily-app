@@ -422,7 +422,6 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     // ── Currency Grid ──
     .currency-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); width: 100%; margin-bottom: var(--space-8);
-      @media (max-width: 560px) { grid-template-columns: repeat(2, 1fr); }
     }
 
     .currency-card {
@@ -451,7 +450,6 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     
     .income-item {
       display: grid; grid-template-columns: 1fr 140px 140px 48px; gap: var(--space-4); padding: var(--space-4); border-radius: 20px;
-      @media (max-width: 640px) { grid-template-columns: 1fr 1fr; }
       
       label { font-size: 10px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
       input, select { 
@@ -564,10 +562,78 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
       &:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
     }
 
-    .step-actions { display: flex; justify-content: space-between; width: 100%; margin-top: var(--space-4); }
+    .step-actions { display: flex; justify-content: space-between; width: 100%; margin-top: var(--space-4); gap: var(--space-3); }
 
     .custom-scrollbar { &::-webkit-scrollbar { width: 4px; } &::-webkit-scrollbar-track { background: transparent; } &::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 10px; } }
     .glass { background: var(--color-bg-input); border: 1px solid var(--color-border); backdrop-filter: blur(10px); }
+
+    // ── Mobile Responsiveness ──
+    @media (max-width: 640px) {
+      .onboarding-wrapper { padding: var(--space-4); align-items: flex-start; padding-top: var(--space-10); }
+      .onboarding-container { gap: var(--space-6); }
+
+      .stepper__label { display: none; }
+      .stepper__dot { width: 28px; height: 28px; font-size: 11px; }
+      .stepper__line { left: calc(50% + 14px); right: calc(-50% + 14px); }
+
+      .step-card { 
+        padding: var(--space-6); 
+        border-radius: 24px; 
+        
+        &__title { font-size: 26px; }
+        &__desc { font-size: 14px; }
+        
+        &__logo.welcome-logo {
+          margin-bottom: var(--space-6);
+          .logo-image { width: 100px; height: 100px; }
+          .logo-text { font-size: 32px; }
+        }
+      }
+
+      .currency-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-2); }
+      .currency-card { padding: var(--space-3); .symbol { font-size: 20px; } .name { font-size: 11px; } }
+
+      .income-item { 
+        grid-template-columns: 1fr; 
+        padding: var(--space-4);
+        
+        .income-item__freq, .income-item__amount { width: 100%; }
+        .btn-delete { width: 100%; margin-top: 4px; height: 40px; }
+      }
+
+      .total-bar { 
+        flex-direction: column; align-items: flex-start; gap: 8px;
+        .value { font-size: 24px; }
+      }
+
+      .category-grid { grid-template-columns: 1fr; gap: var(--space-2); }
+      
+      .visualization {
+        padding: var(--space-4);
+        .l { font-size: 9px; }
+      }
+
+      .snapshot-grid { grid-template-columns: 1fr; }
+      
+      .btn-premium { 
+        height: 48px; padding: 0 20px; font-size: 14px; border-radius: 14px;
+        lily-icon { --icon-size: 16px; }
+        
+        &.btn--lg { width: 100%; justify-content: center; }
+      }
+
+      .feature-pills { flex-wrap: wrap; justify-content: center; .pill { padding: 6px 12px; font-size: 10px; } }
+      
+      .total-status {
+        flex-direction: column; align-items: flex-start; gap: 12px;
+        .status-value { font-size: 20px; }
+      }
+    }
+
+    @media (max-width: 400px) {
+      .currency-grid { grid-template-columns: 1fr; }
+      .step-actions { flex-direction: column; gap: var(--space-3); .btn-premium { width: 100%; justify-content: center; } }
+    }
   `],
 })
 export class OnboardingComponent {
