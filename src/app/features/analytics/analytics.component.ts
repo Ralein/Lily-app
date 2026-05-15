@@ -268,7 +268,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
             <!-- Month Labels -->
             <div class="heatmap-months">
               @for (label of heatmapData().monthLabels; track label.index) {
-                <div class="month-label" [style.grid-column-start]="label.index + 1">{{ label.name }}</div>
+                <div class="month-label" [style.left.%]="(label.index / totalWeeks()) * 100">{{ label.name }}</div>
               }
             </div>
 
@@ -827,10 +827,10 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     .heatmap-container {
       display: flex;
       flex-direction: column;
-      gap: var(--space-2);
-      max-width: 100%;
+      gap: 0;
+      width: 100%;
       overflow-x: auto;
-      padding: var(--space-2) 0;
+      padding: var(--space-3) 0;
 
       &::-webkit-scrollbar { height: 6px; }
       &::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
@@ -838,78 +838,85 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     }
 
     .heatmap-months {
-      display: grid;
-      grid-auto-columns: 16px;
-      column-gap: 3px;
-      margin-left: 32px;
-      font-size: 10px;
-      font-weight: 700;
+      display: flex;
+      margin-left: 36px;
+      font-size: 11px;
+      font-weight: 600;
       color: var(--color-text-tertiary);
-      margin-bottom: 4px;
-      height: 14px;
+      margin-bottom: 6px;
+      height: 16px;
       position: relative;
+      overflow: hidden;
 
       .month-label {
-        grid-row: 1;
+        position: absolute;
         white-space: nowrap;
       }
     }
 
     .heatmap-body {
       display: flex;
-      gap: 8px;
+      gap: 4px;
+      width: 100%;
     }
 
     .heatmap-weekdays {
       display: grid;
-      grid-template-rows: repeat(7, 13px);
+      grid-template-rows: repeat(7, 1fr);
       gap: 3px;
       font-size: 10px;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--color-text-tertiary);
-      width: 24px;
-      text-align: left;
+      width: 30px;
+      flex-shrink: 0;
+      text-align: right;
+      padding-right: 6px;
 
-      span { height: 13px; display: flex; align-items: center; }
+      span {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        font-size: 10px;
+        line-height: 1;
+      }
     }
 
     .heatmap-grid-wrapper {
       flex: 1;
-      margin-top: var(--space-4);
-      padding-bottom: 12px;
+      min-width: 0;
       cursor: crosshair;
+      overflow: hidden;
     }
 
     .heatmap-grid {
       display: grid;
-      grid-template-rows: repeat(7, 13px);
+      grid-template-rows: repeat(7, 1fr);
       grid-auto-flow: column;
+      grid-auto-columns: 1fr;
       gap: 3px;
-      width: max-content;
-      position: relative;
+      width: 100%;
+      aspect-ratio: auto;
     }
 
     .heatmap__cell {
-      width: 13px;
-      height: 13px;
-      border-radius: 2px;
-      background: rgba(255,255,255,0.04);
+      aspect-ratio: 1;
+      width: 100%;
+      border-radius: 3px;
       transition: transform 80ms ease, outline 80ms ease;
-      border: 1px solid rgba(255,255,255,0.04);
 
-      &--0 { background: var(--color-bg-input); }
-      &--1 { background: color-mix(in srgb, var(--color-violet), transparent 80%); }
-      &--2 { background: color-mix(in srgb, var(--color-violet), transparent 50%); }
-      &--3 { background: color-mix(in srgb, var(--color-violet), transparent 20%); }
+      &--0 { background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.08); }
+      &--1 { background: rgba(139, 92, 246, 0.20); }
+      &--2 { background: rgba(139, 92, 246, 0.45); }
+      &--3 { background: rgba(139, 92, 246, 0.70); }
       &--4 {
-        background: var(--color-violet);
-        box-shadow: 0 0 12px var(--color-violet-glow);
+        background: #8b5cf6;
+        box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
       }
 
       &:hover {
-        transform: scale(1.4);
+        transform: scale(1.6);
         z-index: 10;
-        outline: 1px solid rgba(255,255,255,0.6);
+        outline: 2px solid rgba(255,255,255,0.5);
         outline-offset: 1px;
       }
     }
@@ -919,6 +926,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       justify-content: space-between;
       align-items: center;
       margin-top: var(--space-4);
+      padding-left: 36px;
 
       .help-link {
         font-size: 11px;
@@ -932,20 +940,27 @@ import { fadeIn, listAnimation } from '../../shared/animations';
     .heatmap-legend {
       display: flex;
       align-items: center;
-      gap: var(--space-3);
-      padding: 4px 12px;
-      background: rgba(0,0,0,0.2);
-      border-radius: var(--radius-full);
-      border: 1px solid var(--color-bg-glass-border);
+      gap: 6px;
 
-      .label {
-        font-size: 9px;
-        font-weight: 800;
+      .legend-label {
+        font-size: 10px;
+        font-weight: 600;
         color: var(--color-text-tertiary);
-        text-transform: uppercase;
       }
 
-      .legend-cells { display: flex; gap: 4px; }
+      .legend-cells { display: flex; gap: 3px; }
+
+      .legend-cell {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+
+        &.level-0 { background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.08); }
+        &.level-1 { background: rgba(139, 92, 246, 0.20); }
+        &.level-2 { background: rgba(139, 92, 246, 0.45); }
+        &.level-3 { background: rgba(139, 92, 246, 0.70); }
+        &.level-4 { background: #8b5cf6; }
+      }
     }
 
 
@@ -1077,6 +1092,7 @@ export class AnalyticsComponent {
   insights           = computed(() => this.analytics.generateInsights());
   heatmapData        = computed(() => this.analytics.getCalendarHeatmapData(12));
   totalActivityCount = computed(() => this.heatmapData().cells.reduce((s, c) => s + c.totalActivity, 0));
+  totalWeeks         = computed(() => Math.ceil(this.heatmapData().cells.length / 7));
 
   heatmapInsights = computed(() => {
     const data          = this.heatmapData().cells;
