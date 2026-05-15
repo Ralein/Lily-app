@@ -113,18 +113,18 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
                       <div class="income-item glass" anim="fadeIn">
                         <div class="income-item__name">
                           <label>Source Name</label>
-                          <input type="text" [(ngModel)]="source.name" placeholder="e.g. Main Salary" />
+                          <input type="text" [ngModel]="source.name" (ngModelChange)="updateSource(i, {name: $event})" placeholder="e.g. Main Salary" />
                         </div>
                         <div class="income-item__amount">
                           <label>Amount</label>
                           <div class="input-wrap">
                             <span class="symbol">{{ currencySymbol() }}</span>
-                            <input type="number" [(ngModel)]="source.amount" placeholder="0" />
+                            <input type="number" [ngModel]="source.amount" (ngModelChange)="updateSource(i, {amount: $event})" placeholder="0" />
                           </div>
                         </div>
                         <div class="income-item__freq">
                           <label>Frequency</label>
-                          <select [(ngModel)]="source.frequency">
+                          <select [ngModel]="source.frequency" (ngModelChange)="updateSource(i, {frequency: $event})">
                             <option value="monthly">Monthly</option>
                             <option value="biweekly">Bi-weekly</option>
                             <option value="weekly">Weekly</option>
@@ -190,12 +190,12 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
                   </div>
 
                   <div class="category-grid custom-scrollbar">
-                    @for (cat of budgetCategories; track cat.id) {
+                    @for (cat of budgetCategories; track cat.id; let i = $index) {
                       <div class="cat-pill glass">
                         <span class="cat-name">{{ cat.name }}</span>
                         <div class="cat-input">
                           <span class="symbol">{{ currencySymbol() }}</span>
-                          <input type="number" [(ngModel)]="cat.limit" min="0" step="100" />
+                          <input type="number" [(ngModel)]="cat.limit" (ngModelChange)="onBudgetChange()" min="0" step="100" />
                         </div>
                       </div>
                     }
@@ -293,7 +293,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
 
     .onboarding-container {
       width: 100%;
-      max-width: 640px;
+      max-width: 800px;
       position: relative;
       z-index: 1;
       display: flex;
@@ -449,9 +449,9 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     .income-list { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-3); padding-right: 8px; }
     
     .income-item {
-      display: grid; grid-template-columns: 1fr 140px 140px 48px; gap: var(--space-4); padding: var(--space-4); border-radius: 20px;
+      display: grid; grid-template-columns: 1.2fr 160px 160px 48px; gap: var(--space-4); padding: var(--space-5); border-radius: 24px;
       
-      label { font-size: 10px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+      label { font-size: 11px; font-weight: 800; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; display: block; }
       input, select { 
         background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 12px; height: 44px; padding: 0 16px; 
         color: var(--color-text-primary); font-size: 14px; font-weight: 600; width: 100%;
@@ -568,20 +568,20 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     .glass { background: var(--color-bg-input); border: 1px solid var(--color-border); backdrop-filter: blur(10px); }
 
     // ── Mobile Responsiveness ──
-    @media (max-width: 640px) {
+    @media (max-width: 820px) {
       .onboarding-wrapper { padding: var(--space-4); align-items: flex-start; padding-top: var(--space-10); min-height: 100dvh; }
       .onboarding-container { gap: var(--space-6); width: 100%; }
 
       .stepper__label { display: none; }
-      .stepper__dot { width: 28px; height: 28px; font-size: 11px; }
-      .stepper__line { left: calc(50% + 14px); right: calc(-50% + 14px); }
+      .stepper__dot { width: 32px; height: 32px; font-size: 12px; }
+      .stepper__line { left: calc(50% + 16px); right: calc(-50% + 16px); }
 
       .step-card { 
         padding: var(--space-6); 
         border-radius: 24px; 
         width: 100%;
         
-        &__title { font-size: 26px; }
+        &__title { font-size: 28px; }
         &__desc { font-size: 14px; }
         
         &__logo.welcome-logo {
@@ -716,8 +716,20 @@ export class OnboardingComponent {
     }]);
   }
 
+  updateSource(index: number, change: Partial<IncomeSource>): void {
+    this.tempSources.update(sources => {
+      const newSources = [...sources];
+      newSources[index] = { ...newSources[index], ...change };
+      return newSources;
+    });
+  }
+
   removeSource(index: number): void {
     this.tempSources.update(s => s.filter((_, i) => i !== index));
+  }
+
+  onBudgetChange(): void {
+    // Force computed update if needed
   }
 
   saveCurrency(): void {
