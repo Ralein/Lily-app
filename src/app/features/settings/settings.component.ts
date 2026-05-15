@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LilyStore } from '../../core/store/lily.store';
 import { ExportService } from '../../core/services/export.service';
-import { DemoDataService } from '../../core/services/demo-data.service';
 import { ToastService } from '../../core/services/toast.service';
 import { CurrencyDisplayPipe } from '../../shared/pipes/currency-display.pipe';
 import { CURRENCIES } from '../../core/models/settings.model';
@@ -254,10 +253,7 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
                 <span>Restore Backup</span>
                 <input type="file" id="import-file" accept=".json" (change)="importJSON($event)" style="display: none">
               </label>
-              <button class="side-btn glass" (click)="loadDemoData()">
-                <lily-icon name="activity" [size]="16" />
-                <span>Simulate Activity</span>
-              </button>
+
               <div class="danger-zone">
                 <button class="side-btn danger" (click)="confirmReset()">
                   <lily-icon name="trash-2" [size]="16" />
@@ -473,7 +469,6 @@ export class SettingsComponent {
   store = inject(LilyStore);
   private router = inject(Router);
   private exportService = inject(ExportService);
-  private demoData = inject(DemoDataService);
   private toast = inject(ToastService);
 
   currencies = CURRENCIES;
@@ -566,10 +561,7 @@ export class SettingsComponent {
     reader.readAsText(file);
   }
 
-  loadDemoData(): void {
-    this.demoData.generateDemoData();
-    this.toast.success('Activity simulation complete');
-  }
+
 
   confirmReset(): void { this.showResetConfirm.set(true); }
 
