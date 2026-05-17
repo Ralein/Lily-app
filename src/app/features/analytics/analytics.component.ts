@@ -491,12 +491,13 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       .span-4 { grid-column: span 4; }
 
       @media (max-width: 1024px) {
-        .span-2 { grid-column: span 1; }
+        .span-2 { grid-column: span 2; }
         .span-4 { grid-column: 1 / -1; }
       }
 
       @media (max-width: 768px) {
-        .span-2, .span-4 { grid-column: span 1; }
+        grid-template-columns: 1fr !important;
+        .span-2, .span-4 { grid-column: 1 / -1 !important; }
       }
     }
 
@@ -582,25 +583,27 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: var(--space-4);
+        flex-wrap: wrap;
+        gap: var(--space-4);
 
         .title-group {
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 4px;
         }
       }
 
       .chart-title {
-        font-size: var(--fs-xl);
-        font-weight: 700;
+        font-size: 18px;
+        font-weight: 800;
         color: var(--color-text-primary);
-        letter-spacing: -0.02em;
+        margin: 0;
       }
 
       .chart-subtitle {
-        font-size: var(--fs-sm);
-        color: var(--color-text-muted);
-        font-weight: 500;
+        font-size: 13px;
+        color: var(--color-text-tertiary);
+        margin: 0;
       }
 
       .chart-legend {
@@ -924,6 +927,8 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-4);
       margin-top: var(--space-4);
       padding-left: 36px;
 
