@@ -996,7 +996,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       .tooltip-date {
         font-size: 11px;
         font-weight: 700;
-        color: var(--color-text-primary);
+        color: #f8fafc;
         padding-bottom: 4px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
       }
@@ -1013,12 +1013,12 @@ import { fadeIn, listAnimation } from '../../shared/animations';
           font-size: 11px;
           font-weight: 600;
 
-          .label { color: var(--color-text-muted); flex: 1; }
-          .value { font-family: var(--font-mono); font-weight: 700; }
+          .label { color: #cbd5e1; flex: 1; }
+          .value { font-family: var(--font-mono); font-weight: 700; color: #f8fafc; }
 
           &.total {
             font-size: 10px;
-            color: var(--color-text-tertiary);
+            color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.02em;
           }
@@ -1049,7 +1049,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       .tooltip-empty {
         font-size: 12px;
         font-weight: 600;
-        color: var(--color-text-secondary);
+        color: #cbd5e1;
         padding: 4px 0;
       }
     }
