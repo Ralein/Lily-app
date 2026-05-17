@@ -32,6 +32,12 @@ export const CURRENCIES: CurrencyConfig[] = [
   { code: 'CNY', name: 'Chinese Yuan', symbol: '¥', locale: 'zh-CN', position: 'before' },
   { code: 'KRW', name: 'Korean Won', symbol: '₩', locale: 'ko-KR', position: 'before' },
   { code: 'BRL', name: 'Brazilian Real', symbol: 'R$', locale: 'pt-BR', position: 'before' },
+  { code: 'PHP', name: 'Philippine Peso', symbol: '₱', locale: 'en-PH', position: 'before' },
+  { code: 'SGD', name: 'Singapore Dollar', symbol: 'S$', locale: 'en-SG', position: 'before' },
+  { code: 'MYR', name: 'Malaysian Ringgit', symbol: 'RM', locale: 'ms-MY', position: 'before' },
+  { code: 'IDR', name: 'Indonesian Rupiah', symbol: 'Rp', locale: 'id-ID', position: 'before' },
+  { code: 'THB', name: 'Thai Baht', symbol: '฿', locale: 'th-TH', position: 'before' },
+  { code: 'VND', name: 'Vietnamese Dong', symbol: '₫', locale: 'vi-VN', position: 'after' },
 ];
 
 export const DEFAULT_SETTINGS: AppSettings = {

@@ -249,12 +249,11 @@ import { format } from 'date-fns';
       align-items: flex-end;
       
       .page-header__title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        letter-spacing: -0.03em;
-        background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-text-tertiary) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        color: var(--color-text-primary);
+        margin: 0;
       }
 
       .page-header__subtitle {
