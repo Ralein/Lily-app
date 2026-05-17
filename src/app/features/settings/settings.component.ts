@@ -464,6 +464,18 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     @media (max-width: 640px) {
       .settings-side { grid-template-columns: 1fr; }
       .income-grid { grid-template-columns: 1fr; }
+      .income-summary { flex-direction: column; align-items: flex-start; gap: 24px;
+        .summary-toggle { width: 100%; justify-content: space-between; flex-direction: row-reverse;
+          .text { text-align: left; }
+        }
+      }
+      .horizontal-setting { flex-direction: column; align-items: flex-start; gap: 16px; 
+        .glass-select { width: 100%; select { width: 100%; } }
+      }
+      .section-header { flex-direction: column; align-items: flex-start; gap: 16px; 
+        button { width: 100%; justify-content: center; }
+      }
+      .theme-selector { grid-template-columns: 1fr; }
     }
   `],
 })

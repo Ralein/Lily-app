@@ -778,11 +778,15 @@ import { format } from 'date-fns';
       
       .allocation-card {
         padding: var(--space-6);
-        .allocation-header { flex-direction: column; gap: var(--space-2); }
+        .allocation-header { flex-direction: column; gap: var(--space-2); align-items: flex-start; }
         .viz-legend { grid-template-columns: 1fr; gap: var(--space-4); }
       }
       
-      .budget-list-card { padding: var(--space-6); }
+      .budget-list-card { padding: var(--space-6); 
+        .card-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); 
+          .header-actions { width: 100%; .btn-action { width: 100%; justify-content: center; } }
+        }
+      }
       .budget-editor {
         .editor-top { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
         .limit-input-group .amount-input { font-size: 2rem; input { width: 100%; } }
