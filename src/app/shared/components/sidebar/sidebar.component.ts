@@ -1,4 +1,4 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { LilyIconComponent } from '../../icons/lily-icon.component';
 import { LilyStore } from '../../../core/store/lily.store';
@@ -43,13 +43,13 @@ import { LilyStore } from '../../../core/store/lily.store';
       </div>
 
       <div class="sidebar__footer">
-        <div class="sidebar__user" [title]="collapsed() ? 'Jane Doe (Premium)' : ''">
+        <div class="sidebar__user" [title]="collapsed() ? userName() + ' (Premium)' : ''">
           <div class="icon-zone">
-            <div class="user-avatar">JD</div>
+            <div class="user-avatar">{{ userInitials() }}</div>
           </div>
           @if (!collapsed()) {
             <div class="user-info">
-              <span class="user-name">Jane Doe</span>
+              <span class="user-name">{{ userName() }}</span>
               <span class="user-plan">Premium Plan</span>
             </div>
           }
@@ -348,8 +348,14 @@ import { LilyStore } from '../../../core/store/lily.store';
   `],
 })
 export class SidebarComponent {
-  private store = inject(LilyStore);
+  store = inject(LilyStore);
   collapsed = this.store.sidebarCollapsed;
+
+  userName = computed(() => this.store.settings().userName || 'Guest User');
+  userInitials = computed(() => {
+    const name = this.userName();
+    return name.split(' ').filter(n => n.length > 0).map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'G';
+  });
 
   toggle() {
     this.store.toggleSidebar();
