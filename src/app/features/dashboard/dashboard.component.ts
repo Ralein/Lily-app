@@ -455,6 +455,7 @@ import { format } from 'date-fns';
 
     @media (max-width: 768px) {
       .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+      .page-header__title { font-size: 28px; }
       .hero-card { padding: var(--space-6); border-radius: 24px;
         &__main { flex-direction: column; align-items: flex-start; gap: var(--space-6); }
         &__balance { margin-bottom: var(--space-6); 

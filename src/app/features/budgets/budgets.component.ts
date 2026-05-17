@@ -764,7 +764,7 @@ import { format } from 'date-fns';
 
     @media (max-width: 768px) {
       .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
-      .page-header__title { font-size: 2rem; }
+      .page-header__title { font-size: 28px; }
       
       .hero-velocity-card { 
         padding: var(--space-6); 

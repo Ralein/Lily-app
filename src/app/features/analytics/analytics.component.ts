@@ -1065,8 +1065,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         flex-direction: column;
         align-items: flex-start;
         gap: var(--space-4);
-
-        .page-header__title { font-size: var(--fs-2xl); }
+        .page-header__title { font-size: 28px; }
       }
     }
   `],

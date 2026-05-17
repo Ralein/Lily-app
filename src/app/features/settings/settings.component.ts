@@ -456,6 +456,8 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
     }
 
     @media (max-width: 900px) {
+      .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-4); }
+      .page-header__title { font-size: 28px; }
       .settings-layout { grid-template-columns: 1fr; }
       .settings-side { order: 1; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
     }
