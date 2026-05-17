@@ -507,6 +507,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       gap: var(--space-6);
       min-height: 320px;
       overflow: visible;
+      min-width: 0;
 
       .patterns-list,
       .correlations-list {
@@ -631,14 +632,15 @@ import { fadeIn, listAnimation } from '../../shared/animations';
 
       .chart-container {
         flex: 1;
+        width: 100%;
         min-height: 240px;
         position: relative;
+        min-width: 0;
 
         &.donut {
           min-height: 300px;
           max-width: 360px;
           margin: 0 auto;
-          width: 100%;
         }
       }
     }
