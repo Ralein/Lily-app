@@ -10,6 +10,7 @@ export interface AppSettings {
   onboardingComplete: boolean;
   incomeSources: IncomeSource[];   // multiple named income streams
   autoLogIncome: boolean;          // auto-create salary txns on 1st of month
+  userName: string;                // user's name from onboarding
 }
 
 export interface CurrencyConfig {
@@ -43,6 +44,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   onboardingComplete: false,
   incomeSources: [],
   autoLogIncome: true,
+  userName: '',
 };
 
 export { };

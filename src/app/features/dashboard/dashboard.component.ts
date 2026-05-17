@@ -23,7 +23,13 @@ import { format } from 'date-fns';
     <div class="dashboard">
       <div class="page-header" anim="fadeIn">
         <div class="header-content">
-          <h1 class="page-header__title">Overview</h1>
+          <h1 class="page-header__title">
+            @if (store.settings().userName) {
+              Good {{ greeting() }}, {{ store.settings().userName }}
+            } @else {
+              Overview
+            }
+          </h1>
           <p class="page-header__subtitle">{{ currentMonthLabel() }}</p>
         </div>
         <div class="header-actions">
@@ -479,6 +485,13 @@ export class DashboardComponent {
   private analytics = inject(AnalyticsService);
   private toast = inject(ToastService);
   Math = Math;
+
+  greeting = computed(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Morning';
+    if (hour < 17) return 'Afternoon';
+    return 'Evening';
+  });
 
   currentMonthLabel = computed(() => format(new Date(), 'MMMM yyyy'));
 

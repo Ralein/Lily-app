@@ -50,13 +50,18 @@ import { LilyIconComponent } from '../../shared/icons/lily-icon.component';
                 <h1 class="step-card__title">Welcome to <span class="text-gradient">Lily</span></h1>
                 <p class="step-card__desc">Your financial ecosystem, refined. Lily helps you orchestrate your income, budgets, and goals with surgical precision and beautiful clarity.</p>
                 
+                <div class="name-input-group" style="margin-top: var(--space-6); width: 100%; max-width: 320px; text-align: left;">
+                  <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--color-text-tertiary); letter-spacing: 0.08em; margin-bottom: 8px; display: block;">How should we call you?</label>
+                  <input type="text" [ngModel]="userName()" (ngModelChange)="userName.set($event)" placeholder="Your First Name" style="width: 100%; background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: 16px; height: 56px; padding: 0 20px; color: var(--color-text-primary); font-size: 16px; font-weight: 600;" />
+                </div>
+
                 <div class="feature-pills">
                   <div class="pill"><lily-icon name="shield-check" [size]="14" /> Privacy First</div>
                   <div class="pill"><lily-icon name="zap" [size]="14" /> Real-time Sync</div>
                   <div class="pill"><lily-icon name="layers" [size]="14" /> Smart Budgets</div>
                 </div>
 
-                <button class="btn-premium primary" (click)="nextStep()">
+                <button class="btn-premium primary" (click)="nextStep()" [disabled]="!userName().trim()">
                   <span>Begin Initialization</span>
                   <lily-icon name="arrow-right" [size]="18" />
                 </button>
@@ -653,6 +658,7 @@ export class OnboardingComponent {
     { id: 'ready', label: 'Ready' },
   ];
 
+  userName = signal('');
   selectedCurrency = signal('USD');
 
   tempSources = signal<IncomeSource[]>([
@@ -793,6 +799,7 @@ export class OnboardingComponent {
     const sources = this.tempSources().filter(s => s.amount > 0 && s.name.trim());
     sources.forEach(s => this.store.addIncomeSource(s));
 
+    this.store.updateSettings({ userName: this.userName().trim() });
     this.store.completeOnboarding();
     this.confetti.burst();
     this.router.navigate(['/dashboard']);
