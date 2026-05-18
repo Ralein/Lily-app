@@ -975,7 +975,7 @@ import { fadeIn, listAnimation } from '../../shared/animations';
       position: fixed;                              /* FIX 1: was absolute */
       pointer-events: none;
       z-index: 9999;                                /* FIX 1: above everything */
-      transform: translate(-50%, calc(-100% - 12px)); /* FIX 1: offset above cursor */
+      transform: translate(-80%, calc(-100% - 12px)); /* FIX 1: offset above cursor */
       transition: none;                             /* FIX 1: no lag on fast mouse move */
       filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
 
@@ -1066,6 +1066,11 @@ import { fadeIn, listAnimation } from '../../shared/animations';
         align-items: flex-start;
         gap: var(--space-4);
         .page-header__title { font-size: 28px; }
+      }
+
+      .heatmap-grid-wrapper,
+      .heatmap-months {
+        min-width: 700px;
       }
     }
   `],
